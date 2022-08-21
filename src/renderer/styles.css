@@ -1,0 +1,23 @@
+body {
+    background: black;
+}
+
+#world {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: 1px solid white;
+    width: 20px;
+    height: 20px;
+}
+
+#player {
+    border-radius: 50%;
+    background: red;
+}
+
+.entity {
+    position: absolute;
+    transform: translate(-50%, -50%);
+}
