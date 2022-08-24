@@ -10,8 +10,8 @@
         "strictPropertyInitialization": true,
         "paths": {
             "@physics/*": ["src/physics/*"],
-            "@renderer/*": ["src/renderer/*"],
-        },
+            "@renderer/*": ["src/renderer/*"]
+        }
     },
-    "include": ["./src/**/*", "./babel.config.js"],
+    "include": ["./src/**/*", "./babel.config.js"]
 }
