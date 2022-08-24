@@ -20,11 +20,9 @@ export class Renderer {
     private worldElement: HTMLElement;
     private sprites: Sprite[] = [];
 
-    constructor(world: World, player: Body) {
+    constructor(world: World) {
         this.worldElement = this.createWorld(world);
         document.body.appendChild(this.worldElement);
-
-        this.initPlayer(player);
     }
 
     public update(): void {
@@ -35,6 +33,52 @@ export class Renderer {
                 left: toPx(body.x),
             });
         }
+    }
+
+    public addBodySprite(body: Body): void {
+        const element = this.createElement({
+            // id: body.id === this.playerBodyId ? 'player' : undefined,
+            className: 'entity',
+        });
+
+        const { width, height } = body;
+
+        const style: Partial<CSSStyleDeclaration> = {
+            width: toPx(width),
+            height: toPx(height),
+        };
+
+        if (body.shape instanceof Circle) {
+            style.borderRadius = '50%';
+        }
+
+        applyStyle(element, style);
+
+        const sprite = new Sprite(body, element);
+        this.addSprite(sprite);
+    }
+
+    public removeBodySprite(body: Body): void {
+        const spriteToRemove = this.sprites.find((sprite) => sprite.body.id === body.id);
+        console.log(spriteToRemove);
+        if (spriteToRemove) this.removeSprite(spriteToRemove);
+    }
+
+    public assignPlayerSprite(player: Body): void {
+        const playerSprite = this.sprites.find((sprite) => sprite.body.id === player.id);
+        if (playerSprite) {
+            playerSprite.element.id = 'player';
+        }
+    }
+
+    private addSprite(sprite: Sprite): void {
+        this.worldElement.appendChild(sprite.element);
+        this.sprites.push(sprite);
+    }
+
+    private removeSprite(sprite: Sprite): void {
+        this.worldElement.removeChild(sprite.element);
+        this.sprites = this.sprites.filter((s) => s !== sprite);
     }
 
     private createWorld(world: World): HTMLElement {
@@ -49,26 +93,6 @@ export class Renderer {
         return element;
     }
 
-    private initPlayer(player: Body): void {
-        const element = this.createElement({ id: 'player', className: 'entity' });
-        
-        const { width, height } = player;
-
-        const style: Partial<CSSStyleDeclaration> = {
-            width: toPx(width),
-            height: toPx(height),
-        };
-
-        if (player.shape instanceof Circle) {
-            style.borderRadius = '50%';
-        }
-
-        applyStyle(element, style);
-
-        const sprite = new Sprite(player, element);
-        this.addSprite(sprite);
-    }
-
     private createElement(options: CreateElementOptions = {}): HTMLElement {
         const { id, className } = options;
 
@@ -78,10 +102,5 @@ export class Renderer {
         if (className) element.classList.add(className);
 
         return element;
-    }
-
-    private addSprite(sprite: Sprite): void {
-        this.worldElement.appendChild(sprite.element);
-        this.sprites.push(sprite);
     }
 }

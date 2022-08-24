@@ -1,9 +1,8 @@
-import { Shape, Vector } from "@physics/types";
+import { Shape, Vector } from '@physics/types';
+import { v4 as uuid } from 'uuid';
 
 export class Body {
-    constructor(
-        public shape: Shape,
-    ) {}
+    constructor(public shape: Shape, public id = uuid()) {}
 
     get pos(): Vector {
         return this.shape.pos;
@@ -27,5 +26,5 @@ export class Body {
 
     public move(dir: Vector): void {
         this.shape.move(dir);
-    } 
+    }
 }

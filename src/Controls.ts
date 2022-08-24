@@ -8,14 +8,25 @@ enum Key {
 }
 
 export class Controls {
+    private player: Body | null = null;
     private pressedKeys: Set<string>;
 
-    constructor(public player: Body) {
+    constructor() {
         this.initListeners();
         this.pressedKeys = new Set();
     }
 
     public update(): void {
+        this.updatePlayerMovement();
+    }
+
+    public setPlayer(player: Body): void {
+        this.player = player;
+    }
+
+    private updatePlayerMovement(): void {
+        if (!this.player) return;
+
         const movement = { x: 0, y: 0 };
 
         if (this.isPressed(Key.Up)) {
