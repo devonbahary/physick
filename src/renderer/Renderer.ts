@@ -1,8 +1,9 @@
 import 'normalize.css';
-import { Circle } from '../physics/Circle';
-import { Sprite } from './Sprite';
-import { World } from '../physics/World';
-import './styles.css';
+import { Circle } from '@physics/Circle';
+import { Sprite } from '@renderer/Sprite';
+import { World } from '@physics/World';
+import { Body } from '@physics/Body';
+import '@renderer/styles.css';
 
 const applyStyle = (element: HTMLElement, style: Partial<CSSStyleDeclaration>): void => {
     Object.assign(element.style, style);
@@ -19,7 +20,7 @@ export class Renderer {
     private worldElement: HTMLElement;
     private sprites: Sprite[] = [];
 
-    constructor(world: World, player: Circle) {
+    constructor(world: World, player: Body) {
         this.worldElement = this.createWorld(world);
         document.body.appendChild(this.worldElement);
 
@@ -28,10 +29,10 @@ export class Renderer {
 
     public update(): void {
         for (const sprite of this.sprites) {
-            const { element, entity } = sprite;
+            const { body, element } = sprite;
             applyStyle(element, {
-                top: toPx(entity.y),
-                left: toPx(entity.x),
+                top: toPx(body.y),
+                left: toPx(body.x),
             });
         }
     }
@@ -48,14 +49,21 @@ export class Renderer {
         return element;
     }
 
-    private initPlayer(player: Circle): void {
-        const { radius } = player;
-
+    private initPlayer(player: Body): void {
         const element = this.createElement({ id: 'player', className: 'entity' });
-        applyStyle(element, {
-            width: toPx(radius * 2),
-            height: toPx(radius * 2),
-        });
+        
+        const { width, height } = player;
+
+        const style: Partial<CSSStyleDeclaration> = {
+            width: toPx(width),
+            height: toPx(height),
+        };
+
+        if (player.shape instanceof Circle) {
+            style.borderRadius = '50%';
+        }
+
+        applyStyle(element, style);
 
         const sprite = new Sprite(player, element);
         this.addSprite(sprite);

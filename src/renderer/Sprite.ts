@@ -1,5 +1,5 @@
-import { Point } from '../physics/Point';
+import { Body } from '@physics/Body';
 
 export class Sprite {
-    constructor(public entity: Point, public element: HTMLElement) {}
+    constructor(public body: Body, public element: HTMLElement) {}
 }

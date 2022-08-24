@@ -1,4 +1,4 @@
-import { Circle } from './physics/Circle';
+import { Body } from '@physics/Body';
 
 enum Key {
     Up = 'ArrowUp',
@@ -10,7 +10,7 @@ enum Key {
 export class Controls {
     private pressedKeys: Set<string>;
 
-    constructor(public player: Circle) {
+    constructor(public player: Body) {
         this.initListeners();
         this.pressedKeys = new Set();
     }

@@ -17,8 +17,12 @@ module.exports = {
         tsconfigRootDir: __dirname,
         project: ['./tsconfig.json'],
     },
-    plugins: ['@typescript-eslint'],
+    plugins: ['@typescript-eslint', 'unused-imports'],
     rules: {
         '@typescript-eslint/explicit-function-return-type': 'error',
+        'no-restricted-imports': ['error', {
+            "patterns": [".*"],
+        }],
+        'unused-imports/no-unused-imports': 'error',
     },
 };
