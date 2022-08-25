@@ -11,7 +11,7 @@ const controls = new Controls();
 world.subscribe(WorldEvent.AddBody, (body) => renderer.addBodySprite(body));
 world.subscribe(WorldEvent.RemoveBody, (body) => renderer.removeBodySprite(body));
 
-const player = new Body(new Circle(20));
+const player = new Body({ shape: new Circle(20) });
 
 world.addBody(player);
 renderer.assignPlayerSprite(player);
@@ -19,6 +19,7 @@ controls.setPlayer(player);
 
 // TODO: timestep
 const update = (): void => {
+    world.update();
     controls.update();
     renderer.update();
 

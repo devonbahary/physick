@@ -1,4 +1,5 @@
 import { Body } from '@physics/Body';
+import { Vectors } from '@physics/Vectors';
 
 enum Key {
     Up = 'ArrowUp',
@@ -6,6 +7,8 @@ enum Key {
     Down = 'ArrowDown',
     Left = 'ArrowLeft',
 }
+
+const PLAYER_SPEED = 2;
 
 export class Controls {
     private player: Body | null = null;
@@ -25,27 +28,30 @@ export class Controls {
     }
 
     private updatePlayerMovement(): void {
-        if (!this.player) return;
+        if (!this.player || Vectors.magnitude(this.player.velocity) > PLAYER_SPEED) return;
 
         const movement = { x: 0, y: 0 };
 
         if (this.isPressed(Key.Up)) {
-            movement.y -= 5;
+            movement.y -= 1;
         }
 
         if (this.isPressed(Key.Down)) {
-            movement.y += 5;
+            movement.y += 1;
         }
 
         if (this.isPressed(Key.Left)) {
-            movement.x -= 5;
+            movement.x -= 1;
         }
 
         if (this.isPressed(Key.Right)) {
-            movement.x += 5;
+            movement.x += 1;
         }
 
-        this.player.move(movement);
+        if (Vectors.hasMagnitude(movement)) {
+            const velocity = Vectors.resize(movement, PLAYER_SPEED);
+            this.player.setVelocity(velocity);
+        }
     }
 
     private initListeners(): void {

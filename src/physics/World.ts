@@ -1,5 +1,6 @@
 import { Dimensions } from '@physics/types';
 import { Body } from '@physics/Body';
+import { Vectors } from '@physics/Vectors';
 
 type OnBodyChange = (body: Body) => void;
 
@@ -7,6 +8,8 @@ export enum WorldEvent {
     AddBody,
     RemoveBody,
 }
+
+const FRICTIONAL_FORCE = 0.1;
 
 export class World {
     public width: number;
@@ -20,6 +23,15 @@ export class World {
 
         this.width = width;
         this.height = height;
+    }
+
+    public update(): void {
+        for (const body of this.bodies) {
+            if (body.isMoving()) {
+                body.move(body.velocity);
+                this.applyFriction(body);
+            }
+        }
     }
 
     public subscribe(event: WorldEvent, callback: OnBodyChange): void {
@@ -46,6 +58,17 @@ export class World {
 
         for (const removeBodyHandler of this.removeBodyHandlers) {
             removeBodyHandler(body);
+        }
+    }
+
+    private applyFriction(body: Body): void {
+        const opposingVector = Vectors.opposite(body.velocity);
+        const frictionalForce = Vectors.resize(opposingVector, FRICTIONAL_FORCE);
+
+        body.applyForce(Vectors.mult(frictionalForce, body.mass));
+
+        if (Vectors.magnitude(body.velocity) < 0.1) {
+            body.setVelocity({ x: 0, y: 0 });
         }
     }
 }
