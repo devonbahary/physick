@@ -25,9 +25,9 @@ type CollisionEvent = Collision & {
     collisionBody: Body;
 };
 
-const isValidTimeOfCollision = (t: number): boolean => {
+const isCollisionInThisTimestep = (t: number, dt: number): boolean => {
     const rounded = roundForFloatingPoint(t);
-    return isInRange(0, rounded, 1);
+    return isInRange(0, rounded, dt);
 };
 
 const isMovingTowards = (a: Particle, b: Particle): boolean => {
@@ -47,13 +47,13 @@ const getEarliestCollision = (collisions: Collision[]): Collision | null => {
 };
 
 export class Collisions {
-    static getCollisionEventWithBodies(movingBody: Body, bodies: Body[]): CollisionEvent | null {
+    static getCollisionEventWithBodies(movingBody: Body, bodies: Body[], dt: number): CollisionEvent | null {
         if (!movingBody.isMoving()) return null;
 
         return bodies.reduce<CollisionEvent | null>((earliest, collisionBody) => {
             if (movingBody === collisionBody) return earliest;
 
-            const collision = Collisions.getCollision(movingBody, collisionBody);
+            const collision = Collisions.getCollision(movingBody, collisionBody, dt);
 
             if (!collision) return earliest;
 
@@ -98,21 +98,25 @@ export class Collisions {
         return null;
     }
 
-    private static getCollision(a: Body, b: Body): Collision | null {
+    private static getCollision(a: Body, b: Body, dt: number): Collision | null {
         if (a.shape instanceof Circle) {
-            if (b.shape instanceof Circle) return Collisions.getCircleVsCircleCollision(a.shape, b.shape);
-            if (b.shape instanceof Rect) return Collisions.getCircleVsRectCollision(a.shape, b.shape);
+            if (b.shape instanceof Circle) return Collisions.getCircleVsCircleCollision(a.shape, b.shape, dt);
+            if (b.shape instanceof Rect) return Collisions.getCircleVsRectCollision(a.shape, b.shape, dt);
         }
 
         if (a.shape instanceof Rect) {
-            if (b.shape instanceof Circle) return Collisions.getRectVsCircleCollision(a.shape, b.shape);
-            if (b.shape instanceof Rect) return Collisions.getRectVsRectCollision(a.shape, b.shape);
+            if (b.shape instanceof Circle) return Collisions.getRectVsCircleCollision(a.shape, b.shape, dt);
+            if (b.shape instanceof Rect) return Collisions.getRectVsRectCollision(a.shape, b.shape, dt);
         }
 
         return null;
     }
 
-    private static getCircleVsCircleCollision(a: Circle | Particle, b: Circle | Particle): Collision | null {
+    private static getCircleVsCircleCollision(
+        a: Circle | Particle,
+        b: Circle | Particle,
+        dt: number,
+    ): Collision | null {
         // don't consider circles not even moving in the direction of another circle
         if (!isMovingTowards(a, b)) return null;
 
@@ -132,7 +136,7 @@ export class Collisions {
         const timesOfCollision = quadratic(coefficientA, coefficientB, coefficientC);
 
         return timesOfCollision.reduce<Collision | null>((earliest, t) => {
-            if (!isValidTimeOfCollision(t)) return earliest;
+            if (!isCollisionInThisTimestep(t, dt)) return earliest;
 
             const aAtTimeOfColliison = new Particle(a.x + dx * t, a.y + dy * t);
             aAtTimeOfColliison.setVelocity(a.velocity);
@@ -170,7 +174,7 @@ export class Collisions {
     }
 
     // https://gamedev.stackexchange.com/questions/65814/2d-rectangle-circle-continuous-collision-detection
-    private static getCircleVsRectCollision(circle: Circle, rect: Rect): Collision | null {
+    private static getCircleVsRectCollision(circle: Circle, rect: Rect, dt: number): Collision | null {
         const {
             radius,
             velocity: { x: dx, y: dy },
@@ -185,7 +189,7 @@ export class Collisions {
             side: LineSegment,
             getPointOfContact: (collision: PointCollision) => Vector,
         ): void => {
-            const collision = Collisions.getPointVsLineCollision(circle, side);
+            const collision = Collisions.getPointVsLineCollision(circle, side, dt);
 
             if (collision) {
                 sideCollisions.push({
@@ -216,7 +220,7 @@ export class Collisions {
 
         const cornerCollisions = corners.reduce<Collision[]>((collisions, corner) => {
             if (isMovingTowards(circle, corner)) {
-                const collision = Collisions.getCircleVsCircleCollision(circle, corner);
+                const collision = Collisions.getCircleVsCircleCollision(circle, corner, dt);
                 if (collision) collisions.push(collision);
             }
             return collisions;
@@ -226,7 +230,7 @@ export class Collisions {
     }
 
     // https://gamedev.stackexchange.com/questions/65814/2d-rectangle-circle-continuous-collision-detection
-    private static getRectVsCircleCollision(rect: Rect, circle: Circle): Collision | null {
+    private static getRectVsCircleCollision(rect: Rect, circle: Circle, dt: number): Collision | null {
         const { x0, x1, y0, y1, velocity } = rect;
         const { x: dx, y: dy } = velocity;
         const { radius } = circle;
@@ -239,7 +243,7 @@ export class Collisions {
             side: LineSegment,
             getPointOfContact: (collision: PointCollision) => Vector,
         ): void => {
-            const collision = Collisions.getPointVsLineCollision(point, side);
+            const collision = Collisions.getPointVsLineCollision(point, side, dt);
 
             if (collision) {
                 sideCollisions.push({
@@ -275,7 +279,7 @@ export class Collisions {
         const cornerCollisions = corners.reduce<Collision[]>((collisions, corner) => {
             if (isMovingTowards(point, corner)) {
                 corner.setVelocity(velocity);
-                const collision = Collisions.getCircleVsCircleCollision(corner, circle);
+                const collision = Collisions.getCircleVsCircleCollision(corner, circle, dt);
                 if (collision) collisions.push(collision);
             }
             return collisions;
@@ -285,7 +289,7 @@ export class Collisions {
     }
 
     // https://www.emanueleferonato.com/2021/10/21/understanding-physics-continuous-collision-detection-using-swept-aabb-method-and-minkowski-sum/
-    private static getRectVsRectCollision(a: Rect, b: Rect): Collision | null {
+    private static getRectVsRectCollision(a: Rect, b: Rect, dt: number): Collision | null {
         // simulate a point vs line collision using a Minkowski Sum
         const rectBMinkowskiSum = new Rect({
             x: b.x,
@@ -308,7 +312,7 @@ export class Collisions {
         const collisions: LineSegmentCollision[] = [];
 
         if (dy > 0) {
-            const collision = Collisions.getPointVsLineCollision(a, minkowskiTop);
+            const collision = Collisions.getPointVsLineCollision(a, minkowskiTop, dt);
 
             if (collision) {
                 const { timeOfCollision } = collision;
@@ -337,7 +341,7 @@ export class Collisions {
         }
 
         if (dy < 0) {
-            const collision = Collisions.getPointVsLineCollision(a, minkowskiBottom);
+            const collision = Collisions.getPointVsLineCollision(a, minkowskiBottom, dt);
 
             if (collision) {
                 const { timeOfCollision } = collision;
@@ -365,7 +369,7 @@ export class Collisions {
         }
 
         if (dx < 0) {
-            const collision = Collisions.getPointVsLineCollision(a, minkowskiRight);
+            const collision = Collisions.getPointVsLineCollision(a, minkowskiRight, dt);
 
             if (collision) {
                 const { timeOfCollision } = collision;
@@ -393,7 +397,7 @@ export class Collisions {
         }
 
         if (dx > 0) {
-            const collision = Collisions.getPointVsLineCollision(a, minkowskiLeft);
+            const collision = Collisions.getPointVsLineCollision(a, minkowskiLeft, dt);
 
             if (collision) {
                 const { timeOfCollision } = collision;
@@ -423,7 +427,7 @@ export class Collisions {
         return getEarliestCollision(collisions);
     }
 
-    private static getPointVsLineCollision(point: Particle, line: LineSegment): PointCollision | null {
+    private static getPointVsLineCollision(point: Particle, line: LineSegment, dt: number): PointCollision | null {
         const {
             x: pointX,
             y: pointY,
@@ -436,7 +440,7 @@ export class Collisions {
             const { x0, x1, y: lineY } = line;
             const t = (lineY - pointY) / dy;
 
-            if (isValidTimeOfCollision(t)) {
+            if (isCollisionInThisTimestep(t, dt)) {
                 const pointXAtTimeOfCollision = pointX + dx * t;
 
                 if (isInRange(x0, pointXAtTimeOfCollision, x1)) {
@@ -459,7 +463,7 @@ export class Collisions {
             const { x: lineX, y0, y1 } = line;
             const t = (lineX - pointX) / dx;
 
-            if (isValidTimeOfCollision(t)) {
+            if (isCollisionInThisTimestep(t, dt)) {
                 const pointYAtTimeOfCollision = pointY + dy * t;
 
                 if (isInRange(y0, pointYAtTimeOfCollision, y1)) {

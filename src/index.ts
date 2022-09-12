@@ -5,6 +5,9 @@ import { Body } from '@physics/Body';
 import { Controls } from 'src/Controls';
 import { Rect } from '@physics/shapes/Rect';
 
+const MS_IN_SECOND = 1000;
+const DESIRED_FRAMES_PER_SECOND = 60;
+
 const player = new Body({ shape: new Circle({ radius: 20, x: 50, y: 50 }) });
 // const player = new Body({ shape: new Rect({ x: 50, y: 50, width: 40, height: 40 }) });
 
@@ -22,13 +25,17 @@ const rectBody = new Body({ shape: new Rect({ width: 40, height: 40 }) });
 rectBody.moveTo({ x: 180, y: 100 });
 world.addBody(rectBody);
 
-// TODO: timestep
-const update = (): void => {
-    world.update();
-    controls.update();
+const update = (lastTimestamp = Date.now()): void => {
+    const now = Date.now();
+
+    const timestep = now - lastTimestamp;
+    const dt = (DESIRED_FRAMES_PER_SECOND * timestep) / MS_IN_SECOND; // # of frames to advance (1 @60FPS)
+
+    world.update(dt);
+    controls.update(dt);
     renderer.update();
 
-    requestAnimationFrame(() => update());
+    requestAnimationFrame(() => update(now));
 };
 
 requestAnimationFrame(update);

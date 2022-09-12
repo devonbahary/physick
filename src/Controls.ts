@@ -20,11 +20,11 @@ export class Controls {
         this.pressedKeys = new Set();
     }
 
-    public update(): void {
-        this.updatePlayerMovement();
+    public update(dt: number): void {
+        this.updatePlayerMovement(dt);
     }
 
-    private updatePlayerMovement(): void {
+    private updatePlayerMovement(dt: number): void {
         // player shouldn't be able to move if it's already moving faster than its movement speed
         if (Vectors.magnitude(this.player.velocity) > PLAYER_SPEED) return;
 
@@ -34,7 +34,7 @@ export class Controls {
             const velocity = Vectors.resize(movement, PLAYER_SPEED);
             this.player.setVelocity(velocity);
 
-            const collisionEvent = Collisions.getCollisionEventWithBodies(this.player, this.world.bodies);
+            const collisionEvent = Collisions.getCollisionEventWithBodies(this.player, this.world.bodies, dt);
 
             if (collisionEvent) {
                 // slide around an object in contact with

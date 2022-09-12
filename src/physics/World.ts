@@ -30,11 +30,11 @@ export class World {
         this.initBoundaries();
     }
 
-    public update(): void {
+    public update(dt: number): void {
         for (const body of this.bodies) {
             if (!body.isMoving()) continue;
 
-            const collisionEvent = Collisions.getCollisionEventWithBodies(body, this.bodies);
+            const collisionEvent = Collisions.getCollisionEventWithBodies(body, this.bodies, dt);
 
             if (collisionEvent !== null) {
                 if (collisionEvent.timeOfCollision) {
@@ -45,8 +45,8 @@ export class World {
                 // TODO: collision resolution
                 body.setVelocity({ x: 0, y: 0 });
             } else {
-                body.move(body.velocity);
-                this.applyFriction(body);
+                body.move(Vectors.mult(body.velocity, dt));
+                this.applyFriction(body, dt);
             }
         }
     }
@@ -102,9 +102,9 @@ export class World {
         }
     }
 
-    private applyFriction(body: Body): void {
+    private applyFriction(body: Body, dt: number): void {
         // friction has a direct relationship with the body's speed + mass
-        const frictionalForce = Vectors.resize(body.velocity, FRICTIONAL_FORCE * body.mass);
+        const frictionalForce = Vectors.resize(body.velocity, dt * FRICTIONAL_FORCE * body.mass);
 
         const newVelocity = Vectors.subtract(body.velocity, frictionalForce);
         body.setVelocity(newVelocity);
