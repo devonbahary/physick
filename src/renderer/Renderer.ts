@@ -1,7 +1,7 @@
 import 'normalize.css';
 import { Circle } from '@physics/shapes/Circle';
 import { Sprite } from '@renderer/Sprite';
-import { World } from '@physics/World';
+import { World, WorldEvent } from '@physics/World';
 import { Body } from '@physics/Body';
 import '@renderer/styles.css';
 
@@ -23,6 +23,8 @@ export class Renderer {
     constructor(world: World, private player: Body) {
         this.worldElement = this.createWorld(world);
         document.body.appendChild(this.worldElement);
+
+        this.subscribeToWorld(world);
     }
 
     public update(): void {
@@ -61,6 +63,11 @@ export class Renderer {
     public removeBodySprite(body: Body): void {
         const spriteToRemove = this.sprites.find((sprite) => sprite.body.id === body.id);
         if (spriteToRemove) this.removeSprite(spriteToRemove);
+    }
+
+    private subscribeToWorld(world: World): void {
+        world.subscribe(WorldEvent.AddBody, (body) => this.addBodySprite(body));
+        world.subscribe(WorldEvent.RemoveBody, (body) => this.removeBodySprite(body));
     }
 
     private addSprite(sprite: Sprite): void {
