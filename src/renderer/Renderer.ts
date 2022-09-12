@@ -60,7 +60,6 @@ export class Renderer {
 
     public removeBodySprite(body: Body): void {
         const spriteToRemove = this.sprites.find((sprite) => sprite.body.id === body.id);
-        console.log(spriteToRemove);
         if (spriteToRemove) this.removeSprite(spriteToRemove);
     }
 
