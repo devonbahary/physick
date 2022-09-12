@@ -8,6 +8,7 @@ enum Key {
     Right = 'ArrowRight',
     Down = 'ArrowDown',
     Left = 'ArrowLeft',
+    Shift = 'Shift',
 }
 
 const PLAYER_SPEED = 2;
@@ -22,6 +23,10 @@ export class Controls {
 
     public update(dt: number): void {
         this.updatePlayerMovement(dt);
+    }
+
+    public isShiftPressed(): boolean {
+        return this.isPressed(Key.Shift);
     }
 
     private updatePlayerMovement(dt: number): void {

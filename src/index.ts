@@ -31,8 +31,10 @@ const update = (lastTimestamp = Date.now()): void => {
     const timestep = now - lastTimestamp;
     const dt = (DESIRED_FRAMES_PER_SECOND * timestep) / MS_IN_SECOND; // # of frames to advance (1 @60FPS)
 
-    world.update(dt);
-    controls.update(dt);
+    const modifiedDt = controls.isShiftPressed() ? dt * 2 : dt;
+
+    world.update(modifiedDt);
+    controls.update(modifiedDt);
     renderer.update();
 
     requestAnimationFrame(() => update(now));
