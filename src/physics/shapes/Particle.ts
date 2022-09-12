@@ -1,9 +1,14 @@
-import { Vector } from '@physics/types';
+import { Vector } from '@physics/Vectors';
 
-export class Point implements Vector {
+export class Particle implements Vector {
     public velocity: Vector = { x: 0, y: 0 };
 
     constructor(public x = 0, public y = 0) {}
+
+    moveTo(pos: Vector): void {
+        this.x = pos.x;
+        this.y = pos.y;
+    }
 
     move(dir: Vector): void {
         this.x += dir.x;

@@ -1,6 +1,8 @@
 import { Dimensions } from '@physics/types';
 import { Body } from '@physics/Body';
 import { Vectors } from '@physics/Vectors';
+import { Rect } from '@physics/shapes/Rect';
+import { Collisions } from '@physics/Collisions';
 
 type OnBodyChange = (body: Body) => void;
 
@@ -10,6 +12,7 @@ export enum WorldEvent {
 }
 
 const FRICTIONAL_FORCE = 0.1;
+const MINIMUM_FRICTIONAL_SPEED = 0.1;
 
 export class World {
     public width: number;
@@ -23,11 +26,25 @@ export class World {
 
         this.width = width;
         this.height = height;
+
+        this.initBoundaries();
     }
 
     public update(): void {
         for (const body of this.bodies) {
-            if (body.isMoving()) {
+            if (!body.isMoving()) continue;
+
+            const collisionEvent = Collisions.getCollisionEventWithBodies(body, this.bodies);
+
+            if (collisionEvent !== null) {
+                if (collisionEvent.timeOfCollision) {
+                    // TODO: round?
+                    const movement = Vectors.mult(body.velocity, collisionEvent.timeOfCollision);
+                    body.move(movement);
+                }
+                // TODO: collision resolution
+                body.setVelocity({ x: 0, y: 0 });
+            } else {
                 body.move(body.velocity);
                 this.applyFriction(body);
             }
@@ -61,13 +78,39 @@ export class World {
         }
     }
 
+    private initBoundaries(): void {
+        const { width, height } = this;
+
+        const topBorder = new Rect({ width, height: 0 });
+        topBorder.moveTo({ x: width / 2, y: 0 });
+
+        const rightBorder = new Rect({ width: 0, height });
+        rightBorder.moveTo({ x: width, y: height / 2 });
+
+        const bottomBorder = new Rect({ width, height: 0 });
+        bottomBorder.moveTo({ x: width / 2, y: height });
+
+        const leftBorder = new Rect({ width: 0, height });
+        leftBorder.moveTo({ x: 0, y: height / 2 });
+
+        const boundaryRects = [topBorder, rightBorder, bottomBorder, leftBorder];
+
+        const boundaryBodies = boundaryRects.map((shape) => new Body({ shape, mass: Infinity }));
+
+        for (const body of boundaryBodies) {
+            this.addBody(body);
+        }
+    }
+
     private applyFriction(body: Body): void {
-        const opposingVector = Vectors.opposite(body.velocity);
-        const frictionalForce = Vectors.resize(opposingVector, FRICTIONAL_FORCE);
+        // friction has a direct relationship with the body's speed + mass
+        const frictionalForce = Vectors.resize(body.velocity, FRICTIONAL_FORCE * body.mass);
 
-        body.applyForce(Vectors.mult(frictionalForce, body.mass));
+        const newVelocity = Vectors.subtract(body.velocity, frictionalForce);
+        body.setVelocity(newVelocity);
 
-        if (Vectors.magnitude(body.velocity) < 0.1) {
+        // stop the body once reached some minimum rather than infinitely approach 0
+        if (Vectors.magnitude(newVelocity) < MINIMUM_FRICTIONAL_SPEED) {
             body.setVelocity({ x: 0, y: 0 });
         }
     }

@@ -1,13 +1,14 @@
 import { v4 as uuid } from 'uuid';
-import { Shape, Vector } from '@physics/types';
-import { Vectors } from '@physics/Vectors';
+import { Vector, Vectors } from '@physics/Vectors';
+import { Particle } from '@physics/shapes/Particle';
+import { Shape } from '@physics/shapes/types';
 
 type BodyOptions = {
     shape: Shape;
     mass?: number;
 };
 
-export class Body {
+export class Body implements Particle {
     public id = uuid();
     public shape: Shape;
     public mass: number;
@@ -39,12 +40,31 @@ export class Body {
         return this.shape.height;
     }
 
+    get x0(): number {
+        return this.shape.x0;
+    }
+
+    get x1(): number {
+        return this.shape.x1;
+    }
+
+    get y0(): number {
+        return this.shape.y0;
+    }
+    get y1(): number {
+        return this.shape.y1;
+    }
+
     get velocity(): Vector {
         return this.shape.velocity;
     }
 
     public isMoving(): boolean {
         return Vectors.hasMagnitude(this.shape.velocity);
+    }
+
+    public moveTo(pos: Vector): void {
+        this.shape.moveTo(pos);
     }
 
     public move(dir: Vector): void {

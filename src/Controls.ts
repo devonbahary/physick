@@ -1,5 +1,7 @@
 import { Body } from '@physics/Body';
-import { Vectors } from '@physics/Vectors';
+import { Collisions } from '@physics/Collisions';
+import { Vector, Vectors } from '@physics/Vectors';
+import { World } from '@physics/World';
 
 enum Key {
     Up = 'ArrowUp',
@@ -11,10 +13,9 @@ enum Key {
 const PLAYER_SPEED = 2;
 
 export class Controls {
-    private player: Body | null = null;
     private pressedKeys: Set<string>;
 
-    constructor() {
+    constructor(private player: Body, private world: World) {
         this.initListeners();
         this.pressedKeys = new Set();
     }
@@ -23,13 +24,27 @@ export class Controls {
         this.updatePlayerMovement();
     }
 
-    public setPlayer(player: Body): void {
-        this.player = player;
+    private updatePlayerMovement(): void {
+        // player shouldn't be able to move if it's already moving faster than its movement speed
+        if (Vectors.magnitude(this.player.velocity) > PLAYER_SPEED) return;
+
+        const movement = this.getMovementVector();
+
+        if (Vectors.hasMagnitude(movement)) {
+            const velocity = Vectors.resize(movement, PLAYER_SPEED);
+            this.player.setVelocity(velocity);
+
+            const collisionEvent = Collisions.getCollisionEventWithBodies(this.player, this.world.bodies);
+
+            if (collisionEvent) {
+                // slide around an object in contact with
+                const projection = Collisions.getVelocityProjectionOntoContactTangent(collisionEvent);
+                if (projection) this.player.setVelocity(projection);
+            }
+        }
     }
 
-    private updatePlayerMovement(): void {
-        if (!this.player || Vectors.magnitude(this.player.velocity) > PLAYER_SPEED) return;
-
+    private getMovementVector(): Vector {
         const movement = { x: 0, y: 0 };
 
         if (this.isPressed(Key.Up)) {
@@ -48,10 +63,7 @@ export class Controls {
             movement.x += 1;
         }
 
-        if (Vectors.hasMagnitude(movement)) {
-            const velocity = Vectors.resize(movement, PLAYER_SPEED);
-            this.player.setVelocity(velocity);
-        }
+        return Vectors.resize(movement, PLAYER_SPEED);
     }
 
     private initListeners(): void {

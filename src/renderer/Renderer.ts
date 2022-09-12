@@ -1,5 +1,5 @@
 import 'normalize.css';
-import { Circle } from '@physics/Circle';
+import { Circle } from '@physics/shapes/Circle';
 import { Sprite } from '@renderer/Sprite';
 import { World } from '@physics/World';
 import { Body } from '@physics/Body';
@@ -20,7 +20,7 @@ export class Renderer {
     private worldElement: HTMLElement;
     private sprites: Sprite[] = [];
 
-    constructor(world: World) {
+    constructor(world: World, private player: Body) {
         this.worldElement = this.createWorld(world);
         document.body.appendChild(this.worldElement);
     }
@@ -37,7 +37,7 @@ export class Renderer {
 
     public addBodySprite(body: Body): void {
         const element = this.createElement({
-            // id: body.id === this.playerBodyId ? 'player' : undefined,
+            id: body.id === this.player.id ? 'player' : undefined,
             className: 'entity',
         });
 
@@ -62,13 +62,6 @@ export class Renderer {
         const spriteToRemove = this.sprites.find((sprite) => sprite.body.id === body.id);
         console.log(spriteToRemove);
         if (spriteToRemove) this.removeSprite(spriteToRemove);
-    }
-
-    public assignPlayerSprite(player: Body): void {
-        const playerSprite = this.sprites.find((sprite) => sprite.body.id === player.id);
-        if (playerSprite) {
-            playerSprite.element.id = 'player';
-        }
     }
 
     private addSprite(sprite: Sprite): void {
