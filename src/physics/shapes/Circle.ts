@@ -2,7 +2,7 @@ import { Particle } from '@physics/shapes/Particle';
 import { Spatial } from '@physics/shapes/types';
 import { Vector } from '@physics/Vectors';
 
-type CircleArgs = Vector & {
+type CircleArgs = Partial<Vector> & {
     radius: number;
 };
 
