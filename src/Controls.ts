@@ -11,7 +11,7 @@ enum Key {
     Shift = 'Shift',
 }
 
-const PLAYER_SPEED = 2;
+const PLAYER_SPEED = 4;
 
 export class Controls {
     private pressedKeys: Set<string>;
