@@ -13,7 +13,7 @@ const toPx = (val: number): string => `${val}px`;
 
 type CreateElementOptions = {
     id?: string;
-    className?: string;
+    classNames?: string[];
 };
 
 export class Renderer {
@@ -38,9 +38,13 @@ export class Renderer {
     }
 
     public addBodySprite(body: Body): void {
+        const classNames = ['body'];
+
+        if (body.isFixed()) classNames.push('fixed');
+
         const element = this.createElement({
             id: body.id === this.player.id ? 'player' : undefined,
-            className: 'entity',
+            classNames,
         });
 
         const { width, height } = body;
@@ -93,12 +97,12 @@ export class Renderer {
     }
 
     private createElement(options: CreateElementOptions = {}): HTMLElement {
-        const { id, className } = options;
+        const { id, classNames } = options;
 
         const element = document.createElement('div');
 
         if (id) element.id = id;
-        if (className) element.classList.add(className);
+        if (classNames) element.classList.add(...classNames);
 
         return element;
     }

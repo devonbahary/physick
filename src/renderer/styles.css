@@ -16,8 +16,12 @@ body {
     background: red;
 }
 
-.entity {
+.body {
     position: absolute;
     transform: translate(-50%, -50%);
     background: white;
+}
+
+.body.fixed {
+    opacity: 0.5;
 }
