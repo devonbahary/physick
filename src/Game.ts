@@ -23,6 +23,7 @@ export enum GameMode {
     Chaos,
 }
 
+const randBool = (): boolean => Boolean(Math.round(Math.random()));
 const randFloat = (min: number, max: number): number => min + Math.random() * (max - min);
 const randInt = (min: number, max: number): number => min + Math.round(Math.random() * (max - min));
 
@@ -40,6 +41,8 @@ const generateRandomCircles = (): Body[] => {
 
         const randomCircle = new Circle({ radius, ...pos });
         const randomCircleBody = new Body({ shape: randomCircle });
+
+        if (randBool()) randomCircleBody.mass = Infinity;
 
         bodies.push(randomCircleBody);
     }
@@ -62,6 +65,8 @@ const generateRandomRects = (): Body[] => {
 
         const randomRect = new Rect({ width, height, ...pos });
         const randomRectBody = new Body({ shape: randomRect });
+
+        if (randBool()) randomRectBody.mass = Infinity;
 
         bodies.push(randomRectBody);
     }
