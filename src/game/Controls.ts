@@ -4,30 +4,38 @@ import { ContinousCollisionDetection } from '@physics/collisions/ContinousCollis
 import { Vector, Vectors } from '@physics/Vectors';
 import { World } from '@physics/World';
 
-enum Key {
+export enum Key {
     Up = 'ArrowUp',
     Right = 'ArrowRight',
     Down = 'ArrowDown',
     Left = 'ArrowLeft',
     Shift = 'Shift',
+    Space = ' ',
 }
 
 const PLAYER_SPEED = 4;
 
 export class Controls {
     private pressedKeys: Set<string>;
+    private tappedKeys: Set<string>;
 
     constructor(private player: Body, private world: World) {
         this.initListeners();
         this.pressedKeys = new Set();
+        this.tappedKeys = new Set();
     }
 
     public update(dt: number): void {
+        this.tappedKeys.clear();
         this.updatePlayerMovement(dt);
     }
 
-    public isShiftPressed(): boolean {
-        return this.isPressed(Key.Shift);
+    public isPressed(key: Key): boolean {
+        return this.pressedKeys.has(key);
+    }
+
+    public isTapped(key: Key): boolean {
+        return this.tappedKeys.has(key);
     }
 
     private updatePlayerMovement(dt: number): void {
@@ -83,10 +91,7 @@ export class Controls {
 
         document.addEventListener('keyup', (event) => {
             this.pressedKeys.delete(event.key);
+            this.tappedKeys.add(event.key);
         });
-    }
-
-    private isPressed(key: Key): boolean {
-        return this.pressedKeys.has(key);
     }
 }
