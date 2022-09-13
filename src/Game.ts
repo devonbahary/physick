@@ -1,6 +1,7 @@
 import { Body } from '@physics/Body';
 import { Circle } from '@physics/shapes/Circle';
 import { Rect } from '@physics/shapes/Rect';
+import { Shape } from '@physics/shapes/types';
 import { Dimensions } from '@physics/types';
 import { World } from '@physics/World';
 import { Renderer } from '@renderer/Renderer';
@@ -27,6 +28,12 @@ const randBool = (): boolean => Boolean(Math.round(Math.random()));
 const randFloat = (min: number, max: number): number => min + Math.random() * (max - min);
 const randInt = (min: number, max: number): number => min + Math.round(Math.random() * (max - min));
 
+const getProportionateMass = (shape: Shape): number => {
+    const { width, height } = shape;
+    const standardRatio = (40 * 40) / 1;
+    return (width * height) / standardRatio;
+};
+
 const generateRandomCircles = (): Body[] => {
     const bodies: Body[] = [];
 
@@ -40,7 +47,10 @@ const generateRandomCircles = (): Body[] => {
         };
 
         const randomCircle = new Circle({ radius, ...pos });
-        const randomCircleBody = new Body({ shape: randomCircle });
+        const randomCircleBody = new Body({
+            shape: randomCircle,
+            mass: getProportionateMass(randomCircle),
+        });
 
         if (randBool()) randomCircleBody.mass = Infinity;
 
@@ -64,7 +74,10 @@ const generateRandomRects = (): Body[] => {
         };
 
         const randomRect = new Rect({ width, height, ...pos });
-        const randomRectBody = new Body({ shape: randomRect });
+        const randomRectBody = new Body({
+            shape: randomRect,
+            mass: getProportionateMass(randomRect),
+        });
 
         if (randBool()) randomRectBody.mass = Infinity;
 
