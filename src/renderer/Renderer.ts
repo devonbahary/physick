@@ -16,6 +16,33 @@ type CreateElementOptions = {
     classNames?: string[];
 };
 
+const createElement = (options: CreateElementOptions = {}): HTMLElement => {
+    const { id, classNames } = options;
+
+    const element = document.createElement('div');
+
+    if (id) element.id = id;
+    if (classNames) element.classList.add(...classNames);
+
+    return element;
+};
+
+const applyBodySpriteStyles = (sprite: Sprite): void => {
+    const { body, element } = sprite;
+    const { width, height } = body;
+
+    const style: Partial<CSSStyleDeclaration> = {
+        width: toPx(width),
+        height: toPx(height),
+    };
+
+    if (body.shape instanceof Circle) {
+        style.borderRadius = '50%';
+    }
+
+    applyStyle(element, style);
+};
+
 export class Renderer {
     private worldElement: HTMLElement;
     private sprites: Sprite[] = [];
@@ -42,25 +69,13 @@ export class Renderer {
 
         if (body.isFixed()) classNames.push('fixed');
 
-        const element = this.createElement({
+        const element = createElement({
             id: body.id === this.player.id ? 'player' : undefined,
             classNames,
         });
 
-        const { width, height } = body;
-
-        const style: Partial<CSSStyleDeclaration> = {
-            width: toPx(width),
-            height: toPx(height),
-        };
-
-        if (body.shape instanceof Circle) {
-            style.borderRadius = '50%';
-        }
-
-        applyStyle(element, style);
-
         const sprite = new Sprite(body, element);
+        applyBodySpriteStyles(sprite);
         this.addSprite(sprite);
     }
 
@@ -85,24 +100,13 @@ export class Renderer {
     }
 
     private createWorld(world: World): HTMLElement {
-        const element = this.createElement();
+        const element = createElement();
         element.id = 'world';
 
         applyStyle(element, {
             width: toPx(world.width),
             height: toPx(world.height),
         });
-
-        return element;
-    }
-
-    private createElement(options: CreateElementOptions = {}): HTMLElement {
-        const { id, classNames } = options;
-
-        const element = document.createElement('div');
-
-        if (id) element.id = id;
-        if (classNames) element.classList.add(...classNames);
 
         return element;
     }
