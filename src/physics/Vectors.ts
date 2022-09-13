@@ -59,8 +59,8 @@ export class Vectors {
         return a.x * b.x + a.y * b.y;
     }
 
-    static proj(a: Vector, b: Vector): Vector {
-        return Vectors.mult(b, Vectors.dot(a, b) / Vectors.dot(b, b));
+    static proj(of: Vector, onto: Vector): Vector {
+        return Vectors.mult(onto, Vectors.dot(of, onto) / Vectors.dot(onto, onto));
     }
 
     static resize(v: Vector, scalar: number): Vector {
