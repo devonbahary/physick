@@ -4,6 +4,7 @@ import { Vectors } from '@physics/Vectors';
 import { Rect } from '@physics/shapes/Rect';
 import { ContinousCollisionDetection } from '@physics/collisions/ContinousCollisionDetection';
 import { CollisionResolution } from '@physics/collisions/CollisionResolution';
+import { Observable } from '@physics/Observable';
 
 type WorldArgs = Dimensions & {
     options?: Partial<WorldOptions>;
@@ -30,8 +31,8 @@ export class World {
     public width: number;
     public height: number;
     public bodies: Body[] = [];
-    private addBodyHandlers: OnBodyChange[] = [];
-    private removeBodyHandlers: OnBodyChange[] = [];
+    private addBodyObservable = new Observable<Body>();
+    private removeBodyObservable = new Observable<Body>();
     private options: WorldOptions;
 
     constructor(args: WorldArgs) {
@@ -63,28 +64,22 @@ export class World {
     public subscribe(event: WorldEvent, callback: OnBodyChange): void {
         switch (event) {
             case WorldEvent.AddBody:
-                this.addBodyHandlers.push(callback);
+                this.addBodyObservable.observe(callback);
                 break;
             case WorldEvent.RemoveBody:
-                this.removeBodyHandlers.push(callback);
+                this.removeBodyObservable.observe(callback);
                 break;
         }
     }
 
     public addBody(body: Body): void {
         this.bodies.push(body);
-
-        for (const addBodyHandler of this.addBodyHandlers) {
-            addBodyHandler(body);
-        }
+        this.addBodyObservable.notify(body);
     }
 
     public removeBody(body: Body): void {
         this.bodies = this.bodies.filter((b) => b.id !== body.id);
-
-        for (const removeBodyHandler of this.removeBodyHandlers) {
-            removeBodyHandler(body);
-        }
+        this.removeBodyObservable.notify(body);
     }
 
     private initBoundaries(): void {

@@ -1,6 +1,7 @@
 import { Body } from '@physics/Body';
 import { CollisionResolution } from '@physics/collisions/CollisionResolution';
 import { ContinousCollisionDetection } from '@physics/collisions/ContinousCollisionDetection';
+import { Observable } from '@physics/Observable';
 import { Vector, Vectors } from '@physics/Vectors';
 import { World } from '@physics/World';
 
@@ -15,18 +16,21 @@ export enum Key {
 
 const PLAYER_SPEED = 4;
 
+type OnKeyDownObservables = Record<Key, Observable<void>>;
+
 export class Controls {
     private pressedKeys: Set<string>;
-    private tappedKeys: Set<string>;
+    private onKeyDownObservables = Object.values(Key).reduce<OnKeyDownObservables>((acc, key) => {
+        acc[key] = new Observable();
+        return acc;
+    }, {} as OnKeyDownObservables);
 
     constructor(private player: Body, private world: World) {
         this.initListeners();
         this.pressedKeys = new Set();
-        this.tappedKeys = new Set();
     }
 
     public update(dt: number): void {
-        this.tappedKeys.clear();
         this.updatePlayerMovement(dt);
     }
 
@@ -34,8 +38,8 @@ export class Controls {
         return this.pressedKeys.has(key);
     }
 
-    public isTapped(key: Key): boolean {
-        return this.tappedKeys.has(key);
+    public subscribeToOnKeyDown(key: Key, callback: () => void): void {
+        this.onKeyDownObservables[key].observe(callback);
     }
 
     private updatePlayerMovement(dt: number): void {
@@ -87,11 +91,12 @@ export class Controls {
     private initListeners(): void {
         document.addEventListener('keydown', (event) => {
             this.pressedKeys.add(event.key);
+            const onKeyDownObservable = this.onKeyDownObservables[event.key as Key];
+            if (onKeyDownObservable) onKeyDownObservable.notify();
         });
 
         document.addEventListener('keyup', (event) => {
             this.pressedKeys.delete(event.key);
-            this.tappedKeys.add(event.key);
         });
     }
 }

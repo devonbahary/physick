@@ -18,6 +18,10 @@ export class Game {
         this.controls = controls;
         this.renderer = renderer;
         this.world = world;
+
+        this.controls.subscribeToOnKeyDown(Key.Space, () => {
+            this.isPaused = !this.isPaused;
+        });
     }
 
     loop(lastTimestamp = Date.now()): void {
@@ -25,13 +29,8 @@ export class Game {
 
         const dt = this.getTimeDelta(now, lastTimestamp);
 
-        if (this.controls.isTapped(Key.Space)) {
-            this.isPaused = !this.isPaused;
-        }
-
-        this.controls.update(dt);
-
         if (!this.isPaused) {
+            this.controls.update(dt);
             this.world.update(dt);
             this.renderer.update();
         }
