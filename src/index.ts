@@ -3,7 +3,9 @@ import { GameMode, initGame } from 'src/Game';
 const MS_IN_SECOND = 1000;
 const DESIRED_FRAMES_PER_SECOND = 60;
 
-const { controls, renderer, world } = initGame(GameMode.Random);
+const { controls, renderer, world } = initGame(GameMode.Chaos);
+
+console.log(world);
 
 const gameLoop = (lastTimestamp = Date.now()): void => {
     const now = Date.now();

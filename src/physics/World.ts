@@ -4,6 +4,15 @@ import { Vectors } from '@physics/Vectors';
 import { Rect } from '@physics/shapes/Rect';
 import { Collisions } from '@physics/Collisions';
 
+type WorldArgs = Dimensions & {
+    options?: Partial<WorldOptions>;
+};
+
+type WorldOptions = {
+    frictionalForce: number;
+    minimumFrictionalSpeed: number;
+};
+
 type OnBodyChange = (body: Body) => void;
 
 export enum WorldEvent {
@@ -11,8 +20,10 @@ export enum WorldEvent {
     RemoveBody,
 }
 
-const FRICTIONAL_FORCE = 0.1;
-const MINIMUM_FRICTIONAL_SPEED = 0.1;
+const DEFAULT_WORLD_OPTIONS: WorldOptions = {
+    frictionalForce: 0.1,
+    minimumFrictionalSpeed: 0.1,
+};
 
 export class World {
     public width: number;
@@ -20,12 +31,15 @@ export class World {
     public bodies: Body[] = [];
     private addBodyHandlers: OnBodyChange[] = [];
     private removeBodyHandlers: OnBodyChange[] = [];
+    private options: WorldOptions;
 
-    constructor(dimensions: Dimensions) {
-        const { width, height } = dimensions;
+    constructor(args: WorldArgs) {
+        const { width, height, options } = args;
 
         this.width = width;
         this.height = height;
+
+        this.options = { ...DEFAULT_WORLD_OPTIONS, ...options };
 
         this.initBoundaries();
     }
@@ -103,14 +117,16 @@ export class World {
     }
 
     private applyFriction(body: Body, dt: number): void {
+        if (!this.options.frictionalForce) return;
+
         // friction has a direct relationship with the body's speed + mass
-        const frictionalForce = Vectors.resize(body.velocity, dt * FRICTIONAL_FORCE * body.mass);
+        const frictionalForce = Vectors.resize(body.velocity, dt * this.options.frictionalForce * body.mass);
 
         const newVelocity = Vectors.subtract(body.velocity, frictionalForce);
         body.setVelocity(newVelocity);
 
         // stop the body once reached some minimum rather than infinitely approach 0
-        if (Vectors.magnitude(newVelocity) < MINIMUM_FRICTIONAL_SPEED) {
+        if (Vectors.magnitude(newVelocity) < this.options.minimumFrictionalSpeed) {
             body.setVelocity({ x: 0, y: 0 });
         }
     }

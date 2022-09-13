@@ -20,68 +20,125 @@ type Game = {
 export enum GameMode {
     Default,
     Random,
+    Chaos,
 }
 
-const rand = (min: number, max: number): number => min + Math.round(Math.random() * (max - min));
+const randFloat = (min: number, max: number): number => min + Math.random() * (max - min);
+const randInt = (min: number, max: number): number => min + Math.round(Math.random() * (max - min));
 
-const seedRandom = (world: World): void => {
-    const randomNumCircles = rand(1, 5);
+const generateRandomCircles = (): Body[] => {
+    const bodies: Body[] = [];
+
+    const randomNumCircles = randInt(1, 5);
 
     for (let i = 0; i < randomNumCircles; i++) {
-        const radius = rand(5, 60);
+        const radius = randInt(5, 60);
         const pos = {
-            x: rand(radius, WORLD_DIMENSIONS.width - radius),
-            y: rand(radius, WORLD_DIMENSIONS.height - radius),
+            x: randInt(radius, WORLD_DIMENSIONS.width - radius),
+            y: randInt(radius, WORLD_DIMENSIONS.height - radius),
         };
 
         const randomCircle = new Circle({ radius, ...pos });
         const randomCircleBody = new Body({ shape: randomCircle });
 
-        world.addBody(randomCircleBody);
+        bodies.push(randomCircleBody);
     }
 
-    const randomNumRects = rand(1, 5);
+    return bodies;
+};
+
+const generateRandomRects = (): Body[] => {
+    const bodies: Body[] = [];
+
+    const randomNumRects = randInt(1, 5);
 
     for (let i = 0; i < randomNumRects; i++) {
-        const width = rand(10, 120);
-        const height = rand(10, 120);
+        const width = randInt(10, 120);
+        const height = randInt(10, 120);
         const pos = {
-            x: rand(width / 2, WORLD_DIMENSIONS.width - width / 2),
-            y: rand(height / 2, WORLD_DIMENSIONS.height - height / 2),
+            x: randInt(width / 2, WORLD_DIMENSIONS.width - width / 2),
+            y: randInt(height / 2, WORLD_DIMENSIONS.height - height / 2),
         };
 
         const randomRect = new Rect({ width, height, ...pos });
         const randomRectBody = new Body({ shape: randomRect });
 
-        world.addBody(randomRectBody);
+        bodies.push(randomRectBody);
     }
+
+    return bodies;
 };
 
-const seedDefault = (world: World): void => {
+const seedRandom = (player: Body): [World, Renderer] => {
+    const world = new World(WORLD_DIMENSIONS);
+    const renderer = new Renderer(world, player);
+
+    const circleBodies = generateRandomCircles();
+    const rectBodies = generateRandomRects();
+
+    for (const body of [...circleBodies, ...rectBodies]) {
+        world.addBody(body);
+    }
+
+    return [world, renderer];
+};
+
+const seedChaos = (player: Body): [World, Renderer] => {
+    const world = new World({
+        ...WORLD_DIMENSIONS,
+        options: {
+            frictionalForce: 0,
+        },
+    });
+    const renderer = new Renderer(world, player);
+
+    const circleBodies = generateRandomCircles();
+    const rectBodies = generateRandomRects();
+
+    for (const body of [...circleBodies, ...rectBodies]) {
+        world.addBody(body);
+        body.setVelocity({
+            x: randFloat(0, 0.05),
+            y: randFloat(0, 0.05),
+        });
+    }
+
+    return [world, renderer];
+};
+
+const seedDefault = (player: Body): [World, Renderer] => {
+    const world = new World(WORLD_DIMENSIONS);
+    const renderer = new Renderer(world, player);
+
     world.addBody(new Body({ shape: new Circle({ radius: 20, x: 60, y: 90 }) }));
     const rectBody = new Body({ shape: new Rect({ width: 40, height: 40 }) });
     rectBody.moveTo({ x: 180, y: 100 });
     world.addBody(rectBody);
+
+    return [world, renderer];
 };
 
 export const initGame = (mode = GameMode.Default): Game => {
     const player = new Body({ shape: new Circle({ radius: 20, x: 50, y: 50 }) });
     // const player = new Body({ shape: new Rect({ x: 50, y: 50, width: 40, height: 40 }) });
 
-    const world = new World(WORLD_DIMENSIONS);
-    const renderer = new Renderer(world, player);
-    const controls = new Controls(player, world);
+    let world: World;
+    let renderer: Renderer;
+    switch (mode) {
+        case GameMode.Random:
+            [world, renderer] = seedRandom(player);
+            break;
+        case GameMode.Chaos:
+            [world, renderer] = seedChaos(player);
+            break;
+        default:
+            [world, renderer] = seedDefault(player);
+            break;
+    }
 
     world.addBody(player);
 
-    switch (mode) {
-        case GameMode.Random:
-            seedRandom(world);
-            break;
-        default:
-            seedDefault(world);
-            break;
-    }
+    const controls = new Controls(player, world);
 
     return {
         controls,
