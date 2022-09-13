@@ -115,10 +115,12 @@ const seedChaos = (player: Body): [World, Renderer] => {
 
     for (const body of [...circleBodies, ...rectBodies]) {
         world.addBody(body);
-        body.setVelocity({
-            x: randFloat(0, 0.05),
-            y: randFloat(0, 0.05),
-        });
+        if (!body.isFixed()) {
+            body.setVelocity({
+                x: randFloat(0, 2),
+                y: randFloat(0, 2),
+            });
+        }
     }
 
     return [world, renderer];
