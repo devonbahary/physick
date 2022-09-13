@@ -5,7 +5,7 @@ import { Shape } from '@physics/shapes/types';
 import { Dimensions } from '@physics/types';
 import { World } from '@physics/World';
 import { Renderer } from '@renderer/Renderer';
-import { Controls } from 'src/Controls';
+import { Controls } from 'src/game/Controls';
 
 const WORLD_DIMENSIONS: Dimensions = {
     width: 400,
