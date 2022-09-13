@@ -3,7 +3,7 @@ import { GameMode, initGame } from 'src/Game';
 const MS_IN_SECOND = 1000;
 const DESIRED_FRAMES_PER_SECOND = 60;
 
-const { controls, renderer, world } = initGame(GameMode.Chaos);
+const { controls, renderer, world } = initGame(GameMode.Default);
 
 console.log(world);
 

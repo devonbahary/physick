@@ -1,5 +1,6 @@
 import { Body } from '@physics/Body';
-import { Collisions } from '@physics/Collisions';
+import { CollisionResolution } from '@physics/collisions/CollisionResolution';
+import { ContinousCollisionDetection } from '@physics/collisions/ContinousCollisionDetection';
 import { Vector, Vectors } from '@physics/Vectors';
 import { World } from '@physics/World';
 
@@ -39,11 +40,15 @@ export class Controls {
             const velocity = Vectors.resize(movement, PLAYER_SPEED);
             this.player.setVelocity(velocity);
 
-            const collisionEvent = Collisions.getCollisionEventWithBodies(this.player, this.world.bodies, dt);
+            const collisionEvent = ContinousCollisionDetection.getCollisionEventWithBodies(
+                this.player,
+                this.world.bodies,
+                dt,
+            );
 
             if (collisionEvent) {
                 // slide around an object in contact with
-                const projection = Collisions.getVelocityProjectionOntoContactTangent(collisionEvent);
+                const projection = CollisionResolution.getMovementTangentToTouchingFixedBody(collisionEvent);
                 if (projection) this.player.setVelocity(projection);
             }
         }

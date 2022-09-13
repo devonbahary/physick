@@ -3,21 +3,24 @@ import { Vector, Vectors } from '@physics/Vectors';
 import { Particle } from '@physics/shapes/Particle';
 import { Shape } from '@physics/shapes/types';
 
-type BodyOptions = {
+type BodyArgs = {
     shape: Shape;
     mass?: number;
+    restitution?: number;
 };
 
 export class Body implements Particle {
     public id = uuid();
     public shape: Shape;
     public mass: number;
+    public restitution: number;
 
-    constructor(options: BodyOptions) {
-        const { shape, mass = 1 } = options;
+    constructor(args: BodyArgs) {
+        const { shape, mass = 1, restitution = 1 } = args;
 
         this.shape = shape;
         this.mass = mass;
+        this.restitution = restitution;
     }
 
     get pos(): Vector {
@@ -61,6 +64,10 @@ export class Body implements Particle {
 
     public isMoving(): boolean {
         return Vectors.hasMagnitude(this.shape.velocity);
+    }
+
+    public isFixed(): boolean {
+        return this.mass === Infinity;
     }
 
     public moveTo(pos: Vector): void {

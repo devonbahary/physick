@@ -2,7 +2,8 @@ import { Dimensions } from '@physics/types';
 import { Body } from '@physics/Body';
 import { Vectors } from '@physics/Vectors';
 import { Rect } from '@physics/shapes/Rect';
-import { Collisions } from '@physics/Collisions';
+import { ContinousCollisionDetection } from '@physics/collisions/ContinousCollisionDetection';
+import { CollisionResolution } from '@physics/collisions/CollisionResolution';
 
 type WorldArgs = Dimensions & {
     options?: Partial<WorldOptions>;
@@ -48,16 +49,10 @@ export class World {
         for (const body of this.bodies) {
             if (!body.isMoving()) continue;
 
-            const collisionEvent = Collisions.getCollisionEventWithBodies(body, this.bodies, dt);
+            const collisionEvent = ContinousCollisionDetection.getCollisionEventWithBodies(body, this.bodies, dt);
 
-            if (collisionEvent !== null) {
-                if (collisionEvent.timeOfCollision) {
-                    // TODO: round?
-                    const movement = Vectors.mult(body.velocity, collisionEvent.timeOfCollision);
-                    body.move(movement);
-                }
-                // TODO: collision resolution
-                body.setVelocity({ x: 0, y: 0 });
+            if (collisionEvent) {
+                CollisionResolution.resolve(collisionEvent);
             } else {
                 body.move(Vectors.mult(body.velocity, dt));
                 this.applyFriction(body, dt);

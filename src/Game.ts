@@ -110,8 +110,16 @@ const seedDefault = (player: Body): [World, Renderer] => {
     const world = new World(WORLD_DIMENSIONS);
     const renderer = new Renderer(world, player);
 
-    world.addBody(new Body({ shape: new Circle({ radius: 20, x: 60, y: 90 }) }));
-    const rectBody = new Body({ shape: new Rect({ width: 40, height: 40 }) });
+    world.addBody(
+        new Body({
+            shape: new Circle({ radius: 20, x: 60, y: 90 }),
+            mass: Infinity,
+        }),
+    );
+    const rectBody = new Body({
+        shape: new Rect({ width: 40, height: 40 }),
+        mass: Infinity,
+    });
     rectBody.moveTo({ x: 180, y: 100 });
     world.addBody(rectBody);
 
