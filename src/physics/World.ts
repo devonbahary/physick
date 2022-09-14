@@ -53,7 +53,13 @@ export class World {
             const collisionEvent = ContinousCollisionDetection.getCollisionEventWithBodies(body, this.bodies, dt);
 
             if (collisionEvent) {
-                CollisionResolution.resolve(collisionEvent);
+                // because we traverse bodies in no particular order, it's possible that we accidentally consider a false
+                // collision of a slower-moving body into a faster-moving body along the collision vector
+                // rather than ignoring the false collision altogether, we wait for that fast-moving colliding body to get
+                // a chance to move
+                if (ContinousCollisionDetection.isChronological(collisionEvent)) {
+                    CollisionResolution.resolve(collisionEvent);
+                }
             } else {
                 body.move(Vectors.mult(body.velocity, dt));
                 this.applyFriction(body, dt);

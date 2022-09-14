@@ -69,4 +69,13 @@ export class Vectors {
         const normalized = Vectors.normalized(v);
         return Vectors.mult(normalized, scalar);
     }
+
+    static isLarger(a: Vector, b: Vector): boolean {
+        // compare magnitudes without expensive sqrt()
+        return a.x ** 2 + a.y ** 2 > b.x ** 2 + b.y ** 2;
+    }
+
+    static isSameDirection(a: Vector, b: Vector): boolean {
+        return Vectors.dot(a, b) > 0;
+    }
 }

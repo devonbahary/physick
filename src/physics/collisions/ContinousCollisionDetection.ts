@@ -34,6 +34,23 @@ const getEarliestCollision = (collisions: Collision[]): Collision | null => {
 };
 
 export class ContinousCollisionDetection {
+    static isChronological(collisionEvent: CollisionEvent): boolean {
+        // check that the speed at which the movingBody is moving towards collisionBody along the collision vector
+        // is no slower than the speed at which collisionBody is (possibly) moving away
+        const { movingBody, collisionBody, collisionVector } = collisionEvent;
+
+        if (!collisionBody.isMoving()) return true;
+
+        const movingBodyMovementOnCollisionVector = Vectors.proj(movingBody.velocity, collisionVector);
+        const collisionBodyMovementOnCollisionVector = Vectors.proj(collisionBody.velocity, collisionVector);
+
+        if (!Vectors.isSameDirection(movingBodyMovementOnCollisionVector, collisionBodyMovementOnCollisionVector)) {
+            return true; // moving towards each other
+        }
+
+        return !Vectors.isLarger(collisionBodyMovementOnCollisionVector, movingBodyMovementOnCollisionVector);
+    }
+
     static getCollisionEventWithBodies(movingBody: Body, bodies: Body[], dt: number): CollisionEvent | null {
         if (!movingBody.isMoving()) return null;
 
