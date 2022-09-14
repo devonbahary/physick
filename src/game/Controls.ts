@@ -2,6 +2,7 @@ import { Body } from '@physics/Body';
 import { CollisionResolution } from '@physics/collisions/CollisionResolution';
 import { ContinousCollisionDetection } from '@physics/collisions/ContinousCollisionDetection';
 import { Observable } from '@physics/Observable';
+import { roundForFloatingPoint } from '@physics/utilities';
 import { Vector, Vectors } from '@physics/Vectors';
 import { World } from '@physics/World';
 
@@ -58,10 +59,14 @@ export class Controls {
                 dt,
             );
 
-            if (collisionEvent) {
-                // slide around an object in contact with
-                const projection = CollisionResolution.getMovementTangentToTouchingFixedBody(collisionEvent);
-                if (projection) this.player.setVelocity(projection);
+            // move player around adjacent fixed bodies
+            if (
+                collisionEvent &&
+                roundForFloatingPoint(collisionEvent.timeOfCollision) === 0 &&
+                collisionEvent.collisionBody.isFixed()
+            ) {
+                const tangent = CollisionResolution.getTangentMovement(collisionEvent);
+                this.player.setVelocity(tangent);
             }
         }
     }

@@ -5,12 +5,7 @@ import { Particle } from '@physics/shapes/Particle';
 import { HorzLineSegment, LineSegment, LineSegments, VertLineSegment } from '@physics/shapes/LineSegments';
 import { Vector, Vectors } from '@physics/Vectors';
 import { isInRange, quadratic, roundForFloatingPoint } from '@physics/utilities';
-import { CollisionEvent } from '@physics/collisions/types';
-
-export type Collision = {
-    timeOfCollision: number;
-    collisionVector: Vector;
-};
+import { Collision, CollisionEvent } from '@physics/collisions/types';
 
 const isCollisionInThisTimestep = (t: number, dt: number): boolean => {
     const rounded = roundForFloatingPoint(t);

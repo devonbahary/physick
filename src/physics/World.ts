@@ -5,6 +5,7 @@ import { Rect } from '@physics/shapes/Rect';
 import { ContinousCollisionDetection } from '@physics/collisions/ContinousCollisionDetection';
 import { CollisionResolution } from '@physics/collisions/CollisionResolution';
 import { Observable } from '@physics/Observable';
+import { roundForFloatingPoint } from '@physics/utilities';
 
 type WorldArgs = Dimensions & {
     options?: Partial<WorldOptions>;
@@ -59,6 +60,8 @@ export class World {
                 // a chance to move
                 if (ContinousCollisionDetection.isChronological(collisionEvent)) {
                     CollisionResolution.resolve(collisionEvent);
+
+                    this.resolveChainedBodies(collisionEvent.collisionBody);
                 }
             } else {
                 body.move(Vectors.mult(body.velocity, dt));
@@ -86,6 +89,23 @@ export class World {
     public removeBody(body: Body): void {
         this.bodies = this.bodies.filter((b) => b.id !== body.id);
         this.removeBodyObservable.notify(body);
+    }
+
+    // if the force through 1+ non-fixed bodies is stopped at a fixed body, move the last non-fixed body in the chain
+    // around the fixed body
+    private resolveChainedBodies(bodyInChain: Body): void {
+        if (bodyInChain.isFixed()) return;
+
+        const collisionEvent = ContinousCollisionDetection.getCollisionEventWithBodies(bodyInChain, this.bodies, 0);
+
+        if (collisionEvent && roundForFloatingPoint(collisionEvent.timeOfCollision) === 0) {
+            if (collisionEvent.collisionBody.isFixed()) {
+                const getTangentMovement = CollisionResolution.getTangentMovement(collisionEvent);
+                bodyInChain.setVelocity(getTangentMovement);
+            } else {
+                this.resolveChainedBodies(collisionEvent.collisionBody);
+            }
+        }
     }
 
     private initBoundaries(): void {

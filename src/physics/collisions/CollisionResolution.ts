@@ -1,6 +1,5 @@
 import { Body } from '@physics/Body';
 import { CollisionEvent } from '@physics/collisions/types';
-import { roundForFloatingPoint } from '@physics/utilities';
 import { Vector, Vectors } from '@physics/Vectors';
 
 export class CollisionResolution {
@@ -18,15 +17,10 @@ export class CollisionResolution {
         collisionBody.setVelocity(finalVelocityB);
     }
 
-    static getMovementTangentToTouchingFixedBody(collisionEvent: CollisionEvent): Vector | null {
-        const { movingBody, collisionBody, collisionVector, timeOfCollision } = collisionEvent;
-
-        if (roundForFloatingPoint(timeOfCollision) !== 0 || !collisionBody.isFixed()) return null;
-
-        const { velocity } = movingBody;
-
+    static getTangentMovement(collisionEvent: CollisionEvent): Vector {
+        const { movingBody, collisionVector } = collisionEvent;
         const tangentCollisionVector = Vectors.normal(collisionVector);
-        return Vectors.proj(velocity, tangentCollisionVector);
+        return Vectors.proj(movingBody.velocity, tangentCollisionVector);
     }
 
     private static getFinalVelocities(collisionEvent: CollisionEvent): [Vector, Vector] {
