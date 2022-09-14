@@ -32,8 +32,9 @@ export class Game {
         if (!this.isPaused) {
             this.controls.update(dt);
             this.world.update(dt);
-            this.renderer.update();
         }
+
+        this.renderer.update();
 
         requestAnimationFrame(() => this.loop(now));
     }
