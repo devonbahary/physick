@@ -1,7 +1,7 @@
 import { GameMode, initGame } from '@game/modes';
 import { World } from '@physics/World';
 import { Renderer } from '@renderer/Renderer';
-import { Controls, Key } from '@game/Controls';
+import { Controls, ControlsEvent, Key } from '@game/Controls';
 
 const MS_IN_SECOND = 1000;
 const DESIRED_FRAMES_PER_SECOND = 60;
@@ -13,14 +13,16 @@ export class Game {
     private isPaused = false;
 
     constructor() {
-        const { controls, renderer, world } = initGame(GameMode.Chaos);
+        const { controls, renderer, world } = initGame(GameMode.Default);
 
         this.controls = controls;
         this.renderer = renderer;
         this.world = world;
 
-        this.controls.subscribeToOnKeyDown(Key.Space, () => {
-            this.isPaused = !this.isPaused;
+        this.controls.subscribe(ControlsEvent.OnKeyDown, (key) => {
+            if (key === Key.Space) {
+                this.isPaused = !this.isPaused;
+            }
         });
     }
 

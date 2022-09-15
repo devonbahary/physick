@@ -4,7 +4,7 @@ import { Vectors } from '@physics/Vectors';
 import { Rect } from '@physics/shapes/Rect';
 import { ContinousCollisionDetection } from '@physics/collisions/ContinousCollisionDetection';
 import { CollisionResolution } from '@physics/collisions/CollisionResolution';
-import { Observable } from '@physics/Observable';
+import { PubSub } from '@physics/PubSub';
 import { roundForFloatingPoint } from '@physics/utilities';
 
 type WorldArgs = Dimensions & {
@@ -16,12 +16,18 @@ type WorldOptions = {
     minimumFrictionalSpeed: number;
 };
 
-type OnBodyChange = (body: Body) => void;
-
 export enum WorldEvent {
-    AddBody,
-    RemoveBody,
+    AddBody = 'AddBody',
+    RemoveBody = 'RemoveBody',
 }
+
+type WorldEventDataMap = {
+    [WorldEvent.AddBody]: Body;
+    [WorldEvent.RemoveBody]: Body;
+};
+
+type Subscribe = PubSub<WorldEvent, WorldEventDataMap>['subscribe'];
+type Publish = PubSub<WorldEvent, WorldEventDataMap>['publish'];
 
 const DEFAULT_WORLD_OPTIONS: WorldOptions = {
     frictionalForce: 0.1,
@@ -32,8 +38,10 @@ export class World {
     public width: number;
     public height: number;
     public bodies: Body[] = [];
-    private addBodyObservable = new Observable<Body>();
-    private removeBodyObservable = new Observable<Body>();
+
+    public subscribe: Subscribe;
+    private publish: Publish;
+
     private options: WorldOptions;
 
     constructor(args: WorldArgs) {
@@ -44,10 +52,28 @@ export class World {
 
         this.options = { ...DEFAULT_WORLD_OPTIONS, ...options };
 
+        const pubSub = new PubSub<WorldEvent, WorldEventDataMap>(Object.values(WorldEvent));
+        this.subscribe = (...args): ReturnType<Subscribe> => pubSub.subscribe(...args);
+        this.publish = (...args): ReturnType<Publish> => pubSub.publish(...args);
+
         this.initBoundaries();
     }
 
     public update(dt: number): void {
+        this.updateBodies(dt);
+    }
+
+    public addBody(body: Body): void {
+        this.bodies.push(body);
+        this.publish(WorldEvent.AddBody, body);
+    }
+
+    public removeBody(body: Body): void {
+        this.bodies = this.bodies.filter((b) => b.id !== body.id);
+        this.publish(WorldEvent.RemoveBody, body);
+    }
+
+    private updateBodies(dt: number): void {
         for (const body of this.bodies) {
             if (!body.isMoving()) continue;
 
@@ -68,27 +94,6 @@ export class World {
                 this.applyFriction(body, dt);
             }
         }
-    }
-
-    public subscribe(event: WorldEvent, callback: OnBodyChange): void {
-        switch (event) {
-            case WorldEvent.AddBody:
-                this.addBodyObservable.observe(callback);
-                break;
-            case WorldEvent.RemoveBody:
-                this.removeBodyObservable.observe(callback);
-                break;
-        }
-    }
-
-    public addBody(body: Body): void {
-        this.bodies.push(body);
-        this.addBodyObservable.notify(body);
-    }
-
-    public removeBody(body: Body): void {
-        this.bodies = this.bodies.filter((b) => b.id !== body.id);
-        this.removeBodyObservable.notify(body);
     }
 
     // if the force through 1+ non-fixed bodies is stopped at a fixed body, move the last non-fixed body in the chain

@@ -1,7 +1,7 @@
 import { Body } from '@physics/Body';
 import { CollisionResolution } from '@physics/collisions/CollisionResolution';
 import { ContinousCollisionDetection } from '@physics/collisions/ContinousCollisionDetection';
-import { Observable } from '@physics/Observable';
+import { PubSub } from '@physics/PubSub';
 import { roundForFloatingPoint } from '@physics/utilities';
 import { Vector, Vectors } from '@physics/Vectors';
 import { World } from '@physics/World';
@@ -17,18 +17,30 @@ export enum Key {
 
 const PLAYER_SPEED = 4;
 
-type OnKeyDownObservables = Record<Key, Observable<void>>;
+export enum ControlsEvent {
+    OnKeyDown = 'OnKeyDown',
+}
+
+type ControlsEventDataMap = {
+    [ControlsEvent.OnKeyDown]: string;
+};
+
+type Subscribe = PubSub<ControlsEvent, ControlsEventDataMap>['subscribe'];
+type Publish = PubSub<ControlsEvent, ControlsEventDataMap>['publish'];
 
 export class Controls {
+    public subscribe: Subscribe;
+    private publish: Publish;
+
     private pressedKeys: Set<string>;
-    private onKeyDownObservables = Object.values(Key).reduce<OnKeyDownObservables>((acc, key) => {
-        acc[key] = new Observable();
-        return acc;
-    }, {} as OnKeyDownObservables);
 
     constructor(private player: Body, private world: World) {
         this.initListeners();
         this.pressedKeys = new Set();
+
+        const pubSub = new PubSub<ControlsEvent, ControlsEventDataMap>(Object.values(ControlsEvent));
+        this.subscribe = (...args): ReturnType<Subscribe> => pubSub.subscribe(...args);
+        this.publish = (...args): ReturnType<Publish> => pubSub.publish(...args);
     }
 
     public update(dt: number): void {
@@ -37,10 +49,6 @@ export class Controls {
 
     public isPressed(key: Key): boolean {
         return this.pressedKeys.has(key);
-    }
-
-    public subscribeToOnKeyDown(key: Key, callback: () => void): void {
-        this.onKeyDownObservables[key].observe(callback);
     }
 
     private updatePlayerMovement(dt: number): void {
@@ -96,8 +104,7 @@ export class Controls {
     private initListeners(): void {
         document.addEventListener('keydown', (event) => {
             this.pressedKeys.add(event.key);
-            const onKeyDownObservable = this.onKeyDownObservables[event.key as Key];
-            if (onKeyDownObservable) onKeyDownObservable.notify();
+            this.publish(ControlsEvent.OnKeyDown, event.key);
         });
 
         document.addEventListener('keyup', (event) => {

@@ -2,6 +2,7 @@ import { v4 as uuid } from 'uuid';
 import { Vector, Vectors } from '@physics/Vectors';
 import { Particle } from '@physics/shapes/Particle';
 import { Shape } from '@physics/shapes/types';
+import { PubSub } from '@physics/PubSub';
 
 type BodyArgs = {
     shape: Shape;
@@ -9,11 +10,25 @@ type BodyArgs = {
     restitution?: number;
 };
 
+export enum BodyEvent {
+    Move = 'Move',
+}
+
+type BodyEventDataMap = {
+    [BodyEvent.Move]: Body;
+};
+
+type Subscribe = PubSub<BodyEvent, BodyEventDataMap>['subscribe'];
+type Publish = PubSub<BodyEvent, BodyEventDataMap>['publish'];
+
 export class Body implements Particle {
     public id = uuid();
     public shape: Shape;
     public mass: number;
     public restitution: number;
+
+    public subscribe: Subscribe;
+    private publish: Publish;
 
     constructor(args: BodyArgs) {
         const { shape, mass = 1, restitution = 1 } = args;
@@ -21,6 +36,10 @@ export class Body implements Particle {
         this.shape = shape;
         this.mass = mass;
         this.restitution = restitution;
+
+        const pubSub = new PubSub<BodyEvent, BodyEventDataMap>(Object.values(BodyEvent));
+        this.subscribe = (...args): ReturnType<Subscribe> => pubSub.subscribe(...args);
+        this.publish = (...args): ReturnType<Publish> => pubSub.publish(...args);
     }
 
     get pos(): Vector {
@@ -76,6 +95,7 @@ export class Body implements Particle {
 
     public move(dir: Vector): void {
         this.shape.move(dir);
+        this.publish(BodyEvent.Move, this);
     }
 
     public setVelocity(vel: Vector): void {
