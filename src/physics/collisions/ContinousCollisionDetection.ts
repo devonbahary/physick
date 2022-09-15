@@ -6,6 +6,8 @@ import { HorzLineSegment, LineSegment, LineSegments, VertLineSegment } from '@ph
 import { Vector, Vectors } from '@physics/Vectors';
 import { isInRange, quadratic, roundForFloatingPoint } from '@physics/utilities';
 import { Collision, CollisionEvent } from '@physics/collisions/types';
+import { CollisionDetection } from '@physics/collisions/CollisionDetection';
+import { World } from '@physics/World';
 
 const isCollisionInThisTimestep = (t: number, dt: number): boolean => {
     const rounded = roundForFloatingPoint(t);
@@ -46,10 +48,13 @@ export class ContinousCollisionDetection {
         return !Vectors.isLarger(collisionBodyMovementOnCollisionVector, movingBodyMovementOnCollisionVector);
     }
 
-    static getCollisionEventWithBodies(movingBody: Body, bodies: Body[], dt: number): CollisionEvent | null {
-        if (!movingBody.isMoving()) return null;
+    static getCollisionEvent(movingBody: Body, world: World, dt: number): CollisionEvent | null {
+        const movementBoundingBox = CollisionDetection.getMovementBoundingBox(movingBody);
+        if (!movementBoundingBox) return null;
 
-        return bodies.reduce<CollisionEvent | null>((earliest, collisionBody) => {
+        const potentialCollisionBodies = world.getBodiesInBoundingBox(movementBoundingBox);
+
+        return potentialCollisionBodies.reduce<CollisionEvent | null>((earliest, collisionBody) => {
             if (movingBody === collisionBody) return earliest;
 
             const collision = ContinousCollisionDetection.getCollision(movingBody, collisionBody, dt);

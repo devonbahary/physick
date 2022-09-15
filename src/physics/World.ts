@@ -6,9 +6,10 @@ import { ContinousCollisionDetection } from '@physics/collisions/ContinousCollis
 import { CollisionResolution } from '@physics/collisions/CollisionResolution';
 import { PubSub } from '@physics/PubSub';
 import { roundForFloatingPoint } from '@physics/utilities';
+import { QuadTree, QuadTreeConfig } from '@physics/collisions/QuadTree';
 
 type WorldArgs = Dimensions & {
-    options?: Partial<WorldOptions>;
+    options?: Partial<WorldOptions> & { quadTreeConfig?: Partial<QuadTreeConfig> };
 };
 
 type WorldOptions = {
@@ -43,24 +44,29 @@ export class World {
     private publish: Publish;
 
     private options: WorldOptions;
+    private quadTree: QuadTree;
 
     constructor(args: WorldArgs) {
-        const { width, height, options } = args;
+        const { width, height, options = {} } = args;
 
         this.width = width;
         this.height = height;
 
-        this.options = { ...DEFAULT_WORLD_OPTIONS, ...options };
+        const { quadTreeConfig, ...rest } = options;
+        this.options = { ...DEFAULT_WORLD_OPTIONS, ...rest };
 
         const pubSub = new PubSub<WorldEvent, WorldEventDataMap>(Object.values(WorldEvent));
         this.subscribe = (...args): ReturnType<Subscribe> => pubSub.subscribe(...args);
         this.publish = (...args): ReturnType<Publish> => pubSub.publish(...args);
+
+        this.quadTree = new QuadTree(this, quadTreeConfig);
 
         this.initBoundaries();
     }
 
     public update(dt: number): void {
         this.updateBodies(dt);
+        this.quadTree.update();
     }
 
     public addBody(body: Body): void {
@@ -73,11 +79,15 @@ export class World {
         this.publish(WorldEvent.RemoveBody, body);
     }
 
+    public getBodiesInBoundingBox(rect: Rect): Body[] {
+        return this.quadTree.getBodiesInBoundingBox(rect);
+    }
+
     private updateBodies(dt: number): void {
         for (const body of this.bodies) {
             if (!body.isMoving()) continue;
 
-            const collisionEvent = ContinousCollisionDetection.getCollisionEventWithBodies(body, this.bodies, dt);
+            const collisionEvent = ContinousCollisionDetection.getCollisionEvent(body, this, dt);
 
             if (collisionEvent) {
                 // because we traverse bodies in no particular order, it's possible that we accidentally consider a false
@@ -101,7 +111,7 @@ export class World {
     private resolveChainedBodies(bodyInChain: Body): void {
         if (bodyInChain.isFixed()) return;
 
-        const collisionEvent = ContinousCollisionDetection.getCollisionEventWithBodies(bodyInChain, this.bodies, 0);
+        const collisionEvent = ContinousCollisionDetection.getCollisionEvent(bodyInChain, this, 0);
 
         if (collisionEvent && roundForFloatingPoint(collisionEvent.timeOfCollision) === 0) {
             if (collisionEvent.collisionBody.isFixed()) {

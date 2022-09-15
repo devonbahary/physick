@@ -61,11 +61,7 @@ export class Controls {
             const velocity = Vectors.resize(movement, PLAYER_SPEED);
             this.player.setVelocity(velocity);
 
-            const collisionEvent = ContinousCollisionDetection.getCollisionEventWithBodies(
-                this.player,
-                this.world.bodies,
-                dt,
-            );
+            const collisionEvent = ContinousCollisionDetection.getCollisionEvent(this.player, this.world, dt);
 
             // move player around adjacent fixed bodies
             if (
