@@ -108,8 +108,8 @@ export class World {
 
     // if the force through 1+ non-fixed bodies is stopped at a fixed body, move the last non-fixed body in the chain
     // around the fixed body
-    private resolveChainedBodies(bodyInChain: Body): void {
-        if (bodyInChain.isFixed()) return;
+    private resolveChainedBodies(bodyInChain: Body, visitedBodyIds = new Set<string>()): void {
+        if (bodyInChain.isFixed() || visitedBodyIds.has(bodyInChain.id)) return;
 
         const collisionEvent = ContinousCollisionDetection.getCollisionEvent(bodyInChain, this, 0);
 
@@ -118,7 +118,8 @@ export class World {
                 const getTangentMovement = CollisionResolution.getTangentMovement(collisionEvent);
                 bodyInChain.setVelocity(getTangentMovement);
             } else {
-                this.resolveChainedBodies(collisionEvent.collisionBody);
+                visitedBodyIds.add(bodyInChain.id); // avoid infinite recursion
+                this.resolveChainedBodies(collisionEvent.collisionBody, visitedBodyIds);
             }
         }
     }
