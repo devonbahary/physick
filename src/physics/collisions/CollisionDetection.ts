@@ -58,7 +58,7 @@ export class CollisionDetection {
     private static getCircleVsCircleOverlap(a: Circle, b: Circle): boolean {
         const diffPos = Vectors.subtract(a, b);
         const radiiLength = a.radius + b.radius;
-        return diffPos.x ** 2 + diffPos.y ** 2 <= radiiLength;
+        return diffPos.x ** 2 + diffPos.y ** 2 <= radiiLength ** 2;
     }
 
     // https://stackoverflow.com/questions/401847/circle-rectangle-collision-detection-intersection
