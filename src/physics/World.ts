@@ -75,9 +75,6 @@ export class World implements PubSubable<WorldEvent, WorldEventDataMap> {
     public addBody(body: Body): void {
         this.bodies.push(body);
         this.publish(WorldEvent.AddBody, body);
-        body.subscribe(BodyEvent.Collision, (collisionEvent) => {
-            console.log(collisionEvent);
-        });
     }
 
     public removeBody(body: Body): void {
