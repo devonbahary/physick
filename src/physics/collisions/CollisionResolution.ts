@@ -11,10 +11,11 @@ export class CollisionResolution {
             movingBody.move(movementToTimeOfCollision);
         }
 
-        const [finalVelocityA, finalVelocityB] = CollisionResolution.getFinalVelocities(collisionEvent);
+        const [resolvedVelocityA, resolvedVelocityB] =
+            CollisionResolution.getResolvedCollisionVelocities(collisionEvent);
 
-        movingBody.setVelocity(finalVelocityA);
-        collisionBody.setVelocity(finalVelocityB);
+        movingBody.setVelocity(resolvedVelocityA);
+        collisionBody.setVelocity(resolvedVelocityB);
     }
 
     static getTangentMovement(collisionEvent: CollisionEvent): Vector {
@@ -23,7 +24,7 @@ export class CollisionResolution {
         return Vectors.proj(movingBody.velocity, tangentCollisionVector);
     }
 
-    private static getFinalVelocities(collisionEvent: CollisionEvent): [Vector, Vector] {
+    private static getResolvedCollisionVelocities(collisionEvent: CollisionEvent): [Vector, Vector] {
         const { movingBody: a, collisionBody: b, collisionVector } = collisionEvent;
 
         const cor = CollisionResolution.getCoefficientOfRestitution(a, b);
@@ -54,7 +55,7 @@ export class CollisionResolution {
         const coefficient =
             massScalar * (Vectors.dot(diffVel, collisionVector) / (collisionVector.x ** 2 + collisionVector.y ** 2));
 
-        const finalVelocityA = Vectors.subtract(a.velocity, Vectors.mult(collisionVector, coefficient));
+        const resolvedVelocityA = Vectors.subtract(a.velocity, Vectors.mult(collisionVector, coefficient));
 
         /* 
             conservation of momentum
@@ -65,11 +66,11 @@ export class CollisionResolution {
 
         const sum = Vectors.subtract(
             Vectors.add(Vectors.mult(a.velocity, a.mass), Vectors.mult(b.velocity, b.mass)),
-            Vectors.mult(finalVelocityA, a.mass),
+            Vectors.mult(resolvedVelocityA, a.mass),
         );
-        const finalVelocityB = Vectors.divide(sum, b.mass);
+        const resolvedVelocityB = Vectors.divide(sum, b.mass);
 
-        return [Vectors.mult(finalVelocityA, cor), Vectors.mult(finalVelocityB, cor)];
+        return [Vectors.mult(resolvedVelocityA, cor), Vectors.mult(resolvedVelocityB, cor)];
     }
 
     private static getCoefficientOfRestitution(a: Body, b: Body): number {
