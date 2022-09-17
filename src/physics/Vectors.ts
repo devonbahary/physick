@@ -64,10 +64,15 @@ export class Vectors {
     }
 
     static resize(v: Vector, scalar: number): Vector {
-        if (!Vectors.hasMagnitude(v)) return v;
+        const mag = Vectors.magnitude(v);
+        if (!mag) return v;
 
-        const normalized = Vectors.normalized(v);
-        return Vectors.mult(normalized, scalar);
+        const ratio = scalar / mag;
+
+        return {
+            x: v.x * ratio,
+            y: v.y * ratio,
+        };
     }
 
     static isLarger(a: Vector, b: Vector): boolean {
