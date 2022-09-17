@@ -2,14 +2,13 @@ import { v4 as uuid } from 'uuid';
 import { Circle } from '@physics/shapes/Circle';
 import { World } from '@physics/World';
 import { CollisionDetection } from '@physics/collisions/CollisionDetection';
-import { Vectors } from '@physics/Vectors';
+import { Vector, Vectors } from '@physics/Vectors';
 
 export type Force = ConstantForce | IntervalForce;
 
 type BaseForceArgs = {
     shape: Circle;
     magnitude: number;
-    // TODO: dissipationFn
     expiration?: Partial<Expiration>;
 };
 
@@ -48,7 +47,8 @@ abstract class BaseForce {
         for (const body of bodies) {
             if (CollisionDetection.hasOverlap(this.shape, body.shape)) {
                 const direction = Vectors.subtract(body, this.shape);
-                const force = Vectors.resize(direction, this.magnitude);
+                const dissipation = this.getDissipationFactor(direction);
+                const force = Vectors.resize(direction, this.magnitude * dissipation);
                 body.applyForce(force);
             }
         }
@@ -64,6 +64,10 @@ abstract class BaseForce {
     abstract update(world: World, dt: number): void;
 
     protected abstract hasExceededDuration(): boolean;
+
+    private getDissipationFactor(direction: Vector): number {
+        return (this.shape.radius - Vectors.magnitude(direction)) / this.shape.radius; 
+    }
 }
 
 export class ConstantForce extends BaseForce {
