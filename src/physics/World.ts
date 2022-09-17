@@ -196,7 +196,7 @@ export class World implements PubSubable<WorldEvent, WorldEventDataMap> {
         const speed = Vectors.magnitude(body.velocity);
         const friction = this.options.frictionalForce * body.mass;
 
-        if (friction > speed) {
+        if (friction >= speed) { // friction should never reverse a body's velocity, only ever set it to 0
             body.setVelocity({ x: 0, y: 0 });
         } else {
             const newVelocity = Vectors.subtract(body.velocity, Vectors.resize(body.velocity, friction));
