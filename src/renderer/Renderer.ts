@@ -1,57 +1,41 @@
 import 'normalize.css';
-import { Circle } from '@physics/shapes/Circle';
 import { Sprite } from '@renderer/Sprite';
 import { World, WorldEvent } from '@physics/World';
 import { Body } from '@physics/Body';
+import { applyBodySpriteStyles, applyStyle, createElement, toPx } from '@renderer/utilities';
+import { Vector } from '@physics/Vectors';
+import { PubSub } from '@physics/PubSub';
 import '@renderer/styles.css';
 
-const applyStyle = (element: HTMLElement, style: Partial<CSSStyleDeclaration>): void => {
-    Object.assign(element.style, style);
+export enum RendererEvent {
+    ClickSprite = 'ClickSprite',
+    ClickWorld = 'ClickWorld',
+}
+
+type RendererEventDataMap = {
+    [RendererEvent.ClickSprite]: Sprite;
+    [RendererEvent.ClickWorld]: Vector;
 };
 
-const toPx = (val: number): string => `${val}px`;
-
-type CreateElementOptions = {
-    id?: string;
-    classNames?: string[];
-};
-
-const createElement = (options: CreateElementOptions = {}): HTMLElement => {
-    const { id, classNames } = options;
-
-    const element = document.createElement('div');
-
-    if (id) element.id = id;
-    if (classNames) element.classList.add(...classNames);
-
-    return element;
-};
-
-const applyBodySpriteStyles = (sprite: Sprite): void => {
-    const { body, element } = sprite;
-    const { width, height } = body;
-
-    const style: Partial<CSSStyleDeclaration> = {
-        width: toPx(width),
-        height: toPx(height),
-    };
-
-    if (body.shape instanceof Circle) {
-        style.borderRadius = '50%';
-    }
-
-    applyStyle(element, style);
-};
+type Subscribe = PubSub<RendererEvent, RendererEventDataMap>['subscribe'];
+type Publish = PubSub<RendererEvent, RendererEventDataMap>['publish'];
 
 export class Renderer {
     private worldElement: HTMLElement;
     private sprites: Sprite[] = [];
 
+    public subscribe: Subscribe;
+    private publish: Publish;
+
     constructor(world: World, private player: Body) {
         this.worldElement = this.createWorld(world);
         document.body.appendChild(this.worldElement);
 
-        this.subscribeToWorld(world);
+        const pubSub = new PubSub<RendererEvent, RendererEventDataMap>(Object.values(RendererEvent));
+        this.subscribe = (...args): ReturnType<Subscribe> => pubSub.subscribe(...args);
+        this.publish = (...args): ReturnType<Publish> => pubSub.publish(...args);
+
+        this.initWorldSubscriptions(world);
     }
 
     public update(): void {
@@ -75,6 +59,12 @@ export class Renderer {
         });
 
         const sprite = new Sprite(body, element);
+
+        element.addEventListener('click', (event) => {
+            this.publish(RendererEvent.ClickSprite, sprite);
+            event.stopPropagation();
+        });
+
         applyBodySpriteStyles(sprite);
         this.addSprite(sprite);
     }
@@ -84,7 +74,7 @@ export class Renderer {
         if (spriteToRemove) this.removeSprite(spriteToRemove);
     }
 
-    private subscribeToWorld(world: World): void {
+    private initWorldSubscriptions(world: World): void {
         world.subscribe(WorldEvent.AddBody, (body) => this.addBodySprite(body));
         world.subscribe(WorldEvent.RemoveBody, (body) => this.removeBodySprite(body));
     }
@@ -106,6 +96,11 @@ export class Renderer {
         applyStyle(element, {
             width: toPx(world.width),
             height: toPx(world.height),
+        });
+
+        element.addEventListener('click', (event) => {
+            const { offsetX, offsetY } = event;
+            this.publish(RendererEvent.ClickWorld, { x: offsetX, y: offsetY });
         });
 
         return element;

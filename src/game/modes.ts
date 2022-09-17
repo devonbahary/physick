@@ -166,7 +166,7 @@ export const initGame = (mode = GameMode.Default): Game => {
 
     world.addBody(player);
 
-    const controls = new Controls(player, world);
+    const controls = new Controls(player, world, renderer);
 
     return {
         controls,

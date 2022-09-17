@@ -1,10 +1,13 @@
 import { Body } from '@physics/Body';
 import { CollisionResolution } from '@physics/collisions/CollisionResolution';
 import { ContinousCollisionDetection } from '@physics/collisions/ContinousCollisionDetection';
+import { ConstantForce } from '@physics/Force';
 import { PubSub } from '@physics/PubSub';
-import { roundForFloatingPoint } from '@physics/utilities';
+import { Circle } from '@physics/shapes/Circle';
+import { framesInTimeDelta, roundForFloatingPoint } from '@physics/utilities';
 import { Vector, Vectors } from '@physics/Vectors';
 import { World } from '@physics/World';
+import { Renderer, RendererEvent } from '@renderer/Renderer';
 
 export enum Key {
     Up = 'ArrowUp',
@@ -34,13 +37,15 @@ export class Controls {
 
     private pressedKeys: Set<string>;
 
-    constructor(private player: Body, private world: World) {
+    constructor(private player: Body, private world: World, renderer: Renderer) {
         this.initListeners();
         this.pressedKeys = new Set();
 
         const pubSub = new PubSub<ControlsEvent, ControlsEventDataMap>(Object.values(ControlsEvent));
         this.subscribe = (...args): ReturnType<Subscribe> => pubSub.subscribe(...args);
         this.publish = (...args): ReturnType<Publish> => pubSub.publish(...args);
+
+        this.initRendererSubscriptions(renderer);
     }
 
     public update(dt: number): void {
@@ -58,10 +63,17 @@ export class Controls {
         const movement = this.getMovementVector();
 
         if (Vectors.hasMagnitude(movement)) {
-            const velocity = Vectors.resize(movement, PLAYER_SPEED);
-            this.player.setVelocity(velocity);
+            const newVelocity = Vectors.resize(movement, PLAYER_SPEED);
+            const projExistingVelocityOntoNewVelocity = Vectors.proj(this.player.velocity, newVelocity);
 
-            const collisionEvent = ContinousCollisionDetection.getCollisionEvent(this.player, this.world, dt);
+            if (Vectors.isSameDirection(newVelocity, projExistingVelocityOntoNewVelocity)) {
+                this.player.setVelocity(newVelocity);
+            } else {
+                this.player.setVelocity(Vectors.add(newVelocity, projExistingVelocityOntoNewVelocity));
+            }
+
+            const frames = framesInTimeDelta(dt);
+            const collisionEvent = ContinousCollisionDetection.getCollisionEvent(this.player, this.world, frames);
 
             // move player around adjacent fixed bodies
             if (
@@ -105,6 +117,15 @@ export class Controls {
 
         document.addEventListener('keyup', (event) => {
             this.pressedKeys.delete(event.key);
+        });
+    }
+
+    private initRendererSubscriptions(renderer: Renderer): void {
+        renderer.subscribe(RendererEvent.ClickSprite, (sprite) => console.log(sprite.body));
+        renderer.subscribe(RendererEvent.ClickWorld, (pos) => {
+            const shape = new Circle({ ...pos, radius: 50 });
+            const force = new ConstantForce({ shape, force: 5, expiration: { maxApplications: 1 } });
+            this.world.addForce(force);
         });
     }
 }

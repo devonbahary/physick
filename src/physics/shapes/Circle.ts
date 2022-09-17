@@ -1,4 +1,5 @@
 import { Particle } from '@physics/shapes/Particle';
+import { Rect } from '@physics/shapes/Rect';
 import { Spatial } from '@physics/shapes/types';
 import { Vector } from '@physics/Vectors';
 
@@ -37,5 +38,14 @@ export class Circle extends Particle implements Spatial {
 
     get y1(): number {
         return this.y + this.radius;
+    }
+
+    get boundingBox(): Rect {
+        return new Rect({
+            x: this.x,
+            y: this.y,
+            width: this.width,
+            height: this.height,
+        });
     }
 }

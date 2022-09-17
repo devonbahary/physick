@@ -3,9 +3,6 @@ import { World } from '@physics/World';
 import { Renderer } from '@renderer/Renderer';
 import { Controls, ControlsEvent, Key } from '@game/Controls';
 
-const MS_IN_SECOND = 1000;
-const DESIRED_FRAMES_PER_SECOND = 60;
-
 export class Game {
     private controls: Controls;
     private renderer: Renderer;
@@ -29,22 +26,16 @@ export class Game {
     loop(lastTimestamp = Date.now()): void {
         const now = Date.now();
 
-        const dt = this.getTimeDelta(now, lastTimestamp);
+        const dt = now - lastTimestamp;
 
         if (!this.isPaused) {
-            this.controls.update(dt);
-            this.world.update(dt);
+            const simulatedDt = this.controls.isPressed(Key.Shift) ? dt * 2 : dt;
+            this.controls.update(simulatedDt);
+            this.world.update(simulatedDt);
         }
 
         this.renderer.update();
 
         requestAnimationFrame(() => this.loop(now));
-    }
-
-    private getTimeDelta(now: number, lastTimestamp: number): number {
-        const timestep = now - lastTimestamp;
-        const dt = (DESIRED_FRAMES_PER_SECOND * timestep) / MS_IN_SECOND; // # of frames to advance (1 @60FPS)
-
-        return this.controls.isPressed(Key.Shift) ? dt * 2 : dt;
     }
 }

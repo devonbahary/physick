@@ -5,8 +5,9 @@ import { Rect } from '@physics/shapes/Rect';
 import { ContinousCollisionDetection } from '@physics/collisions/ContinousCollisionDetection';
 import { CollisionResolution } from '@physics/collisions/CollisionResolution';
 import { PubSub } from '@physics/PubSub';
-import { roundForFloatingPoint } from '@physics/utilities';
+import { framesInTimeDelta, roundForFloatingPoint } from '@physics/utilities';
 import { QuadTree, QuadTreeConfig } from '@physics/collisions/QuadTree';
+import { Force } from '@physics/Force';
 
 type WorldArgs = Dimensions & {
     options?: Partial<WorldOptions> & { quadTreeConfig?: Partial<QuadTreeConfig> };
@@ -14,7 +15,6 @@ type WorldArgs = Dimensions & {
 
 type WorldOptions = {
     frictionalForce: number;
-    minimumFrictionalSpeed: number;
 };
 
 export enum WorldEvent {
@@ -32,7 +32,6 @@ type Publish = PubSub<WorldEvent, WorldEventDataMap>['publish'];
 
 const DEFAULT_WORLD_OPTIONS: WorldOptions = {
     frictionalForce: 0.1,
-    minimumFrictionalSpeed: 0.1,
 };
 
 export class World {
@@ -45,6 +44,7 @@ export class World {
 
     private options: WorldOptions;
     private quadTree: QuadTree;
+    private forces: Force[] = [];
 
     constructor(args: WorldArgs) {
         const { width, height, options = {} } = args;
@@ -65,7 +65,9 @@ export class World {
     }
 
     public update(dt: number): void {
-        this.updateBodies(dt);
+        const frames = framesInTimeDelta(dt);
+        this.updateForces(dt);
+        this.updateBodies(frames);
         this.quadTree.update();
     }
 
@@ -79,15 +81,33 @@ export class World {
         this.publish(WorldEvent.RemoveBody, body);
     }
 
+    public addForce(force: Force): void {
+        this.forces.push(force);
+    }
+
+    public removeForce(force: Force): void {
+        this.forces = this.forces.filter((f) => f.id !== force.id);
+    }
+
     public getBodiesInBoundingBox(rect: Rect): Body[] {
         return this.quadTree.getBodiesInBoundingBox(rect);
     }
 
-    private updateBodies(dt: number): void {
+    private updateForces(dt: number): void {
+        for (const force of this.forces) {
+            force.update(this, dt);
+        }
+
+        this.forces = this.forces.filter((f) => !f.shouldRemove());
+    }
+
+    private updateBodies(frames: number): void {
         for (const body of this.bodies) {
+            this.applyFriction(body);
+
             if (!body.isMoving()) continue;
 
-            const collisionEvent = ContinousCollisionDetection.getCollisionEvent(body, this, dt);
+            const collisionEvent = ContinousCollisionDetection.getCollisionEvent(body, this, frames);
 
             if (collisionEvent) {
                 // because we traverse bodies in no particular order, it's possible that we accidentally consider a false
@@ -100,8 +120,7 @@ export class World {
                     this.resolveChainedBodies(collisionEvent.collisionBody);
                 }
             } else {
-                body.move(Vectors.mult(body.velocity, dt));
-                this.applyFriction(body, dt);
+                body.move(Vectors.resize(body.velocity, frames * Vectors.magnitude(body.velocity)));
             }
         }
     }
@@ -148,18 +167,17 @@ export class World {
         }
     }
 
-    private applyFriction(body: Body, dt: number): void {
-        if (!this.options.frictionalForce) return;
+    private applyFriction(body: Body): void {
+        if (!body.isMoving() || !this.options.frictionalForce) return;
 
-        // friction has a direct relationship with the body's speed + mass
-        const frictionalForce = Vectors.resize(body.velocity, dt * this.options.frictionalForce * body.mass);
+        const speed = Vectors.magnitude(body.velocity);
+        const friction = this.options.frictionalForce * body.mass;
 
-        const newVelocity = Vectors.subtract(body.velocity, frictionalForce);
-        body.setVelocity(newVelocity);
-
-        // stop the body once reached some minimum rather than infinitely approach 0
-        if (Vectors.magnitude(newVelocity) < this.options.minimumFrictionalSpeed) {
+        if (friction > speed) {
             body.setVelocity({ x: 0, y: 0 });
+        } else {
+            const newVelocity = Vectors.subtract(body.velocity, Vectors.resize(body.velocity, friction));
+            body.setVelocity(newVelocity);
         }
     }
 }
