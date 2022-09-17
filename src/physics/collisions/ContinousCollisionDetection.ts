@@ -48,11 +48,13 @@ export class ContinousCollisionDetection {
         return !Vectors.isLarger(collisionBodyMovementOnCollisionVector, movingBodyMovementOnCollisionVector);
     }
 
-    static getCollisionEvent(movingBody: Body, world: World, frames: number): CollisionEvent | null {
+    static getCollisionEvent(movingBody: Body, world: World, frames: number, ignoreBodyIds = new Set<string>()): CollisionEvent | null {
         const movementBoundingBox = CollisionDetection.getMovementBoundingBox(movingBody);
         if (!movementBoundingBox) return null;
 
-        const potentialCollisionBodies = world.getBodiesInBoundingBox(movementBoundingBox);
+        const bodiesInBoundingBox = world.getBodiesInBoundingBox(movementBoundingBox);
+
+        const potentialCollisionBodies = bodiesInBoundingBox.filter((body) => !ignoreBodyIds.has(body.id));
 
         return potentialCollisionBodies.reduce<CollisionEvent | null>((earliest, collisionBody) => {
             if (movingBody === collisionBody) return earliest;

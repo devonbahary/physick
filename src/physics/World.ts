@@ -106,25 +106,37 @@ export class World implements PubSubable<WorldEvent, WorldEventDataMap> {
         for (const body of this.bodies) {
             this.applyFriction(body);
 
-            if (!body.isMoving()) continue;
+            if (body.isMoving()) this.updateBodyMovement(body, frames);
+        }
+    }
 
-            const collisionEvent = ContinousCollisionDetection.getCollisionEvent(body, this, frames);
+    private updateBodyMovement(body: Body, frames: number, ignoreBodyIds = new Set<string>()): void {
+        const collisionEvent = ContinousCollisionDetection.getCollisionEvent(body, this, frames, ignoreBodyIds);
 
-            if (collisionEvent) {
-                // because we traverse bodies in no particular order, it's possible that we accidentally consider a false
-                // collision of a slower-moving body into a faster-moving body along the collision vector
-                // rather than ignoring the false collision altogether, we wait for that fast-moving colliding body to get
-                // a chance to move
-                if (ContinousCollisionDetection.isChronological(collisionEvent)) {
+        if (collisionEvent) {
+            // because we traverse bodies in no particular order, it's possible that we accidentally consider a false
+            // collision of a slower-moving body into a faster-moving body along the collision vector
+            // rather than ignoring the false collision altogether, we wait for that fast-moving colliding body to get
+            // a chance to move
+            if (ContinousCollisionDetection.isChronological(collisionEvent)) {
+                const { collisionBody } = collisionEvent;
+
+                if (collisionBody.isSensor) {
+                    this.onCollision(collisionEvent);
+
+                    ignoreBodyIds.add(collisionBody.id);
+
+                    this.updateBodyMovement(body, frames, ignoreBodyIds);
+                } else {
                     CollisionResolution.resolve(collisionEvent);
 
                     this.onCollision(collisionEvent);
-
-                    this.resolveChainedBodies(collisionEvent.collisionBody);
+    
+                    this.resolveChainedBodies(collisionBody);
                 }
-            } else {
-                body.move(Vectors.resize(body.velocity, frames * Vectors.magnitude(body.velocity)));
             }
+        } else {
+            body.move(Vectors.resize(body.velocity, frames * Vectors.magnitude(body.velocity)));
         }
     }
 

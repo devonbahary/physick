@@ -9,6 +9,7 @@ type BodyArgs = {
     shape: Shape;
     mass?: number;
     restitution?: number;
+    isSensor?: boolean; // don't collide with other Bodies, but still publish CollisionEvents
 };
 
 export enum BodyEvent {
@@ -29,16 +30,18 @@ export class Body implements Particle, PubSubable<BodyEvent, BodyEventDataMap> {
     public shape: Shape;
     public mass: number;
     public restitution: number;
+    public isSensor: boolean;
 
     public subscribe: Subscribe;
     public publish: Publish;
 
     constructor(args: BodyArgs) {
-        const { shape, mass = 1, restitution = 1 } = args;
+        const { shape, mass = 1, restitution = 1, isSensor = false } = args;
 
         this.shape = shape;
         this.mass = mass;
         this.restitution = restitution;
+        this.isSensor = isSensor;
 
         const pubSub = new PubSub<BodyEvent, BodyEventDataMap>(Object.values(BodyEvent));
         this.subscribe = (...args): ReturnType<Subscribe> => pubSub.subscribe(...args);
@@ -97,6 +100,7 @@ export class Body implements Particle, PubSubable<BodyEvent, BodyEventDataMap> {
     }
 
     public move(dir: Vector): void {
+        if (this.isSensor) return;
         this.shape.move(dir);
         this.publish(BodyEvent.Move, this);
     }
@@ -106,6 +110,7 @@ export class Body implements Particle, PubSubable<BodyEvent, BodyEventDataMap> {
     }
 
     public applyForce(force: Vector): void {
+        if (this.isSensor) return;
         const netForce = Vectors.divide(force, this.mass);
         this.shape.velocity = Vectors.add(this.shape.velocity, netForce);
     }
