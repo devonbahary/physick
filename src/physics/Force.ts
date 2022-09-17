@@ -66,7 +66,7 @@ abstract class BaseForce {
     protected abstract hasExceededDuration(): boolean;
 
     private getDissipationFactor(direction: Vector): number {
-        return (this.shape.radius - Vectors.magnitude(direction)) / this.shape.radius; 
+        return (this.shape.radius - Vectors.magnitude(direction)) / this.shape.radius;
     }
 }
 
