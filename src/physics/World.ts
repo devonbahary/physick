@@ -1,13 +1,14 @@
 import { Dimensions } from '@physics/types';
-import { Body } from '@physics/Body';
+import { Body, BodyEvent } from '@physics/Body';
 import { Vectors } from '@physics/Vectors';
 import { Rect } from '@physics/shapes/Rect';
 import { ContinousCollisionDetection } from '@physics/collisions/ContinousCollisionDetection';
 import { CollisionResolution } from '@physics/collisions/CollisionResolution';
-import { PubSub } from '@physics/PubSub';
+import { PubSub, PubSubable } from '@physics/PubSub';
 import { framesInTimeDelta, roundForFloatingPoint } from '@physics/utilities';
 import { QuadTree, QuadTreeConfig } from '@physics/collisions/QuadTree';
 import { Force } from '@physics/Force';
+import { CollisionEvent } from '@physics/collisions/types';
 
 type WorldArgs = Dimensions & {
     options?: Partial<WorldOptions> & { quadTreeConfig?: Partial<QuadTreeConfig> };
@@ -34,13 +35,13 @@ const DEFAULT_WORLD_OPTIONS: WorldOptions = {
     frictionalForce: 0.1,
 };
 
-export class World {
+export class World implements PubSubable<WorldEvent, WorldEventDataMap> {
     public width: number;
     public height: number;
     public bodies: Body[] = [];
 
     public subscribe: Subscribe;
-    private publish: Publish;
+    public publish: Publish;
 
     private options: WorldOptions;
     private quadTree: QuadTree;
@@ -74,6 +75,9 @@ export class World {
     public addBody(body: Body): void {
         this.bodies.push(body);
         this.publish(WorldEvent.AddBody, body);
+        body.subscribe(BodyEvent.Collision, (collisionEvent) => {
+            console.log(collisionEvent);
+        });
     }
 
     public removeBody(body: Body): void {
@@ -117,6 +121,8 @@ export class World {
                 if (ContinousCollisionDetection.isChronological(collisionEvent)) {
                     CollisionResolution.resolve(collisionEvent);
 
+                    this.onCollision(collisionEvent);
+
                     this.resolveChainedBodies(collisionEvent.collisionBody);
                 }
             } else {
@@ -133,6 +139,8 @@ export class World {
         const collisionEvent = ContinousCollisionDetection.getCollisionEvent(bodyInChain, this, 0);
 
         if (collisionEvent && roundForFloatingPoint(collisionEvent.timeOfCollision) === 0) {
+            this.onCollision(collisionEvent);
+
             if (collisionEvent.collisionBody.isFixed()) {
                 const getTangentMovement = CollisionResolution.getTangentMovement(collisionEvent);
                 bodyInChain.setVelocity(getTangentMovement);
@@ -141,6 +149,12 @@ export class World {
                 this.resolveChainedBodies(collisionEvent.collisionBody, visitedBodyIds);
             }
         }
+    }
+
+    private onCollision(collisionEvent: CollisionEvent): void {
+        const { movingBody, collisionBody } = collisionEvent;
+        movingBody.publish(BodyEvent.Collision, collisionEvent);
+        collisionBody.publish(BodyEvent.Collision, collisionEvent);
     }
 
     private initBoundaries(): void {

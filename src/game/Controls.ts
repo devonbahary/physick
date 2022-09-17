@@ -2,7 +2,7 @@ import { Body } from '@physics/Body';
 import { CollisionResolution } from '@physics/collisions/CollisionResolution';
 import { ContinousCollisionDetection } from '@physics/collisions/ContinousCollisionDetection';
 import { ConstantForce } from '@physics/Force';
-import { PubSub } from '@physics/PubSub';
+import { PubSub, PubSubable } from '@physics/PubSub';
 import { Circle } from '@physics/shapes/Circle';
 import { framesInTimeDelta, roundForFloatingPoint } from '@physics/utilities';
 import { Vector, Vectors } from '@physics/Vectors';
@@ -31,9 +31,9 @@ type ControlsEventDataMap = {
 type Subscribe = PubSub<ControlsEvent, ControlsEventDataMap>['subscribe'];
 type Publish = PubSub<ControlsEvent, ControlsEventDataMap>['publish'];
 
-export class Controls {
+export class Controls implements PubSubable<ControlsEvent, ControlsEventDataMap> {
     public subscribe: Subscribe;
-    private publish: Publish;
+    public publish: Publish;
 
     private pressedKeys: Set<string>;
 

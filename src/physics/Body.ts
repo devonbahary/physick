@@ -2,7 +2,8 @@ import { v4 as uuid } from 'uuid';
 import { Vector, Vectors } from '@physics/Vectors';
 import { Particle } from '@physics/shapes/Particle';
 import { Shape } from '@physics/shapes/types';
-import { PubSub } from '@physics/PubSub';
+import { PubSub, PubSubable } from '@physics/PubSub';
+import { CollisionEvent } from '@physics/collisions/types';
 
 type BodyArgs = {
     shape: Shape;
@@ -12,23 +13,25 @@ type BodyArgs = {
 
 export enum BodyEvent {
     Move = 'Move',
+    Collision = 'Collision',
 }
 
 type BodyEventDataMap = {
     [BodyEvent.Move]: Body;
+    [BodyEvent.Collision]: CollisionEvent;
 };
 
 type Subscribe = PubSub<BodyEvent, BodyEventDataMap>['subscribe'];
 type Publish = PubSub<BodyEvent, BodyEventDataMap>['publish'];
 
-export class Body implements Particle {
+export class Body implements Particle, PubSubable<BodyEvent, BodyEventDataMap> {
     public id = uuid();
     public shape: Shape;
     public mass: number;
     public restitution: number;
 
     public subscribe: Subscribe;
-    private publish: Publish;
+    public publish: Publish;
 
     constructor(args: BodyArgs) {
         const { shape, mass = 1, restitution = 1 } = args;

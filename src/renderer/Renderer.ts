@@ -4,7 +4,7 @@ import { World, WorldEvent } from '@physics/World';
 import { Body } from '@physics/Body';
 import { applyBodySpriteStyles, applyStyle, createElement, toPx } from '@renderer/utilities';
 import { Vector } from '@physics/Vectors';
-import { PubSub } from '@physics/PubSub';
+import { PubSub, PubSubable } from '@physics/PubSub';
 import '@renderer/styles.css';
 
 export enum RendererEvent {
@@ -20,12 +20,12 @@ type RendererEventDataMap = {
 type Subscribe = PubSub<RendererEvent, RendererEventDataMap>['subscribe'];
 type Publish = PubSub<RendererEvent, RendererEventDataMap>['publish'];
 
-export class Renderer {
+export class Renderer implements PubSubable<RendererEvent, RendererEventDataMap> {
     private worldElement: HTMLElement;
     private sprites: Sprite[] = [];
 
     public subscribe: Subscribe;
-    private publish: Publish;
+    public publish: Publish;
 
     constructor(world: World, private player: Body) {
         this.worldElement = this.createWorld(world);

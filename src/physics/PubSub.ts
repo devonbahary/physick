@@ -1,5 +1,10 @@
 type EventObserversMap<E extends string, EMap extends Record<E, unknown>> = Record<E, ((eventData: EMap[E]) => void)[]>;
 
+export type PubSubable<Event extends string, EventDataMap extends Record<Event, unknown>> = {
+    subscribe: (event: Event, callback: (eventData: EventDataMap[Event]) => void) => void;
+    publish: (event: Event, eventData: EventDataMap[Event]) => void;
+};
+
 export class PubSub<Event extends string, EventDataMap extends Record<Event, unknown>> {
     private eventObserversMap: EventObserversMap<Event, EventDataMap>;
 
