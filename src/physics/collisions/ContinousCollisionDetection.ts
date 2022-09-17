@@ -48,7 +48,12 @@ export class ContinousCollisionDetection {
         return !Vectors.isLarger(collisionBodyMovementOnCollisionVector, movingBodyMovementOnCollisionVector);
     }
 
-    static getCollisionEvent(movingBody: Body, world: World, frames: number, ignoreBodyIds = new Set<string>()): CollisionEvent | null {
+    static getCollisionEvent(
+        movingBody: Body,
+        world: World,
+        frames: number,
+        ignoreBodyIds = new Set<string>(),
+    ): CollisionEvent | null {
         const movementBoundingBox = CollisionDetection.getMovementBoundingBox(movingBody);
         if (!movementBoundingBox) return null;
 
