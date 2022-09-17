@@ -8,7 +8,7 @@ export type Force = ConstantForce | IntervalForce;
 
 type BaseForceArgs = {
     shape: Circle;
-    force: number;
+    magnitude: number;
     // TODO: dissipationFn
     expiration?: Partial<Expiration>;
 };
@@ -31,13 +31,13 @@ const DEFAULT_EXPIRATION: Expiration = {
 abstract class BaseForce {
     id = uuid();
     private shape: Circle;
-    private force: number;
+    private magnitude: number;
     protected expirable: Expirable;
 
     constructor(args: BaseForceArgs) {
-        const { shape, force, expiration } = args;
+        const { shape, magnitude, expiration } = args;
         this.shape = shape;
-        this.force = force;
+        this.magnitude = magnitude;
 
         this.expirable = { ...DEFAULT_EXPIRATION, ...expiration, applications: 0, age: 0 };
     }
@@ -48,7 +48,7 @@ abstract class BaseForce {
         for (const body of bodies) {
             if (CollisionDetection.hasOverlap(this.shape, body.shape)) {
                 const direction = Vectors.subtract(body, this.shape);
-                const force = Vectors.resize(direction, this.force);
+                const force = Vectors.resize(direction, this.magnitude);
                 body.applyForce(force);
             }
         }

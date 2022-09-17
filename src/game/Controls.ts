@@ -124,7 +124,7 @@ export class Controls {
         renderer.subscribe(RendererEvent.ClickSprite, (sprite) => console.log(sprite.body));
         renderer.subscribe(RendererEvent.ClickWorld, (pos) => {
             const shape = new Circle({ ...pos, radius: 50 });
-            const force = new ConstantForce({ shape, force: 5, expiration: { maxApplications: 1 } });
+            const force = new ConstantForce({ shape, magnitude: 5, expiration: { maxApplications: 1 } });
             this.world.addForce(force);
         });
     }
