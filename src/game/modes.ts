@@ -34,16 +34,16 @@ const getProportionateMass = (shape: Shape): number => {
     return (width * height) / standardRatio;
 };
 
-const generateRandomCircles = (): Body[] => {
+const generateRandomCircles = (world: World, min = 1, max = 5): Body[] => {
     const bodies: Body[] = [];
 
-    const randomNumCircles = randInt(1, 5);
+    const randomNumCircles = randInt(min, max);
 
     for (let i = 0; i < randomNumCircles; i++) {
         const radius = randInt(5, 60);
         const pos = {
-            x: randInt(radius, WORLD_DIMENSIONS.width - radius),
-            y: randInt(radius, WORLD_DIMENSIONS.height - radius),
+            x: randInt(radius, world.width - radius),
+            y: randInt(radius, world.height - radius),
         };
 
         const randomCircle = new Circle({ radius, ...pos });
@@ -60,17 +60,17 @@ const generateRandomCircles = (): Body[] => {
     return bodies;
 };
 
-const generateRandomRects = (): Body[] => {
+const generateRandomRects = (world: World, min = 1, max = 5): Body[] => {
     const bodies: Body[] = [];
 
-    const randomNumRects = randInt(1, 5);
+    const randomNumRects = randInt(min, max);
 
     for (let i = 0; i < randomNumRects; i++) {
         const width = randInt(10, 120);
         const height = randInt(10, 120);
         const pos = {
-            x: randInt(width / 2, WORLD_DIMENSIONS.width - width / 2),
-            y: randInt(height / 2, WORLD_DIMENSIONS.height - height / 2),
+            x: randInt(width / 2, world.width - width / 2),
+            y: randInt(height / 2, world.height - height / 2),
         };
 
         const randomRect = new Rect({ width, height, ...pos });
@@ -91,8 +91,8 @@ const seedRandom = (player: Body): [World, Renderer] => {
     const world = new World(WORLD_DIMENSIONS);
     const renderer = new Renderer(world, player);
 
-    const circleBodies = generateRandomCircles();
-    const rectBodies = generateRandomRects();
+    const circleBodies = generateRandomCircles(world);
+    const rectBodies = generateRandomRects(world);
 
     for (const body of [...circleBodies, ...rectBodies]) {
         world.addBody(body);
@@ -110,8 +110,8 @@ const seedChaos = (player: Body): [World, Renderer] => {
     });
     const renderer = new Renderer(world, player);
 
-    const circleBodies = generateRandomCircles();
-    const rectBodies = generateRandomRects();
+    const circleBodies = generateRandomCircles(world, 25, 50);
+    const rectBodies = generateRandomRects(world, 25, 50);
 
     for (const body of [...circleBodies, ...rectBodies]) {
         world.addBody(body);
