@@ -60,34 +60,32 @@ export class Controls implements PubSubable<ControlsEvent, ControlsEventDataMap>
         // player shouldn't be able to move if it's already moving faster than its movement speed
         if (Vectors.magnitude(this.player.velocity) > PLAYER_SPEED) return;
 
-        const movement = this.getMovementVector();
+        const direction = this.getMovementDirection();
+        if (!Vectors.hasMagnitude(direction)) return;
 
-        if (Vectors.hasMagnitude(movement)) {
-            const newVelocity = Vectors.resize(movement, PLAYER_SPEED);
-            const projExistingVelocityOntoNewVelocity = Vectors.proj(this.player.velocity, newVelocity);
+        const newVelocity = Vectors.resize(direction, PLAYER_SPEED);
+        if (Vectors.isSameDirection(this.player.velocity, newVelocity)) {
+            this.player.setVelocity(newVelocity);
+        } else {
+            const sumMovement = Vectors.add(newVelocity, this.player.velocity);
+            this.player.setVelocity(sumMovement);
+        }
 
-            if (Vectors.isSameDirection(newVelocity, projExistingVelocityOntoNewVelocity)) {
-                this.player.setVelocity(newVelocity);
-            } else {
-                this.player.setVelocity(Vectors.add(newVelocity, projExistingVelocityOntoNewVelocity));
-            }
+        const frames = framesInTimeDelta(dt);
+        const collisionEvent = ContinousCollisionDetection.getCollisionEvent(this.player, this.world, frames);
 
-            const frames = framesInTimeDelta(dt);
-            const collisionEvent = ContinousCollisionDetection.getCollisionEvent(this.player, this.world, frames);
-
-            // move player around adjacent fixed bodies
-            if (
-                collisionEvent &&
-                roundForFloatingPoint(collisionEvent.timeOfCollision) === 0 &&
-                collisionEvent.collisionBody.isFixed()
-            ) {
-                const tangent = CollisionResolution.getTangentMovement(collisionEvent);
-                this.player.setVelocity(tangent);
-            }
+        // redirect player around adjacent fixed bodies
+        if (
+            collisionEvent &&
+            roundForFloatingPoint(collisionEvent.timeOfCollision) === 0 &&
+            collisionEvent.collisionBody.isFixed()
+        ) {
+            const tangent = CollisionResolution.getTangentMovement(collisionEvent);
+            this.player.setVelocity(tangent);
         }
     }
 
-    private getMovementVector(): Vector {
+    private getMovementDirection(): Vector {
         const movement = { x: 0, y: 0 };
 
         if (this.isPressed(Key.Up)) {
