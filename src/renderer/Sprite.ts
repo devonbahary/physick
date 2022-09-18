@@ -2,8 +2,8 @@ import { Body } from '@physics/Body';
 import { applyStyle, toPx } from '@renderer/utilities';
 
 export class Sprite {
-    private lastX: number = 0;
-    private lastY: number = 0;
+    private lastX = 0;
+    private lastY = 0;
 
     constructor(public body: Body, public element: HTMLElement) {}
 
