@@ -40,11 +40,7 @@ export class Renderer implements PubSubable<RendererEvent, RendererEventDataMap>
 
     public update(): void {
         for (const sprite of this.sprites) {
-            const { body, element } = sprite;
-            applyStyle(element, {
-                top: toPx(body.y),
-                left: toPx(body.x),
-            });
+            sprite.update();
         }
     }
 
