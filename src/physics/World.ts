@@ -127,6 +127,7 @@ export class World implements PubSubable<WorldEvent, WorldEventDataMap> {
                 if (collisionBody.isSensor) {
                     this.onCollision(collisionEvent);
 
+                    // recognize sensor collision but do not resolve collision; continue on
                     ignoreBodyIds.add(collisionBody.id);
 
                     this.updateBodyMovement(body, frames, ignoreBodyIds);
