@@ -111,6 +111,9 @@ export class Controls implements PubSubable<ControlsEvent, ControlsEventDataMap>
 
     private initListeners(): void {
         document.addEventListener('keydown', (event) => {
+            if ([Key.Up, Key.Right, Key.Down, Key.Left, Key.Space].includes(event.key as Key)) {
+                event.preventDefault();
+            }
             this.pressedKeys.add(event.key);
             this.publish(ControlsEvent.OnKeyDown, event.key);
         });
