@@ -152,9 +152,9 @@ export class World implements PubSubable<WorldEvent, WorldEventDataMap> {
     // if the force through 1+ non-fixed bodies is stopped at a fixed body, move the last non-fixed body in the chain
     // around the fixed body
     private resolveChainedBodies(bodyInChain: Body, visitedBodyIds = new Set<string>()): void {
-        if (bodyInChain.isFixed() || visitedBodyIds.has(bodyInChain.id)) return;
+        if (bodyInChain.isFixed()) return;
 
-        const collisionEvent = ContinousCollisionDetection.getCollisionEvent(bodyInChain, this, 0);
+        const collisionEvent = ContinousCollisionDetection.getCollisionEvent(bodyInChain, this, 0, visitedBodyIds);
 
         if (collisionEvent && roundForFloatingPoint(collisionEvent.timeOfCollision) === 0) {
             this.onCollision(collisionEvent);
