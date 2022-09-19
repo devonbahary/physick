@@ -18,7 +18,9 @@ export enum Key {
     Space = ' ',
 }
 
-const PLAYER_SPEED = 4;
+const FRAMES_TO_TOP_SPEED = 1;
+const PLAYER_TOP_SPEED = 4;
+const PLAYER_ACCELERATION = PLAYER_TOP_SPEED / FRAMES_TO_TOP_SPEED;
 
 export enum ControlsEvent {
     OnKeyDown = 'OnKeyDown',
@@ -57,21 +59,23 @@ export class Controls implements PubSubable<ControlsEvent, ControlsEventDataMap>
     }
 
     private updatePlayerMovement(dt: number): void {
+        const playerSpeed = Vectors.magnitude(this.player.velocity);
+
         // player shouldn't be able to move if it's already moving faster than its movement speed
-        if (Vectors.magnitude(this.player.velocity) > PLAYER_SPEED) return;
+        if (playerSpeed >= PLAYER_TOP_SPEED) return;
 
         const direction = this.getMovementDirection();
-        if (!Vectors.hasMagnitude(direction)) return;
-
-        const newVelocity = Vectors.resize(direction, PLAYER_SPEED);
-        if (Vectors.isSameDirection(this.player.velocity, newVelocity)) {
-            this.player.setVelocity(newVelocity);
-        } else {
-            const sumMovement = Vectors.add(newVelocity, this.player.velocity);
-            this.player.setVelocity(sumMovement);
-        }
+        if (!Vectors.hasMagnitude(direction)) return; // no player input
 
         const frames = framesInTimeDelta(dt);
+
+        const acceleration = Vectors.resize(direction, PLAYER_ACCELERATION * frames * this.player.mass);
+        this.player.applyForce(acceleration);
+
+        if (Vectors.magnitude(this.player.velocity) >= PLAYER_TOP_SPEED) {
+            this.player.setVelocity(Vectors.resize(this.player.velocity, PLAYER_TOP_SPEED));
+        }
+
         const collisionEvent = ContinousCollisionDetection.getCollisionEvent(this.player, this.world, frames);
 
         // redirect player around adjacent fixed bodies
@@ -100,7 +104,7 @@ export class Controls implements PubSubable<ControlsEvent, ControlsEventDataMap>
             movement.x += 1;
         }
 
-        return Vectors.resize(movement, PLAYER_SPEED);
+        return movement;
     }
 
     private initListeners(): void {
