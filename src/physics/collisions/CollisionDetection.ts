@@ -32,6 +32,7 @@ export class CollisionDetection {
             height,
         });
     }
+
     static hasOverlap(a: Shape, b: Shape): boolean {
         if (a instanceof Circle) {
             if (b instanceof Circle) {
