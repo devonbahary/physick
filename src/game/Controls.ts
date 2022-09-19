@@ -75,11 +75,7 @@ export class Controls implements PubSubable<ControlsEvent, ControlsEventDataMap>
         const collisionEvent = ContinousCollisionDetection.getCollisionEvent(this.player, this.world, frames);
 
         // redirect player around adjacent fixed bodies
-        if (
-            collisionEvent &&
-            roundForFloatingPoint(collisionEvent.timeOfCollision) === 0 &&
-            collisionEvent.collisionBody.isFixed()
-        ) {
+        if (collisionEvent && roundForFloatingPoint(collisionEvent.timeOfCollision) === 0) {
             const tangent = CollisionResolution.getTangentMovement(collisionEvent);
             this.player.setVelocity(tangent);
         }

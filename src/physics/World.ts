@@ -122,7 +122,7 @@ export class World implements PubSubable<WorldEvent, WorldEventDataMap> {
             // rather than ignoring the false collision altogether, we wait for that fast-moving colliding body to get
             // a chance to move
             if (ContinousCollisionDetection.isChronological(collisionEvent)) {
-                const { collisionBody, movingBody } = collisionEvent;
+                const { collisionBody } = collisionEvent;
 
                 if (collisionBody.isSensor) {
                     this.onCollision(collisionEvent);
@@ -133,12 +133,6 @@ export class World implements PubSubable<WorldEvent, WorldEventDataMap> {
                     this.updateBodyMovement(body, frames, ignoreBodyIds);
                 } else {
                     CollisionResolution.resolve(collisionEvent);
-
-                    // the resolved velocities represent the speed at which the collision pair should be traveling after
-                    // considering friction and collision, but b/c we don't perform a sub-step here, we should account
-                    // for the frictional loss of velocity that will occur before these bodies get a chance to move again
-                    this.recompenseFriction(movingBody);
-                    this.recompenseFriction(collisionBody);
 
                     this.onCollision(collisionEvent);
 
@@ -201,10 +195,13 @@ export class World implements PubSubable<WorldEvent, WorldEventDataMap> {
     }
 
     private applyFriction(body: Body): void {
-        if (!body.isMoving() || !this.options.frictionalForce) return;
+        if (!body.isMoving()) return;
+
+        const friction = this.getFrictionOnBody(body);
+
+        if (!friction) return;
 
         const speed = Vectors.magnitude(body.velocity);
-        const friction = this.options.frictionalForce * body.mass;
 
         if (friction >= speed) {
             // friction should never reverse a body's velocity, only ever set it to 0
@@ -215,9 +212,7 @@ export class World implements PubSubable<WorldEvent, WorldEventDataMap> {
         }
     }
 
-    private recompenseFriction(body: Body): void {
-        if (!body.isMoving() || !this.options.frictionalForce) return;
-        const friction = this.options.frictionalForce * body.mass;
-        body.setVelocity(Vectors.add(body.velocity, Vectors.resize(body.velocity, friction)));
+    private getFrictionOnBody(body: Body): number {
+        return body.mass * this.options.frictionalForce;
     }
 }
