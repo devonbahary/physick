@@ -1,4 +1,5 @@
 import { Body } from '@physics/Body';
+import { Character } from '@physics/Character';
 import { Circle } from '@physics/shapes/Circle';
 import { Rect } from '@physics/shapes/Rect';
 import { Shape } from '@physics/shapes/types';
@@ -87,9 +88,9 @@ const generateRandomRects = (world: World, min = 1, max = 5): Body[] => {
     return bodies;
 };
 
-const seedRandom = (player: Body): [World, Renderer] => {
+const seedRandom = (playerBody: Body): [World, Renderer] => {
     const world = new World(WORLD_DIMENSIONS);
-    const renderer = new Renderer(world, player);
+    const renderer = new Renderer(world, playerBody);
 
     const circleBodies = generateRandomCircles(world);
     const rectBodies = generateRandomRects(world);
@@ -101,14 +102,14 @@ const seedRandom = (player: Body): [World, Renderer] => {
     return [world, renderer];
 };
 
-const seedChaos = (player: Body): [World, Renderer] => {
+const seedChaos = (playerBody: Body): [World, Renderer] => {
     const world = new World({
         ...WORLD_DIMENSIONS,
         options: {
             frictionalForce: 0,
         },
     });
-    const renderer = new Renderer(world, player);
+    const renderer = new Renderer(world, playerBody);
 
     const circleBodies = generateRandomCircles(world, 25, 50);
     const rectBodies = generateRandomRects(world, 25, 50);
@@ -126,9 +127,9 @@ const seedChaos = (player: Body): [World, Renderer] => {
     return [world, renderer];
 };
 
-const seedDefault = (player: Body): [World, Renderer] => {
+const seedDefault = (playerBody: Body): [World, Renderer] => {
     const world = new World(WORLD_DIMENSIONS);
-    const renderer = new Renderer(world, player);
+    const renderer = new Renderer(world, playerBody);
 
     world.addBody(
         new Body({
@@ -147,24 +148,31 @@ const seedDefault = (player: Body): [World, Renderer] => {
 };
 
 export const initGame = (mode = GameMode.Default): Game => {
-    const player = new Body({ shape: new Circle({ radius: 20, x: 50, y: 50 }) });
-    // const player = new Body({ shape: new Rect({ x: 50, y: 50, width: 40, height: 40 }) });
+    const player = new Character(
+        new Body({
+            shape: new Circle({
+                x: 50,
+                y: 50,
+                radius: 20,
+            }),
+        }),
+    );
 
     let world: World;
     let renderer: Renderer;
     switch (mode) {
         case GameMode.Random:
-            [world, renderer] = seedRandom(player);
+            [world, renderer] = seedRandom(player.body);
             break;
         case GameMode.Chaos:
-            [world, renderer] = seedChaos(player);
+            [world, renderer] = seedChaos(player.body);
             break;
         default:
-            [world, renderer] = seedDefault(player);
+            [world, renderer] = seedDefault(player.body);
             break;
     }
 
-    world.addBody(player);
+    world.addBody(player.body);
 
     const controls = new Controls(player, world, renderer);
 

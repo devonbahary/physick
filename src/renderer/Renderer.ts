@@ -27,7 +27,7 @@ export class Renderer implements PubSubable<RendererEvent, RendererEventDataMap>
     public subscribe: Subscribe;
     public publish: Publish;
 
-    constructor(world: World, private player: Body) {
+    constructor(world: World, private playerBody: Body) {
         this.worldElement = this.createWorld(world);
         document.body.appendChild(this.worldElement);
 
@@ -50,7 +50,7 @@ export class Renderer implements PubSubable<RendererEvent, RendererEventDataMap>
         if (body.isFixed()) classNames.push('fixed');
 
         const element = createElement({
-            id: body.id === this.player.id ? 'player' : undefined,
+            id: body.id === this.playerBody.id ? 'player' : undefined,
             classNames,
         });
 

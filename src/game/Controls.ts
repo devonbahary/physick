@@ -1,11 +1,8 @@
-import { Body } from '@physics/Body';
-import { CollisionResolution } from '@physics/collisions/CollisionResolution';
-import { ContinousCollisionDetection } from '@physics/collisions/ContinousCollisionDetection';
+import { Character } from '@physics/Character';
 import { ConstantForce } from '@physics/Force';
 import { PubSub, PubSubable } from '@physics/PubSub';
 import { Circle } from '@physics/shapes/Circle';
-import { framesInTimeDelta, roundForFloatingPoint } from '@physics/utilities';
-import { Vector, Vectors } from '@physics/Vectors';
+import { Vector } from '@physics/Vectors';
 import { World } from '@physics/World';
 import { Renderer, RendererEvent } from '@renderer/Renderer';
 
@@ -17,10 +14,6 @@ export enum Key {
     Shift = 'Shift',
     Space = ' ',
 }
-
-const FRAMES_TO_TOP_SPEED = 1;
-const PLAYER_TOP_SPEED = 4;
-const PLAYER_ACCELERATION = PLAYER_TOP_SPEED / FRAMES_TO_TOP_SPEED;
 
 export enum ControlsEvent {
     OnKeyDown = 'OnKeyDown',
@@ -39,7 +32,7 @@ export class Controls implements PubSubable<ControlsEvent, ControlsEventDataMap>
 
     private pressedKeys: Set<string>;
 
-    constructor(private player: Body, private world: World, renderer: Renderer) {
+    constructor(private player: Character, private world: World, renderer: Renderer) {
         this.initListeners();
         this.pressedKeys = new Set();
 
@@ -59,30 +52,8 @@ export class Controls implements PubSubable<ControlsEvent, ControlsEventDataMap>
     }
 
     private updatePlayerMovement(dt: number): void {
-        const playerSpeed = Vectors.magnitude(this.player.velocity);
-
-        // player shouldn't be able to move if it's already moving faster than its movement speed
-        if (playerSpeed >= PLAYER_TOP_SPEED) return;
-
         const direction = this.getMovementDirection();
-        if (!Vectors.hasMagnitude(direction)) return; // no player input
-
-        const frames = framesInTimeDelta(dt);
-
-        const acceleration = Vectors.resize(direction, PLAYER_ACCELERATION * frames * this.player.mass);
-        this.player.applyForce(acceleration);
-
-        if (Vectors.magnitude(this.player.velocity) >= PLAYER_TOP_SPEED) {
-            this.player.setVelocity(Vectors.resize(this.player.velocity, PLAYER_TOP_SPEED));
-        }
-
-        const collisionEvent = ContinousCollisionDetection.getCollisionEvent(this.player, this.world, frames);
-
-        // redirect player around adjacent fixed bodies
-        if (collisionEvent && roundForFloatingPoint(collisionEvent.timeOfCollision) === 0) {
-            const tangent = CollisionResolution.getTangentMovement(collisionEvent);
-            this.player.setVelocity(tangent);
-        }
+        this.player.move(this.world, direction, dt);
     }
 
     private getMovementDirection(): Vector {
