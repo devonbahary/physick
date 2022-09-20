@@ -105,7 +105,7 @@ export class World implements PubSubable<WorldEvent, WorldEventDataMap> {
     private updateBodies(frames: number): void {
         for (const body of this.bodies) {
             // make sure each potential collision pair have both had friction applied before consideration
-            this.applyFriction(body);
+            this.applyFriction(body, frames);
         }
 
         for (const body of this.bodies) {
@@ -194,10 +194,10 @@ export class World implements PubSubable<WorldEvent, WorldEventDataMap> {
         }
     }
 
-    private applyFriction(body: Body): void {
+    private applyFriction(body: Body, frames: number): void {
         if (!body.isMoving()) return;
 
-        const friction = this.getFrictionOnBody(body);
+        const friction = this.getFrictionOnBody(body, frames);
 
         if (!friction) return;
 
@@ -212,7 +212,7 @@ export class World implements PubSubable<WorldEvent, WorldEventDataMap> {
         }
     }
 
-    private getFrictionOnBody(body: Body): number {
-        return body.mass * this.options.frictionalForce;
+    private getFrictionOnBody(body: Body, frames: number): number {
+        return body.mass * this.options.frictionalForce * frames;
     }
 }
