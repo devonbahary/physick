@@ -32,7 +32,7 @@ type Subscribe = PubSub<WorldEvent, WorldEventDataMap>['subscribe'];
 type Publish = PubSub<WorldEvent, WorldEventDataMap>['publish'];
 
 const DEFAULT_WORLD_OPTIONS: WorldOptions = {
-    frictionalForce: 3,
+    frictionalForce: 0.5,
 };
 
 export class World implements PubSubable<WorldEvent, WorldEventDataMap> {
