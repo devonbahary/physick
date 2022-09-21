@@ -15,6 +15,7 @@ const WORLD_DIMENSIONS: Dimensions = {
 
 type Game = {
     controls: Controls;
+    player: Character;
     renderer: Renderer;
     world: World;
 };
@@ -178,6 +179,7 @@ export const initGame = (mode = GameMode.Default): Game => {
 
     return {
         controls,
+        player,
         renderer,
         world,
     };

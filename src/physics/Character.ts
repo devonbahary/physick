@@ -1,9 +1,10 @@
 import { Body } from '@physics/Body';
 import { Vector, Vectors } from '@physics/Vectors';
-import { framesInTimeDelta, roundForFloatingPoint } from '@physics/utilities';
+import { roundForFloatingPoint } from '@physics/utilities';
 import { ContinousCollisionDetection } from '@physics/collisions/ContinousCollisionDetection';
 import { World } from '@physics/World';
 import { CollisionResolution } from '@physics/collisions/CollisionResolution';
+import { CollisionEvent } from '@physics/collisions/types';
 
 type CharacterOptions = {
     framesToTopSpeed: number;
@@ -11,11 +12,22 @@ type CharacterOptions = {
 };
 
 const DEFAULT_CHARACTER_OPTIONS: CharacterOptions = {
-    framesToTopSpeed: 1,
+    framesToTopSpeed: 5,
     topSpeed: 4,
 };
 
+type Momentum = {
+    consecutiveFrames: number;
+    lastHeading: Vector | null;
+    heading: Vector | null;
+};
+
 export class Character {
+    private momentum: Momentum = {
+        consecutiveFrames: 0,
+        lastHeading: null,
+        heading: null,
+    };
     private options: CharacterOptions;
 
     constructor(public body: Body, options?: Partial<CharacterOptions>) {
@@ -27,14 +39,6 @@ export class Character {
         if (this.options.framesToTopSpeed <= 0) throw new Error(`Character.framesToTopSpeed must be > 0`);
     }
 
-    get acceleration(): number {
-        return this.topSpeed / this.framesToTopSpeed;
-    }
-
-    get speed(): number {
-        return Vectors.magnitude(this.body.velocity);
-    }
-
     get topSpeed(): number {
         return this.options.topSpeed;
     }
@@ -43,27 +47,77 @@ export class Character {
         return this.options.framesToTopSpeed;
     }
 
-    move(world: World, direction: Vector, dt: number): void {
+    get acceleration(): number {
+        return this.topSpeed / this.framesToTopSpeed;
+    }
+
+    update(frames: number): void {
+        this.updateMomentum(frames);
+    }
+
+    move(world: World, direction: Vector, frames: number): void {
         if (!Vectors.hasMagnitude(direction)) return;
 
-        // player shouldn't be able to move if it's already moving faster than its movement speed
-        if (this.speed >= this.topSpeed) return;
+        this.momentum.heading = direction;
 
-        const frames = framesInTimeDelta(dt);
+        // character shouldn't be able to move if it's already moving faster than its movement speed
+        if (this.body.speed >= this.topSpeed) return;
 
-        const acceleration = Vectors.resize(direction, this.acceleration * frames * this.body.mass);
-        this.body.applyForce(acceleration);
+        const acceleration = this.getAccelerationWithMomentum(world);
+        const accelerativeForce = Vectors.resize(direction, acceleration * this.body.mass);
+        this.body.applyForce(accelerativeForce);
 
-        if (this.speed >= this.topSpeed) {
+        if (this.body.speed >= this.topSpeed) {
             this.body.setVelocity(Vectors.resize(this.body.velocity, this.topSpeed));
         }
 
         const collisionEvent = ContinousCollisionDetection.getCollisionEvent(this.body, world, frames);
+        if (collisionEvent) this.redirectAroundCollisionBody(collisionEvent);
+    }
 
-        // redirect player around adjacent fixed bodies
-        if (collisionEvent && roundForFloatingPoint(collisionEvent.timeOfCollision) === 0) {
+    private redirectAroundCollisionBody(collisionEvent: CollisionEvent): void {
+        if (roundForFloatingPoint(collisionEvent.timeOfCollision) === 0) {
             const tangent = CollisionResolution.getTangentMovement(collisionEvent);
             this.body.setVelocity(tangent);
         }
+    }
+
+    private getAccelerationWithMomentum(world: World): number {
+        const friction = world.getFrictionOnBody(this.body);
+
+        const momentum = this.getMomentum();
+
+        return friction > this.acceleration ? momentum : this.acceleration;
+    }
+
+    private getMomentum(): number {
+        return Math.min(this.topSpeed, (this.topSpeed * this.momentum.consecutiveFrames) / this.framesToTopSpeed);
+    }
+
+    private updateMomentum(frames: number): void {
+        if (!this.headingHasUpdated() || this.headingHasReversed()) {
+            this.resetMomentum();
+        } else if (this.momentum.heading) {
+            const consecutiveFrames = this.momentum.consecutiveFrames + frames;
+            this.momentum.consecutiveFrames = Math.min(consecutiveFrames, this.framesToTopSpeed);
+        }
+
+        this.momentum.lastHeading = this.momentum.heading;
+    }
+
+    private resetMomentum(): void {
+        this.momentum.consecutiveFrames = 0;
+        this.momentum.lastHeading = null;
+        this.momentum.heading = null;
+    }
+
+    private headingHasUpdated(): boolean {
+        // heading will point to a new vector every frame as long as move() is called
+        return this.momentum.lastHeading !== this.momentum.heading;
+    }
+
+    private headingHasReversed(): boolean {
+        const { lastHeading, heading } = this.momentum;
+        return Boolean(lastHeading && heading && !Vectors.isSameDirection(lastHeading, heading));
     }
 }

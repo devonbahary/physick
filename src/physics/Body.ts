@@ -87,6 +87,10 @@ export class Body implements Particle, PubSubable<BodyEvent, BodyEventDataMap> {
         return this.shape.velocity;
     }
 
+    get speed(): number {
+        return Vectors.magnitude(this.velocity);
+    }
+
     public isMoving(): boolean {
         return Vectors.hasMagnitude(this.shape.velocity);
     }

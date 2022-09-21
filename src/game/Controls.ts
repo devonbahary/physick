@@ -43,17 +43,17 @@ export class Controls implements PubSubable<ControlsEvent, ControlsEventDataMap>
         this.initRendererSubscriptions(renderer);
     }
 
-    public update(dt: number): void {
-        this.updatePlayerMovement(dt);
+    public update(frames: number): void {
+        this.updatePlayerMovement(frames);
     }
 
     public isPressed(key: Key): boolean {
         return this.pressedKeys.has(key);
     }
 
-    private updatePlayerMovement(dt: number): void {
+    private updatePlayerMovement(frames: number): void {
         const direction = this.getMovementDirection();
-        this.player.move(this.world, direction, dt);
+        this.player.move(this.world, direction, frames);
     }
 
     private getMovementDirection(): Vector {
