@@ -3,7 +3,7 @@ import { Dimensions } from '@physics/types';
 import { Spatial } from '@physics/shapes/types';
 import { Vector } from '@physics/Vectors';
 
-type RectArgs = Partial<Vector> & Dimensions;
+export type RectArgs = Partial<Vector> & Dimensions;
 
 export class Rect extends Particle implements Spatial {
     public width: number;

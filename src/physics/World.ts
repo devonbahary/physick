@@ -9,6 +9,7 @@ import { framesInTimeDelta, roundForFloatingPoint } from '@physics/utilities';
 import { QuadTree, QuadTreeConfig } from '@physics/collisions/QuadTree';
 import { Force } from '@physics/Force';
 import { CollisionEvent } from '@physics/collisions/types';
+import { SerializedWorld, Serializer } from '@physics/Serializer';
 
 type WorldArgs = Dimensions & {
     options?: Partial<WorldOptions> & { quadTreeConfig?: Partial<QuadTreeConfig> };
@@ -96,6 +97,18 @@ export class World implements PubSubable<WorldEvent, WorldEventDataMap> {
 
     public getFrictionOnBody(body: Body): number {
         return body.mass * this.options.frictionalForce;
+    }
+
+    // TODO: forces?
+    public loadSerialized(serializedWorld: SerializedWorld): void {
+        for (const body of this.bodies) {
+            this.removeBody(body);
+        }
+
+        for (const serializedBody of serializedWorld.bodies) {
+            const body = Serializer.fromSerializedBody(serializedBody);
+            this.addBody(body);
+        }
     }
 
     private updateForces(dt: number): void {

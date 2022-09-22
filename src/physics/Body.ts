@@ -5,7 +5,8 @@ import { Shape } from '@physics/shapes/types';
 import { PubSub, PubSubable } from '@physics/PubSub';
 import { CollisionEvent } from '@physics/collisions/types';
 
-type BodyArgs = {
+export type BodyArgs = {
+    id?: string;
     shape: Shape;
     mass?: number;
     restitution?: number;
@@ -26,7 +27,7 @@ type Subscribe = PubSub<BodyEvent, BodyEventDataMap>['subscribe'];
 type Publish = PubSub<BodyEvent, BodyEventDataMap>['publish'];
 
 export class Body implements Particle, PubSubable<BodyEvent, BodyEventDataMap> {
-    public id = uuid();
+    public id: string;
     public shape: Shape;
     public mass: number;
     public restitution: number;
@@ -36,8 +37,9 @@ export class Body implements Particle, PubSubable<BodyEvent, BodyEventDataMap> {
     public publish: Publish;
 
     constructor(args: BodyArgs) {
-        const { shape, mass = 1, restitution = 1, isSensor = false } = args;
+        const { id = uuid(), shape, mass = 1, restitution = 1, isSensor = false } = args;
 
+        this.id = id;
         this.shape = shape;
         this.mass = mass;
         this.restitution = restitution;

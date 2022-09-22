@@ -3,7 +3,7 @@ import { Rect } from '@physics/shapes/Rect';
 import { Spatial } from '@physics/shapes/types';
 import { Vector } from '@physics/Vectors';
 
-type CircleArgs = Partial<Vector> & {
+export type CircleArgs = Partial<Vector> & {
     radius: number;
 };
 
