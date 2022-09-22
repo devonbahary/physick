@@ -36,19 +36,21 @@ export class Game {
     loop(lastTimestamp = Date.now()): void {
         const now = Date.now();
         const dt = now - lastTimestamp;
-        if (!this.isPaused) this.timestep(dt);
+        if (!this.isPaused) {
+            const simulatedDt = this.controls.isPressed(Key.Shift) ? dt * 2 : dt;
+            this.timestep(simulatedDt);
+        }
 
         requestAnimationFrame(() => this.loop(now));
     }
 
     private timestep(dt: number): void {
-        const simulatedDt = this.controls.isPressed(Key.Shift) ? dt * 2 : dt;
-        const frames = framesInTimeDelta(simulatedDt);
+        const frames = framesInTimeDelta(dt);
 
         this.controls.update(frames);
         this.updateCharacters(frames);
         this.worldStateMemory.update(dt, this.world); // serialize bodies before velocity is resolved to capture contributing forces
-        this.world.update(simulatedDt);
+        this.world.update(dt);
 
         this.renderer.update();
     }
