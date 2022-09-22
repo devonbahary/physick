@@ -47,8 +47,8 @@ export class Game {
 
         this.controls.update(frames);
         this.updateCharacters(frames);
+        this.worldStateMemory.update(dt, this.world); // serialize bodies before velocity is resolved to capture contributing forces
         this.world.update(simulatedDt);
-        this.worldStateMemory.update(dt, this.world);
 
         this.renderer.update();
     }
