@@ -23,6 +23,7 @@ export class WorldStateMemory {
 
         if (this.worldStateSnapshots.length >= WORLD_STATE_SNAPSHOT_LIMIT) {
             this.worldStateSnapshots.shift();
+            this.index -= 1;
         }
 
         this.worldStateSnapshots.push({
