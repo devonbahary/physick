@@ -206,5 +206,9 @@ export class QuadTree extends InternalNode {
                 this.addBody(body); // re-insert in proper position
             });
         });
+
+        world.subscribe(WorldEvent.RemoveBody, (body) => {
+            this.removeBody(body);
+        });
     }
 }
