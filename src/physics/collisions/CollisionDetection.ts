@@ -26,8 +26,8 @@ export class CollisionDetection {
         const height = bounds.y1 - bounds.y0;
 
         return new Rect({
-            x: x0 + width / 2,
-            y: y0 + height / 2,
+            x: bounds.x0 + width / 2,
+            y: bounds.y0 + height / 2,
             width,
             height,
         });
