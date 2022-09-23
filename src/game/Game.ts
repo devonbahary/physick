@@ -78,7 +78,7 @@ export class Game {
             const snapshot = this.worldStateMemory.getSnapshot();
             if (snapshot) {
                 this.world.loadSerialized(snapshot.serialized);
-                this.renderer.update();
+                this.timestep(snapshot.dt);
             } else {
                 const fakeDt = 16.7; // 60FPS in ms
                 this.timestep(fakeDt);
