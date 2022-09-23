@@ -1,8 +1,8 @@
 import { Body, BodyEvent } from '@physics/Body';
-import { Rect } from '@physics/shapes/Rect';
-import { Dimensions } from '@physics/types';
+import { Dimensions } from '@physics/shapes/types';
 import { World, WorldEvent } from '@physics/World';
 import { CollisionDetection } from '@physics/collisions/CollisionDetection';
+import { BoundingBox } from '@physics/shapes/rects/BoundingBox';
 
 export type QuadTreeConfig = {
     maxBodiesInLeaf: number;
@@ -19,26 +19,26 @@ const DEFAULT_CONFIG: QuadTreeConfig = {
 };
 
 abstract class Node {
-    constructor(public rect: Rect) {}
+    constructor(public boundingBox: BoundingBox) {}
 
-    abstract getBodiesInBoundingBox(rect: Rect): Body[];
+    abstract getBodiesInBoundingBox(boundingBox: BoundingBox): Body[];
 
     abstract addBody(body: Body): void;
 
-    protected overlapsWith(rect: Rect): boolean {
-        return CollisionDetection.hasOverlap(this.rect, rect);
+    protected overlapsWith(boundingBox: BoundingBox): boolean {
+        return CollisionDetection.hasOverlap(this.boundingBox, boundingBox);
     }
 }
 
 class Leaf extends Node {
     public bodies: Body[] = [];
 
-    constructor(rect: Rect, private config: QuadTreeConfig) {
-        super(rect);
+    constructor(boundingBox: BoundingBox, private config: QuadTreeConfig) {
+        super(boundingBox);
     }
 
-    getBodiesInBoundingBox(rect: Rect): Body[] {
-        return this.overlapsWith(rect) ? this.bodies : [];
+    getBodiesInBoundingBox(boundingBox: BoundingBox): Body[] {
+        return this.overlapsWith(boundingBox) ? this.bodies : [];
     }
 
     addBody(body: Body): void {
@@ -54,8 +54,8 @@ class Leaf extends Node {
     shouldPartition(): boolean {
         if (this.bodies.length <= this.config.maxBodiesInLeaf) return false;
         return (
-            this.rect.width / 4 >= this.config.minLeafDimensions.width &&
-            this.rect.height / 4 >= this.config.minLeafDimensions.height
+            this.boundingBox.width / 4 >= this.config.minLeafDimensions.width &&
+            this.boundingBox.height / 4 >= this.config.minLeafDimensions.height
         );
     }
 }
@@ -63,9 +63,9 @@ class Leaf extends Node {
 class InternalNode extends Node {
     private children: (InternalNode | Leaf)[];
 
-    constructor(rect: Rect, private config: QuadTreeConfig) {
-        super(rect);
-        this.children = InternalNode.initLeaves(rect, config);
+    constructor(boundingBox: BoundingBox, private config: QuadTreeConfig) {
+        super(boundingBox);
+        this.children = InternalNode.initLeaves(boundingBox, config);
     }
 
     get bodies(): Body[] {
@@ -79,56 +79,32 @@ class InternalNode extends Node {
         return Array.from(uniqueBodiesSet);
     }
 
-    static initLeaves(rect: Rect, config: QuadTreeConfig): Leaf[] {
-        const { x0, x, width, y0, y, height } = rect;
+    static initLeaves(boundingBox: BoundingBox, config: QuadTreeConfig): Leaf[] {
+        const { x0, x1, width, y0, y1, height } = boundingBox;
 
         const halfWidth = width / 2;
-        const quarterWidth = width / 4;
         const halfHeight = height / 2;
-        const quarterHeight = height / 4;
 
-        const dimensions = {
-            width: halfWidth,
-            height: halfHeight,
-        };
+        const leftSide = { x0, x1: x0 + halfWidth };
+        const rightSide = { x0: x0 + halfWidth, x1 };
+        const topSide = { y0, y1: y0 + halfHeight };
+        const bottomSide = { y0: y0 + halfHeight, y1 };
 
-        const topLeftRect = new Rect({
-            x: x0 + quarterWidth,
-            y: y0 + quarterHeight,
-            ...dimensions,
-        });
-
-        const topRightRect = new Rect({
-            x: x + quarterWidth,
-            y: y0 + quarterHeight,
-            ...dimensions,
-        });
-
-        const bottomLeftRect = new Rect({
-            x: x0 + quarterWidth,
-            y: y + quarterHeight,
-            ...dimensions,
-        });
-
-        const bottomRightRect = new Rect({
-            x: x + quarterWidth,
-            y: y + quarterHeight,
-            ...dimensions,
-        });
-
-        return [
-            new Leaf(topLeftRect, config),
-            new Leaf(topRightRect, config),
-            new Leaf(bottomLeftRect, config),
-            new Leaf(bottomRightRect, config),
+        const bounds = [
+            new BoundingBox({ ...leftSide, ...topSide }),
+            new BoundingBox({ ...rightSide, ...topSide }),
+            new BoundingBox({ ...leftSide, ...bottomSide }),
+            new BoundingBox({ ...rightSide, ...bottomSide }),
         ];
+
+        return bounds.map((r) => new Leaf(r, config));
     }
 
-    getBodiesInBoundingBox(rect: Rect): Body[] {
-        if (!this.overlapsWith(rect)) return [];
+    getBodiesInBoundingBox(boundingBox: BoundingBox): Body[] {
+        if (!this.overlapsWith(boundingBox)) return [];
 
         const uniqueBodiesSet = this.children.reduce<Set<Body>>((acc, child) => {
-            const bodies = child.getBodiesInBoundingBox(rect);
+            const bodies = child.getBodiesInBoundingBox(boundingBox);
             for (const body of bodies) {
                 acc.add(body);
             }
@@ -154,7 +130,7 @@ class InternalNode extends Node {
         this.children = this.children.map((child) => {
             if (child instanceof Leaf) {
                 if (child.shouldPartition()) {
-                    const internalNode = new InternalNode(child.rect, this.config);
+                    const internalNode = new InternalNode(child.boundingBox, this.config);
 
                     for (const body of child.bodies) {
                         internalNode.addBody(body);
@@ -166,7 +142,7 @@ class InternalNode extends Node {
             }
 
             if (child.shouldCollapse()) {
-                const leaf = new Leaf(child.rect, this.config);
+                const leaf = new Leaf(child.boundingBox, this.config);
 
                 for (const body of child.bodies) {
                     leaf.addBody(body);
@@ -187,14 +163,14 @@ class InternalNode extends Node {
 export class QuadTree extends InternalNode {
     constructor(world: World, config: Partial<QuadTreeConfig> = {}) {
         const { width, height } = world;
-        const rect = new Rect({
-            x: width / 2,
-            y: height / 2,
-            width,
-            height,
+        const boundingBox = new BoundingBox({
+            x0: 0,
+            x1: width,
+            y0: 0,
+            y1: height,
         });
 
-        super(rect, { ...DEFAULT_CONFIG, ...config });
+        super(boundingBox, { ...DEFAULT_CONFIG, ...config });
 
         this.initWorldSubscriptions(world);
     }

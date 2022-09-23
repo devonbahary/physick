@@ -1,6 +1,6 @@
 import { Body } from '@physics/Body';
-import { Circle } from '@physics/shapes/Circle';
-import { Rect } from '@physics/shapes/Rect';
+import { Circle } from '@physics/shapes/circles/Circle';
+import { Rect } from '@physics/shapes/rects/Rect';
 import { Particle } from '@physics/shapes/Particle';
 import { HorzLineSegment, LineSegment, LineSegments, VertLineSegment } from '@physics/shapes/LineSegments';
 import { Vector, Vectors } from '@physics/Vectors';

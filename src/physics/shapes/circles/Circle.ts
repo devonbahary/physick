@@ -1,13 +1,13 @@
 import { Particle } from '@physics/shapes/Particle';
-import { Rect } from '@physics/shapes/Rect';
-import { Spatial } from '@physics/shapes/types';
 import { Vector } from '@physics/Vectors';
+import { BoundingBox } from '@physics/shapes/rects/BoundingBox';
+import { BoundingCircle } from '@physics/shapes/circles/BoundingCircle';
 
 export type CircleArgs = Partial<Vector> & {
     radius: number;
 };
 
-export class Circle extends Particle implements Spatial {
+export class Circle extends Particle implements BoundingCircle {
     public radius: number;
 
     constructor(args: CircleArgs) {
@@ -40,12 +40,8 @@ export class Circle extends Particle implements Spatial {
         return this.y + this.radius;
     }
 
-    get boundingBox(): Rect {
-        return new Rect({
-            x: this.x,
-            y: this.y,
-            width: this.width,
-            height: this.height,
-        });
+    get boundingBox(): BoundingBox {
+        const { x0, x1, y0, y1 } = this;
+        return new BoundingBox({ x0, x1, y0, y1 });
     }
 }

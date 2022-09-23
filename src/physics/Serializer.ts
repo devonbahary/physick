@@ -1,8 +1,7 @@
-import { Rect, RectArgs } from '@physics/shapes/Rect';
+import { Rect, RectArgs } from '@physics/shapes/rects/Rect';
 import { Vector } from '@physics/Vectors';
-import { Circle, CircleArgs } from '@physics/shapes/Circle';
+import { Circle, CircleArgs } from '@physics/shapes/circles/Circle';
 import { Body, BodyArgs } from '@physics/Body';
-import { Shape } from '@physics/shapes/types';
 import { World } from '@physics/World';
 
 export type SerializedWorld = {
@@ -71,7 +70,7 @@ export class Serializer {
         };
     }
 
-    private static getSerializedShape(shape: Shape): SerializedShape {
+    private static getSerializedShape(shape: Body['shape']): SerializedShape {
         if (shape instanceof Circle) {
             return Serializer.getSerializedCircle(shape);
         }

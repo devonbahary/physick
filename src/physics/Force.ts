@@ -1,13 +1,13 @@
 import { v4 as uuid } from 'uuid';
-import { Circle } from '@physics/shapes/Circle';
 import { World } from '@physics/World';
 import { CollisionDetection } from '@physics/collisions/CollisionDetection';
 import { Vector, Vectors } from '@physics/Vectors';
+import { BoundingCircle } from '@physics/shapes/circles/BoundingCircle';
 
 export type Force = ConstantForce | IntervalForce;
 
 type BaseForceArgs = {
-    shape: Circle;
+    boundingCircle: BoundingCircle;
     magnitude: number;
     expiration?: Partial<Expiration>;
 };
@@ -29,26 +29,26 @@ const DEFAULT_EXPIRATION: Expiration = {
 
 abstract class BaseForce {
     id = uuid();
-    private shape: Circle;
+    private boundingCircle: BoundingCircle;
     private magnitude: number;
     protected expirable: Expirable;
 
     constructor(args: BaseForceArgs) {
-        const { shape, magnitude, expiration } = args;
-        this.shape = shape;
+        const { boundingCircle, magnitude, expiration } = args;
+        this.boundingCircle = boundingCircle;
         this.magnitude = magnitude;
 
         this.expirable = { ...DEFAULT_EXPIRATION, ...expiration, applications: 0, age: 0 };
     }
 
     protected apply(world: World): void {
-        const bodies = world.getBodiesInBoundingBox(this.shape.boundingBox);
+        const bodies = world.getBodiesInBoundingBox(this.boundingCircle.boundingBox);
 
         for (const body of bodies) {
-            if (CollisionDetection.hasOverlap(this.shape, body.shape)) {
-                const direction = Vectors.subtract(body, this.shape);
-                const dissipation = this.getDissipationFactor(direction);
-                const force = Vectors.resize(direction, this.magnitude * dissipation);
+            if (CollisionDetection.hasOverlap(this.boundingCircle, body.shape)) {
+                const diffPos = Vectors.subtract(body, this.boundingCircle);
+                const dissipation = this.getDissipationFactor(diffPos);
+                const force = Vectors.resize(diffPos, this.magnitude * dissipation);
                 body.applyForce(force);
             }
         }
@@ -65,8 +65,8 @@ abstract class BaseForce {
 
     protected abstract hasExceededDuration(): boolean;
 
-    private getDissipationFactor(direction: Vector): number {
-        return (this.shape.radius - Vectors.magnitude(direction)) / this.shape.radius;
+    private getDissipationFactor(diffPos: Vector): number {
+        return (this.boundingCircle.radius - Vectors.magnitude(diffPos)) / this.boundingCircle.radius;
     }
 }
 

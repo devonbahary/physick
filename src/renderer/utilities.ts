@@ -1,4 +1,4 @@
-import { Circle } from '@physics/shapes/Circle';
+import { Circle } from '@physics/shapes/circles/Circle';
 import { Sprite } from '@renderer/Sprite';
 
 export const applyStyle = (element: HTMLElement, style: Partial<CSSStyleDeclaration>): void => {

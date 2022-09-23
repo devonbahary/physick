@@ -1,7 +1,7 @@
-import { Dimensions } from '@physics/types';
+import { Dimensions } from '@physics/shapes/types';
 import { Body, BodyEvent } from '@physics/Body';
 import { Vectors } from '@physics/Vectors';
-import { Rect } from '@physics/shapes/Rect';
+import { Rect } from '@physics/shapes/rects/Rect';
 import { ContinousCollisionDetection } from '@physics/collisions/ContinousCollisionDetection';
 import { CollisionResolution } from '@physics/collisions/CollisionResolution';
 import { PubSub, PubSubable } from '@physics/PubSub';
@@ -10,6 +10,7 @@ import { QuadTree, QuadTreeConfig } from '@physics/collisions/QuadTree';
 import { Force } from '@physics/Force';
 import { CollisionEvent } from '@physics/collisions/types';
 import { SerializedWorld, Serializer } from '@physics/Serializer';
+import { BoundingBox } from '@physics/shapes/rects/BoundingBox';
 
 type WorldArgs = Dimensions & {
     options?: Partial<WorldOptions> & { quadTreeConfig?: Partial<QuadTreeConfig> };
@@ -91,8 +92,8 @@ export class World implements PubSubable<WorldEvent, WorldEventDataMap> {
         this.forces = this.forces.filter((f) => f.id !== force.id);
     }
 
-    public getBodiesInBoundingBox(rect: Rect): Body[] {
-        return this.quadTree.getBodiesInBoundingBox(rect);
+    public getBodiesInBoundingBox(boundingBox: BoundingBox): Body[] {
+        return this.quadTree.getBodiesInBoundingBox(boundingBox);
     }
 
     public getFrictionOnBody(body: Body): number {
@@ -190,21 +191,14 @@ export class World implements PubSubable<WorldEvent, WorldEventDataMap> {
     private initBoundaries(): void {
         const { width, height } = this;
 
-        const topBorder = new Rect({ width, height: 0 });
-        topBorder.moveTo({ x: width / 2, y: 0 });
+        const rects = [
+            new Rect({ x: width / 2, width, height: 0 }), // top
+            new Rect({ x: width, y: height / 2, width: 0, height }), // right
+            new Rect({ x: width / 2, y: height, width, height: 0 }), // bottom
+            new Rect({ x: 0, y: height / 2, width: 0, height }), // left
+        ];
 
-        const rightBorder = new Rect({ width: 0, height });
-        rightBorder.moveTo({ x: width, y: height / 2 });
-
-        const bottomBorder = new Rect({ width, height: 0 });
-        bottomBorder.moveTo({ x: width / 2, y: height });
-
-        const leftBorder = new Rect({ width: 0, height });
-        leftBorder.moveTo({ x: 0, y: height / 2 });
-
-        const boundaryRects = [topBorder, rightBorder, bottomBorder, leftBorder];
-
-        const boundaryBodies = boundaryRects.map((shape) => new Body({ shape, mass: Infinity }));
+        const boundaryBodies = rects.map((shape) => new Body({ shape, mass: Infinity }));
 
         for (const body of boundaryBodies) {
             this.addBody(body);

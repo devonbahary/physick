@@ -1,11 +1,12 @@
 import { Body } from '@physics/Body';
-import { Circle } from '@physics/shapes/Circle';
-import { Rect } from '@physics/shapes/Rect';
+import { BoundingBox } from '@physics/shapes/rects/BoundingBox';
+import { BoundingCircle } from '@physics/shapes/circles/BoundingCircle';
 import { Shape } from '@physics/shapes/types';
+import { isCircle, isRect } from '@physics/shapes/utilities';
 import { Vectors } from '@physics/Vectors';
 
 export class CollisionDetection {
-    static getMovementBoundingBox(body: Body): Rect | null {
+    static getMovementBoundingBox(body: Body): BoundingBox | null {
         if (!body.isMoving()) return null;
         const {
             x0,
@@ -22,33 +23,25 @@ export class CollisionDetection {
         if (dy > 0) bounds.y1 += dy;
         if (dy < 0) bounds.y0 += dy;
 
-        const width = bounds.x1 - bounds.x0;
-        const height = bounds.y1 - bounds.y0;
-
-        return new Rect({
-            x: bounds.x0 + width / 2,
-            y: bounds.y0 + height / 2,
-            width,
-            height,
-        });
+        return new BoundingBox(bounds);
     }
 
     static hasOverlap(a: Shape, b: Shape): boolean {
-        if (a instanceof Circle) {
-            if (b instanceof Circle) {
+        if (isCircle(a)) {
+            if (isCircle(b)) {
                 return CollisionDetection.getCircleVsCircleOverlap(a, b);
             }
-            if (b instanceof Rect) {
+            if (isRect(b)) {
                 return CollisionDetection.getCircleVsRectOverlap(a, b);
             }
         }
 
-        if (a instanceof Rect) {
-            if (b instanceof Circle) {
+        if (isRect(a)) {
+            if (isCircle(b)) {
                 return CollisionDetection.getCircleVsRectOverlap(b, a);
             }
 
-            if (b instanceof Rect) {
+            if (isRect(b)) {
                 return CollisionDetection.getRectVsRectOverlap(a, b);
             }
         }
@@ -56,14 +49,14 @@ export class CollisionDetection {
         throw new Error(`can't determine overlap for shapes: ${JSON.stringify(a)}, ${JSON.stringify(b)}`);
     }
 
-    private static getCircleVsCircleOverlap(a: Circle, b: Circle): boolean {
+    private static getCircleVsCircleOverlap(a: BoundingCircle, b: BoundingCircle): boolean {
         const diffPos = Vectors.subtract(a, b);
         const radiiLength = a.radius + b.radius;
         return diffPos.x ** 2 + diffPos.y ** 2 <= radiiLength ** 2;
     }
 
     // https://stackoverflow.com/questions/401847/circle-rectangle-collision-detection-intersection
-    private static getCircleVsRectOverlap(circle: Circle, rect: Rect): boolean {
+    private static getCircleVsRectOverlap(circle: BoundingCircle, rect: BoundingBox): boolean {
         const dx = Math.abs(circle.x - rect.x);
         const dy = Math.abs(circle.y - rect.y);
 
@@ -80,7 +73,7 @@ export class CollisionDetection {
         return circleDistanceFromCorner <= circle.radius ** 2;
     }
 
-    private static getRectVsRectOverlap(a: Rect, b: Rect): boolean {
+    private static getRectVsRectOverlap(a: BoundingBox, b: BoundingBox): boolean {
         return a.x0 <= b.x1 && a.x1 >= b.x0 && a.y0 <= b.y1 && a.y1 >= b.y0;
     }
 }

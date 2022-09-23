@@ -1,13 +1,14 @@
 import { v4 as uuid } from 'uuid';
 import { Vector, Vectors } from '@physics/Vectors';
 import { Particle } from '@physics/shapes/Particle';
-import { Shape } from '@physics/shapes/types';
 import { PubSub, PubSubable } from '@physics/PubSub';
 import { CollisionEvent } from '@physics/collisions/types';
+import { Rect } from '@physics/shapes/rects/Rect';
+import { Circle } from '@physics/shapes/circles/Circle';
 
 export type BodyArgs = {
     id?: string;
-    shape: Shape;
+    shape: Rect | Circle;
     mass?: number;
     restitution?: number;
     isSensor?: boolean; // don't collide with other Bodies, but still publish CollisionEvents
@@ -28,7 +29,7 @@ type Publish = PubSub<BodyEvent, BodyEventDataMap>['publish'];
 
 export class Body implements Particle, PubSubable<BodyEvent, BodyEventDataMap> {
     public id: string;
-    public shape: Shape;
+    public shape: Rect | Circle;
     public mass: number;
     public restitution: number;
     public isSensor: boolean;

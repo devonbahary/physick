@@ -1,9 +1,9 @@
 import { Body } from '@physics/Body';
 import { Character } from '@physics/Character';
-import { Circle } from '@physics/shapes/Circle';
-import { Rect } from '@physics/shapes/Rect';
-import { Shape } from '@physics/shapes/types';
-import { Dimensions } from '@physics/types';
+import { BoundingCircle } from '@physics/shapes/circles/BoundingCircle';
+import { Circle } from '@physics/shapes/circles/Circle';
+import { Rect } from '@physics/shapes/rects/Rect';
+import { Dimensions, Shape } from '@physics/shapes/types';
 import { World } from '@physics/World';
 import { Renderer } from '@renderer/Renderer';
 import { Controls } from 'src/game/Controls';

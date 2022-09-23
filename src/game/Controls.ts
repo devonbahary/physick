@@ -1,7 +1,7 @@
 import { Character } from '@physics/Character';
 import { ConstantForce } from '@physics/Force';
 import { PubSub, PubSubable } from '@physics/PubSub';
-import { Circle } from '@physics/shapes/Circle';
+import { BoundingCircle } from '@physics/shapes/circles/BoundingCircle';
 import { Vector } from '@physics/Vectors';
 import { World } from '@physics/World';
 import { Renderer, RendererEvent } from '@renderer/Renderer';
@@ -95,8 +95,12 @@ export class Controls implements PubSubable<ControlsEvent, ControlsEventDataMap>
     private initRendererSubscriptions(renderer: Renderer): void {
         renderer.subscribe(RendererEvent.ClickSprite, (sprite) => console.log(sprite.body));
         renderer.subscribe(RendererEvent.ClickWorld, (pos) => {
-            const shape = new Circle({ ...pos, radius: 50 });
-            const force = new ConstantForce({ shape, magnitude: 5, expiration: { maxApplications: 1 } });
+            const shape = new BoundingCircle({ ...pos, radius: 50 });
+            const force = new ConstantForce({
+                boundingCircle: shape,
+                magnitude: 5,
+                expiration: { maxApplications: 1 },
+            });
             this.world.addForce(force);
         });
     }

@@ -1,11 +1,11 @@
 import { Particle } from '@physics/shapes/Particle';
-import { Dimensions } from '@physics/types';
-import { Spatial } from '@physics/shapes/types';
 import { Vector } from '@physics/Vectors';
+import { Dimensions } from '@physics/shapes/types';
+import { BoundingBox } from '@physics/shapes/rects/BoundingBox';
 
 export type RectArgs = Partial<Vector> & Dimensions;
 
-export class Rect extends Particle implements Spatial {
+export class Rect extends Particle implements BoundingBox {
     public width: number;
     public height: number;
 

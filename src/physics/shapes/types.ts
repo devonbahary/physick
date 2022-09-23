@@ -1,8 +1,12 @@
-import { Circle } from '@physics/shapes/Circle';
-import { Rect } from '@physics/shapes/Rect';
-import { Dimensions } from '@physics/types';
+import { BoundingBox } from '@physics/shapes/rects/BoundingBox';
+import { BoundingCircle } from '@physics/shapes/circles/BoundingCircle';
 
-export type Shape = Rect | Circle;
+export type Dimensions = {
+    width: number;
+    height: number;
+};
+
+export type Shape = BoundingBox | BoundingCircle;
 
 export type Spatial = Dimensions & {
     x: number;
