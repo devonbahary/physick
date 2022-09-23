@@ -1,6 +1,5 @@
 import { Body, BodyEvent } from '@physics/Body';
 import { Rect } from '@physics/shapes/Rect';
-import { Shape } from '@physics/shapes/types';
 import { Dimensions } from '@physics/types';
 import { World, WorldEvent } from '@physics/World';
 import { CollisionDetection } from '@physics/collisions/CollisionDetection';
@@ -20,21 +19,26 @@ const DEFAULT_CONFIG: QuadTreeConfig = {
 };
 
 abstract class Node {
-    public bodies: Body[] = [];
+    constructor(public rect: Rect) {}
 
     abstract getBodiesInBoundingBox(rect: Rect): Body[];
 
     abstract addBody(body: Body): void;
+
+    protected overlapsWith(rect: Rect): boolean {
+        return CollisionDetection.hasOverlap(this.rect, rect);
+    }
 }
 
-class Leaf implements Node {
+class Leaf extends Node {
     public bodies: Body[] = [];
 
-    constructor(public rect: Rect, private config: QuadTreeConfig) {}
+    constructor(rect: Rect, private config: QuadTreeConfig) {
+        super(rect);
+    }
 
     getBodiesInBoundingBox(rect: Rect): Body[] {
-        if (!this.overlapsWith(rect)) return [];
-        return this.bodies.filter((body) => CollisionDetection.hasOverlap(this.rect, body.shape));
+        return this.overlapsWith(rect) ? this.bodies : [];
     }
 
     addBody(body: Body): void {
@@ -54,15 +58,13 @@ class Leaf implements Node {
             this.rect.height / 4 >= this.config.minLeafDimensions.height
         );
     }
-
-    private overlapsWith(shape: Shape): boolean {
-        return CollisionDetection.hasOverlap(this.rect, shape);
-    }
 }
 
-class InternalNode implements Node {
+class InternalNode extends Node {
     private children: (InternalNode | Leaf)[];
-    constructor(private rect: Rect, private config: QuadTreeConfig) {
+
+    constructor(rect: Rect, private config: QuadTreeConfig) {
+        super(rect);
         this.children = InternalNode.initLeaves(rect, config);
     }
 
@@ -124,6 +126,7 @@ class InternalNode implements Node {
 
     getBodiesInBoundingBox(rect: Rect): Body[] {
         if (!this.overlapsWith(rect)) return [];
+
         const uniqueBodiesSet = this.children.reduce<Set<Body>>((acc, child) => {
             const bodies = child.getBodiesInBoundingBox(rect);
             for (const body of bodies) {
@@ -161,6 +164,7 @@ class InternalNode implements Node {
                 }
                 return child;
             }
+
             if (child.shouldCollapse()) {
                 const leaf = new Leaf(child.rect, this.config);
 
@@ -170,16 +174,13 @@ class InternalNode implements Node {
 
                 return leaf;
             }
+
             return child;
         });
     }
 
     shouldCollapse(): boolean {
         return this.bodies.length <= this.config.maxBodiesInLeaf;
-    }
-
-    private overlapsWith(rect: Rect): boolean {
-        return CollisionDetection.hasOverlap(this.rect, rect);
     }
 }
 
