@@ -105,9 +105,9 @@ export class Body implements Particle, PubSubable<BodyEvent, BodyEventDataMap> {
         this.shape.moveTo(pos);
     }
 
-    public move(dir: Vector): void {
+    public move(movement: Vector): void {
         if (this.isSensor) return;
-        this.shape.move(dir);
+        this.shape.move(movement);
         this.publish(BodyEvent.Move, this);
     }
 
