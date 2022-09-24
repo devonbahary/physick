@@ -1,6 +1,5 @@
 import { Body } from '@physics/Body';
 import { Character } from '@physics/Character';
-import { BoundingCircle } from '@physics/shapes/circles/BoundingCircle';
 import { Circle } from '@physics/shapes/circles/Circle';
 import { Rect } from '@physics/shapes/rects/Rect';
 import { Dimensions, Shape } from '@physics/shapes/types';
@@ -135,12 +134,10 @@ const seedDefault = (playerBody: Body): [World, Renderer] => {
     world.addBody(
         new Body({
             shape: new Circle({ radius: 20, x: 60, y: 90 }),
-            mass: Infinity,
         }),
     );
     const rectBody = new Body({
         shape: new Rect({ width: 40, height: 40 }),
-        mass: Infinity,
     });
     rectBody.moveTo({ x: 180, y: 100 });
     world.addBody(rectBody);
