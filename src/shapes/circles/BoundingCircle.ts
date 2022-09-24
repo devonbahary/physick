@@ -1,5 +1,5 @@
-import { Spatial } from '@physics/shapes/types';
-import { BoundingBox } from '@physics/shapes/rects/BoundingBox';
+import { Spatial } from '../types';
+import { BoundingBox } from '../rects/BoundingBox';
 
 type BoundingCircleArgs = {
     x: number;

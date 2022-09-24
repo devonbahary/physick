@@ -1,9 +1,9 @@
-import { Body } from '@physics/Body';
-import { BoundingBox } from '@physics/shapes/rects/BoundingBox';
-import { BoundingCircle } from '@physics/shapes/circles/BoundingCircle';
-import { Shape } from '@physics/shapes/types';
-import { isCircle, isRect } from '@physics/shapes/utilities';
-import { Vectors } from '@physics/Vectors';
+import { Body } from '../Body';
+import { BoundingBox } from '../shapes/rects/BoundingBox';
+import { BoundingCircle } from '../shapes/circles/BoundingCircle';
+import { Shape } from '../shapes/types';
+import { isCircle, isRect } from '../shapes/utilities';
+import { Vectors } from '../Vectors';
 
 export class CollisionDetection {
     static getMovementBoundingBox(body: Body): BoundingBox | null {

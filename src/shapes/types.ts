@@ -1,5 +1,5 @@
-import { BoundingBox } from '@physics/shapes/rects/BoundingBox';
-import { BoundingCircle } from '@physics/shapes/circles/BoundingCircle';
+import { BoundingBox } from './rects/BoundingBox';
+import { BoundingCircle } from './circles/BoundingCircle';
 
 export type Dimensions = {
     width: number;

@@ -1,8 +1,8 @@
-import { Rect, RectArgs } from '@physics/shapes/rects/Rect';
-import { Vector } from '@physics/Vectors';
-import { Circle, CircleArgs } from '@physics/shapes/circles/Circle';
-import { Body, BodyArgs } from '@physics/Body';
-import { World } from '@physics/World';
+import { Rect, RectArgs } from './shapes/rects/Rect';
+import { Vector } from './Vectors';
+import { Circle, CircleArgs } from './shapes/circles/Circle';
+import { Body, BodyArgs } from './Body';
+import { World } from './World';
 
 export type SerializedWorld = {
     bodies: SerializedBody[];

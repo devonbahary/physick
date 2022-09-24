@@ -1,4 +1,4 @@
-import { Spatial } from '@physics/shapes/types';
+import { Spatial } from '../types';
 
 type BoundingBoxArgs = Pick<Spatial, 'x0' | 'x1' | 'y0' | 'y1'>;
 

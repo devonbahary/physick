@@ -1,7 +1,7 @@
-import { Particle } from '@physics/shapes/Particle';
-import { Vector } from '@physics/Vectors';
-import { BoundingBox } from '@physics/shapes/rects/BoundingBox';
-import { BoundingCircle } from '@physics/shapes/circles/BoundingCircle';
+import { Particle } from '../Particle';
+import { Vector } from '../../Vectors';
+import { BoundingBox } from '../rects/BoundingBox';
+import { BoundingCircle } from './BoundingCircle';
 
 export type CircleArgs = Partial<Vector> & {
     radius: number;

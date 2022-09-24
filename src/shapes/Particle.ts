@@ -1,4 +1,4 @@
-import { Vector } from '@physics/Vectors';
+import { Vector } from '../Vectors';
 
 export class Particle implements Vector {
     public velocity: Vector = { x: 0, y: 0 };

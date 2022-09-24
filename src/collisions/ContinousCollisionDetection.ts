@@ -1,13 +1,13 @@
-import { Body } from '@physics/Body';
-import { Circle } from '@physics/shapes/circles/Circle';
-import { Rect } from '@physics/shapes/rects/Rect';
-import { Particle } from '@physics/shapes/Particle';
-import { HorzLineSegment, LineSegment, LineSegments, VertLineSegment } from '@physics/shapes/LineSegments';
-import { Vector, Vectors } from '@physics/Vectors';
-import { isInRange, quadratic, roundForFloatingPoint } from '@physics/utilities';
-import { Collision, CollisionEvent } from '@physics/collisions/types';
-import { CollisionDetection } from '@physics/collisions/CollisionDetection';
-import { World } from '@physics/World';
+import { Body } from '../Body';
+import { Circle } from '../shapes/circles/Circle';
+import { Rect } from '../shapes/rects/Rect';
+import { Particle } from '../shapes/Particle';
+import { HorzLineSegment, LineSegment, LineSegments, VertLineSegment } from '../shapes/LineSegments';
+import { Vector, Vectors } from '../Vectors';
+import { isInRange, quadratic, roundForFloatingPoint } from '../utilities';
+import { Collision, CollisionEvent } from '../collisions/types';
+import { CollisionDetection } from '../collisions/CollisionDetection';
+import { World } from '../World';
 
 const isCollisionInThisTimestep = (t: number, frames: number): boolean => {
     const rounded = roundForFloatingPoint(t);

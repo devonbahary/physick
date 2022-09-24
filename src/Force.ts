@@ -1,8 +1,8 @@
 import { v4 as uuid } from 'uuid';
-import { World } from '@physics/World';
-import { CollisionDetection } from '@physics/collisions/CollisionDetection';
-import { Vector, Vectors } from '@physics/Vectors';
-import { BoundingCircle } from '@physics/shapes/circles/BoundingCircle';
+import { World } from './World';
+import { CollisionDetection } from './collisions/CollisionDetection';
+import { Vector, Vectors } from './Vectors';
+import { BoundingCircle } from './shapes/circles/BoundingCircle';
 
 export type Force = ConstantForce | IntervalForce;
 

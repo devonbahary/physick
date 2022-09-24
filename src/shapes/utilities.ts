@@ -1,6 +1,6 @@
-import { BoundingBox } from '@physics/shapes/rects/BoundingBox';
-import { BoundingCircle } from '@physics/shapes/circles/BoundingCircle';
-import { Shape } from '@physics/shapes/types';
+import { BoundingBox } from './rects/BoundingBox';
+import { BoundingCircle } from './circles/BoundingCircle';
+import { Shape } from './types';
 
 export const isRect = (rect: Shape): rect is BoundingBox => {
     for (const prop of ['x0', 'x1', 'y0', 'y1']) {

@@ -1,3 +1,13 @@
-import { Game } from '@game/Game';
-
-new Game().loop();
+export * from './Body';
+export * from './shapes/circles/BoundingCircle';
+export * from './shapes/circles/Circle';
+export * from './shapes/rects/BoundingBox';
+export * from './shapes/rects/Rect';
+export * from './Character';
+export * from './Force';
+export * from './PubSub';
+export * from './World';
+export * from './Vectors';
+export * from './shapes/types';
+export * from './utilities';
+export * from './Serializer';

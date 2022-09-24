@@ -1,10 +1,10 @@
 import { v4 as uuid } from 'uuid';
-import { Vector, Vectors } from '@physics/Vectors';
-import { Particle } from '@physics/shapes/Particle';
-import { PubSub, PubSubable } from '@physics/PubSub';
-import { CollisionEvent } from '@physics/collisions/types';
-import { Rect } from '@physics/shapes/rects/Rect';
-import { Circle } from '@physics/shapes/circles/Circle';
+import { Vector, Vectors } from './Vectors';
+import { Particle } from './shapes/Particle';
+import { PubSub, PubSubable } from './PubSub';
+import { CollisionEvent } from './collisions/types';
+import { Rect } from './shapes/rects/Rect';
+import { Circle } from './shapes/circles/Circle';
 
 export type BodyArgs = {
     id?: string;

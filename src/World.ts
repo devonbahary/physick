@@ -1,16 +1,16 @@
-import { Dimensions } from '@physics/shapes/types';
-import { Body, BodyEvent } from '@physics/Body';
-import { Vectors } from '@physics/Vectors';
-import { Rect } from '@physics/shapes/rects/Rect';
-import { ContinousCollisionDetection } from '@physics/collisions/ContinousCollisionDetection';
-import { CollisionResolution } from '@physics/collisions/CollisionResolution';
-import { PubSub, PubSubable } from '@physics/PubSub';
-import { framesInTimeDelta, roundForFloatingPoint } from '@physics/utilities';
-import { QuadTree, QuadTreeConfig } from '@physics/collisions/QuadTree';
-import { Force } from '@physics/Force';
-import { CollisionEvent } from '@physics/collisions/types';
-import { SerializedWorld, Serializer } from '@physics/Serializer';
-import { BoundingBox } from '@physics/shapes/rects/BoundingBox';
+import { Dimensions } from './shapes/types';
+import { Body, BodyEvent } from './Body';
+import { Vectors } from './Vectors';
+import { Rect } from './shapes/rects/Rect';
+import { ContinousCollisionDetection } from './collisions/ContinousCollisionDetection';
+import { CollisionResolution } from './collisions/CollisionResolution';
+import { PubSub, PubSubable } from './PubSub';
+import { framesInTimeDelta, roundForFloatingPoint } from './utilities';
+import { QuadTree, QuadTreeConfig } from './QuadTree';
+import { Force } from './Force';
+import { CollisionEvent } from './collisions/types';
+import { SerializedWorld, Serializer } from './Serializer';
+import { BoundingBox } from './shapes/rects/BoundingBox';
 
 type WorldArgs = Dimensions & {
     options?: Partial<WorldOptions> & { quadTreeConfig?: Partial<QuadTreeConfig> };

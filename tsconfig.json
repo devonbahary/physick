@@ -7,12 +7,13 @@
         "noImplicitThis": true,
         "strictNullChecks": true,
         "baseUrl": ".",
+        "declaration": true,
         "strictPropertyInitialization": true,
+        "module": "commonjs",
+        "sourceMap": true,
         "paths": {
-            "@game/*": ["src/game/*"],
-            "@physics/*": ["src/physics/*"],
-            "@renderer/*": ["src/renderer/*"]
+            "@physick/*": ["src/*"]
         }
     },
-    "include": ["./src/**/*", "./babel.config.js"]
+    "include": ["./src/**/*"]
 }

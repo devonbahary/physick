@@ -1,4 +1,4 @@
-import { isInRange } from '@physics/utilities';
+import { isInRange } from '../utilities';
 
 export type LineSegment = HorzLineSegment | VertLineSegment;
 

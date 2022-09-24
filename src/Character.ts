@@ -1,10 +1,10 @@
-import { Body } from '@physics/Body';
-import { Vector, Vectors } from '@physics/Vectors';
-import { roundForFloatingPoint } from '@physics/utilities';
-import { ContinousCollisionDetection } from '@physics/collisions/ContinousCollisionDetection';
-import { World } from '@physics/World';
-import { CollisionResolution } from '@physics/collisions/CollisionResolution';
-import { CollisionEvent } from '@physics/collisions/types';
+import { Body } from './Body';
+import { Vector, Vectors } from './Vectors';
+import { roundForFloatingPoint } from './utilities';
+import { ContinousCollisionDetection } from './collisions/ContinousCollisionDetection';
+import { World } from './World';
+import { CollisionResolution } from './collisions/CollisionResolution';
+import { CollisionEvent } from './collisions/types';
 
 type CharacterOptions = {
     framesToTopSpeed: number;

@@ -1,8 +1,8 @@
-import { Body, BodyEvent } from '@physics/Body';
-import { Dimensions } from '@physics/shapes/types';
-import { World, WorldEvent } from '@physics/World';
-import { CollisionDetection } from '@physics/collisions/CollisionDetection';
-import { BoundingBox } from '@physics/shapes/rects/BoundingBox';
+import { Body, BodyEvent } from './Body';
+import { Dimensions } from './shapes/types';
+import { World, WorldEvent } from './World';
+import { CollisionDetection } from './collisions/CollisionDetection';
+import { BoundingBox } from './shapes/rects/BoundingBox';
 
 export type QuadTreeConfig = {
     maxBodiesInLeaf: number;

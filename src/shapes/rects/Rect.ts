@@ -1,7 +1,7 @@
-import { Particle } from '@physics/shapes/Particle';
-import { Vector } from '@physics/Vectors';
-import { Dimensions } from '@physics/shapes/types';
-import { BoundingBox } from '@physics/shapes/rects/BoundingBox';
+import { Particle } from '../Particle';
+import { Vector } from '../../Vectors';
+import { Dimensions } from '../types';
+import { BoundingBox } from '../rects/BoundingBox';
 
 export type RectArgs = Partial<Vector> & Dimensions;
 

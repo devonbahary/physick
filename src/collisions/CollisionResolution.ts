@@ -1,6 +1,6 @@
-import { Body } from '@physics/Body';
-import { CollisionEvent } from '@physics/collisions/types';
-import { Vector, Vectors } from '@physics/Vectors';
+import { Body } from '../Body';
+import { CollisionEvent } from '../collisions/types';
+import { Vector, Vectors } from '../Vectors';
 
 export class CollisionResolution {
     static resolve(collisionEvent: CollisionEvent): void {
