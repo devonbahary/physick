@@ -1,4 +1,3 @@
 build
-**/generated/**
 .eslintrc.js
 webpack.config.js
