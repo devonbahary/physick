@@ -12,7 +12,7 @@ type CharacterOptions = {
 };
 
 const DEFAULT_CHARACTER_OPTIONS: CharacterOptions = {
-    framesToTopSpeed: 6,
+    framesToTopSpeed: 5,
     topSpeed: 4,
 };
 
