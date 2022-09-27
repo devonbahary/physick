@@ -5,7 +5,7 @@ import { Rect } from './shapes/rects/Rect';
 import { ContinousCollisionDetection } from './collisions/ContinousCollisionDetection';
 import { CollisionResolution } from './collisions/CollisionResolution';
 import { PubSub, PubSubable } from './PubSub';
-import { framesInTimeDelta, roundForFloatingPoint } from './utilities';
+import { roundForFloatingPoint } from './utilities';
 import { QuadTree, QuadTreeConfig } from './QuadTree';
 import { Force } from './Force';
 import { CollisionEvent } from './collisions/types';
@@ -68,9 +68,8 @@ export class World implements PubSubable<WorldEvent, WorldEventDataMap> {
     }
 
     public update(dt: number): void {
-        const frames = framesInTimeDelta(dt);
         this.updateForces(dt);
-        this.updateBodies(frames);
+        this.updateBodies(dt);
         this.quadTree.update();
     }
 
@@ -120,19 +119,19 @@ export class World implements PubSubable<WorldEvent, WorldEventDataMap> {
         this.forces = this.forces.filter((f) => !f.shouldRemove());
     }
 
-    private updateBodies(frames: number): void {
+    private updateBodies(dt: number): void {
         for (const body of this.bodies) {
             // make sure each potential collision pair have both had friction applied before consideration
             this.applyFriction(body);
         }
 
         for (const body of this.bodies) {
-            if (body.isMoving()) this.updateBodyMovement(body, frames);
+            if (body.isMoving()) this.updateBodyMovement(body, dt);
         }
     }
 
-    private updateBodyMovement(body: Body, frames: number, ignoreBodyIds = new Set<string>()): void {
-        const collisionEvent = ContinousCollisionDetection.getCollisionEvent(body, this, frames, ignoreBodyIds);
+    private updateBodyMovement(body: Body, dt: number, ignoreBodyIds = new Set<string>()): void {
+        const collisionEvent = ContinousCollisionDetection.getCollisionEvent(body, this, dt, ignoreBodyIds);
 
         if (collisionEvent) {
             // because we traverse bodies in no particular order, it's possible that we accidentally consider a false
@@ -148,7 +147,7 @@ export class World implements PubSubable<WorldEvent, WorldEventDataMap> {
                     // recognize sensor collision but do not resolve collision; continue on
                     ignoreBodyIds.add(collisionBody.id);
 
-                    this.updateBodyMovement(body, frames, ignoreBodyIds);
+                    this.updateBodyMovement(body, dt, ignoreBodyIds);
                 } else {
                     CollisionResolution.resolve(collisionEvent);
 
@@ -158,7 +157,7 @@ export class World implements PubSubable<WorldEvent, WorldEventDataMap> {
                 }
             }
         } else {
-            body.move(Vectors.resize(body.velocity, frames * body.speed));
+            body.move(Vectors.resize(body.velocity, dt * body.speed));
         }
     }
 

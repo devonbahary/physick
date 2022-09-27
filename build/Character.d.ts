@@ -13,8 +13,8 @@ export declare class Character {
     get topSpeed(): number;
     get framesToTopSpeed(): number;
     get acceleration(): number;
-    update(frames: number): void;
-    move(world: World, direction: Vector, frames: number): void;
+    update(dt: number): void;
+    move(world: World, direction: Vector, dt: number): void;
     private redirectAroundCollisionBody;
     private getAccelerationWithMomentum;
     private getMomentum;

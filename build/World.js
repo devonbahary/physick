@@ -68,9 +68,8 @@ var World = /** @class */ (function () {
         this.initBoundaries();
     }
     World.prototype.update = function (dt) {
-        var frames = (0, utilities_1.framesInTimeDelta)(dt);
         this.updateForces(dt);
-        this.updateBodies(frames);
+        this.updateBodies(dt);
         this.quadTree.update();
     };
     World.prototype.addBody = function (body) {
@@ -112,7 +111,7 @@ var World = /** @class */ (function () {
         }
         this.forces = this.forces.filter(function (f) { return !f.shouldRemove(); });
     };
-    World.prototype.updateBodies = function (frames) {
+    World.prototype.updateBodies = function (dt) {
         for (var _i = 0, _a = this.bodies; _i < _a.length; _i++) {
             var body = _a[_i];
             // make sure each potential collision pair have both had friction applied before consideration
@@ -121,12 +120,12 @@ var World = /** @class */ (function () {
         for (var _b = 0, _c = this.bodies; _b < _c.length; _b++) {
             var body = _c[_b];
             if (body.isMoving())
-                this.updateBodyMovement(body, frames);
+                this.updateBodyMovement(body, dt);
         }
     };
-    World.prototype.updateBodyMovement = function (body, frames, ignoreBodyIds) {
+    World.prototype.updateBodyMovement = function (body, dt, ignoreBodyIds) {
         if (ignoreBodyIds === void 0) { ignoreBodyIds = new Set(); }
-        var collisionEvent = ContinousCollisionDetection_1.ContinousCollisionDetection.getCollisionEvent(body, this, frames, ignoreBodyIds);
+        var collisionEvent = ContinousCollisionDetection_1.ContinousCollisionDetection.getCollisionEvent(body, this, dt, ignoreBodyIds);
         if (collisionEvent) {
             // because we traverse bodies in no particular order, it's possible that we accidentally consider a false
             // collision of a slower-moving body into a faster-moving body along the collision vector
@@ -138,7 +137,7 @@ var World = /** @class */ (function () {
                     this.onCollision(collisionEvent);
                     // recognize sensor collision but do not resolve collision; continue on
                     ignoreBodyIds.add(collisionBody.id);
-                    this.updateBodyMovement(body, frames, ignoreBodyIds);
+                    this.updateBodyMovement(body, dt, ignoreBodyIds);
                 }
                 else {
                     CollisionResolution_1.CollisionResolution.resolve(collisionEvent);
@@ -148,7 +147,7 @@ var World = /** @class */ (function () {
             }
         }
         else {
-            body.move(Vectors_1.Vectors.resize(body.velocity, frames * body.speed));
+            body.move(Vectors_1.Vectors.resize(body.velocity, dt * body.speed));
         }
     };
     // if the force through 1+ non-fixed bodies is stopped at a fixed body, move the last non-fixed body in the chain

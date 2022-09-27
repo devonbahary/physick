@@ -28,9 +28,9 @@ var LineSegments_1 = require("../shapes/LineSegments");
 var Vectors_1 = require("../Vectors");
 var utilities_1 = require("../utilities");
 var CollisionDetection_1 = require("../collisions/CollisionDetection");
-var isCollisionInThisTimestep = function (t, frames) {
+var isCollisionInThisTimestep = function (t, dt) {
     var rounded = (0, utilities_1.roundForFloatingPoint)(t);
-    return (0, utilities_1.isInRange)(0, rounded, frames);
+    return (0, utilities_1.isInRange)(0, rounded, dt);
 };
 var isMovingTowards = function (a, b) {
     var diffVector = Vectors_1.Vectors.subtract(b, a);
@@ -61,7 +61,7 @@ var ContinousCollisionDetection = /** @class */ (function () {
         }
         return !Vectors_1.Vectors.isLarger(collisionBodyMovementOnCollisionVector, movingBodyMovementOnCollisionVector);
     };
-    ContinousCollisionDetection.getCollisionEvent = function (movingBody, world, frames, ignoreBodyIds) {
+    ContinousCollisionDetection.getCollisionEvent = function (movingBody, world, dt, ignoreBodyIds) {
         if (ignoreBodyIds === void 0) { ignoreBodyIds = new Set(); }
         var movementBoundingBox = CollisionDetection_1.CollisionDetection.getMovementBoundingBox(movingBody);
         if (!movementBoundingBox)
@@ -71,7 +71,7 @@ var ContinousCollisionDetection = /** @class */ (function () {
         return potentialCollisionBodies.reduce(function (earliest, collisionBody) {
             if (movingBody === collisionBody)
                 return earliest;
-            var collision = ContinousCollisionDetection.getCollision(movingBody, collisionBody, frames);
+            var collision = ContinousCollisionDetection.getCollision(movingBody, collisionBody, dt);
             if (!collision)
                 return earliest;
             if (earliest === null || earliest.timeOfCollision > collision.timeOfCollision) {
@@ -80,22 +80,22 @@ var ContinousCollisionDetection = /** @class */ (function () {
             return earliest;
         }, null);
     };
-    ContinousCollisionDetection.getCollision = function (a, b, frames) {
+    ContinousCollisionDetection.getCollision = function (a, b, dt) {
         if (a.shape instanceof Circle_1.Circle) {
             if (b.shape instanceof Circle_1.Circle)
-                return ContinousCollisionDetection.getCircleVsCircleCollision(a.shape, b.shape, frames);
+                return ContinousCollisionDetection.getCircleVsCircleCollision(a.shape, b.shape, dt);
             if (b.shape instanceof Rect_1.Rect)
-                return ContinousCollisionDetection.getCircleVsRectCollision(a.shape, b.shape, frames);
+                return ContinousCollisionDetection.getCircleVsRectCollision(a.shape, b.shape, dt);
         }
         if (a.shape instanceof Rect_1.Rect) {
             if (b.shape instanceof Circle_1.Circle)
-                return ContinousCollisionDetection.getRectVsCircleCollision(a.shape, b.shape, frames);
+                return ContinousCollisionDetection.getRectVsCircleCollision(a.shape, b.shape, dt);
             if (b.shape instanceof Rect_1.Rect)
-                return ContinousCollisionDetection.getRectVsRectCollision(a.shape, b.shape, frames);
+                return ContinousCollisionDetection.getRectVsRectCollision(a.shape, b.shape, dt);
         }
         return null;
     };
-    ContinousCollisionDetection.getCircleVsCircleCollision = function (a, b, frames) {
+    ContinousCollisionDetection.getCircleVsCircleCollision = function (a, b, dt) {
         // don't consider circles not even moving in the direction of another circle
         if (!isMovingTowards(a, b))
             return null;
@@ -109,7 +109,7 @@ var ContinousCollisionDetection = /** @class */ (function () {
         var coefficientC = Math.pow(diffX, 2) + Math.pow(diffY, 2) - Math.pow((radiusA + radiusB), 2);
         var timesOfCollision = (0, utilities_1.quadratic)(coefficientA, coefficientB, coefficientC);
         return timesOfCollision.reduce(function (earliest, t) {
-            if (!isCollisionInThisTimestep(t, frames))
+            if (!isCollisionInThisTimestep(t, dt))
                 return earliest;
             var aAtTimeOfCollision = new Particle_1.Particle(a.x + dx * t, a.y + dy * t);
             aAtTimeOfCollision.setVelocity(a.velocity);
@@ -126,13 +126,13 @@ var ContinousCollisionDetection = /** @class */ (function () {
         }, null);
     };
     // https://gamedev.stackexchange.com/questions/65814/2d-rectangle-circle-continuous-collision-detection
-    ContinousCollisionDetection.getCircleVsRectCollision = function (circle, rect, frames) {
+    ContinousCollisionDetection.getCircleVsRectCollision = function (circle, rect, dt) {
         var radius = circle.radius, _a = circle.velocity, dx = _a.x, dy = _a.y;
         var x0 = rect.x0, x1 = rect.x1, y0 = rect.y0, y1 = rect.y1;
         // consider circle collision into each rect side
         var sideCollisions = [];
         var addSideCollision = function (circle, side, collisionVector) {
-            var timeOfCollision = ContinousCollisionDetection.getPointVsLineTimeOfCollision(circle, side, frames);
+            var timeOfCollision = ContinousCollisionDetection.getPointVsLineTimeOfCollision(circle, side, dt);
             if (timeOfCollision !== null) {
                 sideCollisions.push({
                     timeOfCollision: timeOfCollision,
@@ -163,7 +163,7 @@ var ContinousCollisionDetection = /** @class */ (function () {
         var corners = [topLeftCorner, topRightCorner, bottomRightCorner, bottomLeftCorner];
         var cornerCollisions = corners.reduce(function (collisions, corner) {
             if (isMovingTowards(circle, corner)) {
-                var collision = ContinousCollisionDetection.getCircleVsCircleCollision(circle, corner, frames);
+                var collision = ContinousCollisionDetection.getCircleVsCircleCollision(circle, corner, dt);
                 if (collision)
                     collisions.push(collision);
             }
@@ -172,14 +172,14 @@ var ContinousCollisionDetection = /** @class */ (function () {
         return getEarliestCollision(__spreadArray(__spreadArray([], sideCollisions, true), cornerCollisions, true));
     };
     // https://gamedev.stackexchange.com/questions/65814/2d-rectangle-circle-continuous-collision-detection
-    ContinousCollisionDetection.getRectVsCircleCollision = function (rect, circle, frames) {
+    ContinousCollisionDetection.getRectVsCircleCollision = function (rect, circle, dt) {
         var x0 = rect.x0, x1 = rect.x1, y0 = rect.y0, y1 = rect.y1, velocity = rect.velocity;
         var dx = velocity.x, dy = velocity.y;
         var radius = circle.radius;
         // consider rect side collisions into the circle
         var sideCollisions = [];
         var addSideCollision = function (point, side, collisionVector) {
-            var timeOfCollision = ContinousCollisionDetection.getPointVsLineTimeOfCollision(point, side, frames);
+            var timeOfCollision = ContinousCollisionDetection.getPointVsLineTimeOfCollision(point, side, dt);
             if (timeOfCollision !== null) {
                 sideCollisions.push({
                     timeOfCollision: timeOfCollision,
@@ -212,7 +212,7 @@ var ContinousCollisionDetection = /** @class */ (function () {
         var cornerCollisions = corners.reduce(function (collisions, corner) {
             if (isMovingTowards(point, corner)) {
                 corner.setVelocity(velocity);
-                var collision = ContinousCollisionDetection.getCircleVsCircleCollision(corner, circle, frames);
+                var collision = ContinousCollisionDetection.getCircleVsCircleCollision(corner, circle, dt);
                 if (collision)
                     collisions.push(collision);
             }
@@ -221,10 +221,10 @@ var ContinousCollisionDetection = /** @class */ (function () {
         return getEarliestCollision(__spreadArray(__spreadArray([], sideCollisions, true), cornerCollisions, true));
     };
     // https://www.emanueleferonato.com/2021/10/21/understanding-physics-continuous-collision-detection-using-swept-aabb-method-and-minkowski-sum/
-    ContinousCollisionDetection.getRectVsRectCollision = function (a, b, frames) {
+    ContinousCollisionDetection.getRectVsRectCollision = function (a, b, dt) {
         var collisions = [];
         var addSideCollision = function (minkowskiCollisionSide, actualCollisionSide, getMovingSideAtTimeOfCollision, collisionVector) {
-            var timeOfCollision = ContinousCollisionDetection.getPointVsLineTimeOfCollision(a, minkowskiCollisionSide, frames);
+            var timeOfCollision = ContinousCollisionDetection.getPointVsLineTimeOfCollision(a, minkowskiCollisionSide, dt);
             if (timeOfCollision !== null) {
                 var movingSideAtTimeOfCollision = getMovingSideAtTimeOfCollision(timeOfCollision);
                 var lineSegmentContact = LineSegments_1.LineSegments.getOverlappingSegment(actualCollisionSide, movingSideAtTimeOfCollision);
@@ -303,14 +303,14 @@ var ContinousCollisionDetection = /** @class */ (function () {
         }
         return getEarliestCollision(collisions);
     };
-    ContinousCollisionDetection.getPointVsLineTimeOfCollision = function (point, line, frames) {
+    ContinousCollisionDetection.getPointVsLineTimeOfCollision = function (point, line, dt) {
         var pointX = point.x, pointY = point.y, _a = point.velocity, dx = _a.x, dy = _a.y;
         if (line instanceof LineSegments_1.HorzLineSegment) {
             if (!dy)
                 return null;
             var x0 = line.x0, x1 = line.x1, lineY = line.y;
             var t = (lineY - pointY) / dy;
-            if (isCollisionInThisTimestep(t, frames)) {
+            if (isCollisionInThisTimestep(t, dt)) {
                 var pointXAtTimeOfCollision = pointX + dx * t;
                 if ((0, utilities_1.isInRange)(x0, pointXAtTimeOfCollision, x1))
                     return t;
@@ -321,7 +321,7 @@ var ContinousCollisionDetection = /** @class */ (function () {
                 return null;
             var lineX = line.x, y0 = line.y0, y1 = line.y1;
             var t = (lineX - pointX) / dx;
-            if (isCollisionInThisTimestep(t, frames)) {
+            if (isCollisionInThisTimestep(t, dt)) {
                 var pointYAtTimeOfCollision = pointY + dy * t;
                 if ((0, utilities_1.isInRange)(y0, pointYAtTimeOfCollision, y1))
                     return t;

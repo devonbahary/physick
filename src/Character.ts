@@ -51,11 +51,11 @@ export class Character {
         return this.topSpeed / this.framesToTopSpeed;
     }
 
-    update(frames: number): void {
-        this.updateMomentum(frames);
+    update(dt: number): void {
+        this.updateMomentum(dt);
     }
 
-    move(world: World, direction: Vector, frames: number): void {
+    move(world: World, direction: Vector, dt: number): void {
         if (!Vectors.hasMagnitude(direction)) return;
 
         this.momentum.heading = direction;
@@ -71,7 +71,7 @@ export class Character {
             this.body.setVelocity(Vectors.resize(this.body.velocity, this.topSpeed));
         }
 
-        const collisionEvent = ContinousCollisionDetection.getCollisionEvent(this.body, world, frames);
+        const collisionEvent = ContinousCollisionDetection.getCollisionEvent(this.body, world, dt);
         if (collisionEvent) this.redirectAroundCollisionBody(collisionEvent);
     }
 
@@ -94,11 +94,11 @@ export class Character {
         return Math.min(this.topSpeed, (this.topSpeed * this.momentum.consecutiveFrames) / this.framesToTopSpeed);
     }
 
-    private updateMomentum(frames: number): void {
+    private updateMomentum(dt: number): void {
         if (!this.headingHasUpdated() || this.headingHasReversed()) {
             this.resetMomentum();
         } else if (this.momentum.heading) {
-            const consecutiveFrames = this.momentum.consecutiveFrames + frames;
+            const consecutiveFrames = this.momentum.consecutiveFrames + dt;
             this.momentum.consecutiveFrames = Math.min(consecutiveFrames, this.framesToTopSpeed);
         }
 

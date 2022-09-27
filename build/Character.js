@@ -53,10 +53,10 @@ var Character = /** @class */ (function () {
         enumerable: false,
         configurable: true
     });
-    Character.prototype.update = function (frames) {
-        this.updateMomentum(frames);
+    Character.prototype.update = function (dt) {
+        this.updateMomentum(dt);
     };
-    Character.prototype.move = function (world, direction, frames) {
+    Character.prototype.move = function (world, direction, dt) {
         if (!Vectors_1.Vectors.hasMagnitude(direction))
             return;
         this.momentum.heading = direction;
@@ -69,7 +69,7 @@ var Character = /** @class */ (function () {
         if (this.body.speed >= this.topSpeed) {
             this.body.setVelocity(Vectors_1.Vectors.resize(this.body.velocity, this.topSpeed));
         }
-        var collisionEvent = ContinousCollisionDetection_1.ContinousCollisionDetection.getCollisionEvent(this.body, world, frames);
+        var collisionEvent = ContinousCollisionDetection_1.ContinousCollisionDetection.getCollisionEvent(this.body, world, dt);
         if (collisionEvent)
             this.redirectAroundCollisionBody(collisionEvent);
     };
@@ -87,12 +87,12 @@ var Character = /** @class */ (function () {
     Character.prototype.getMomentum = function () {
         return Math.min(this.topSpeed, (this.topSpeed * this.momentum.consecutiveFrames) / this.framesToTopSpeed);
     };
-    Character.prototype.updateMomentum = function (frames) {
+    Character.prototype.updateMomentum = function (dt) {
         if (!this.headingHasUpdated() || this.headingHasReversed()) {
             this.resetMomentum();
         }
         else if (this.momentum.heading) {
-            var consecutiveFrames = this.momentum.consecutiveFrames + frames;
+            var consecutiveFrames = this.momentum.consecutiveFrames + dt;
             this.momentum.consecutiveFrames = Math.min(consecutiveFrames, this.framesToTopSpeed);
         }
         this.momentum.lastHeading = this.momentum.heading;

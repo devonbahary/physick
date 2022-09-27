@@ -13,6 +13,6 @@ export const quadratic = (a: number, b: number, c: number): number[] => {
 
 export const roundForFloatingPoint = (num: number): number => Math.round(num * 1000) / 1000;
 
-export const framesInTimeDelta = (dt: number): number => {
+export const getDtFromTimeDiff = (dt: number): number => {
     return (DESIRED_FRAMES_PER_SECOND * dt) / MS_IN_SECOND; // # "frame" defined as 1/60s
 };

@@ -3,7 +3,7 @@ import { CollisionEvent } from '../collisions/types';
 import { World } from '../World';
 export declare class ContinousCollisionDetection {
     static isChronological(collisionEvent: CollisionEvent): boolean;
-    static getCollisionEvent(movingBody: Body, world: World, frames: number, ignoreBodyIds?: Set<string>): CollisionEvent | null;
+    static getCollisionEvent(movingBody: Body, world: World, dt: number, ignoreBodyIds?: Set<string>): CollisionEvent | null;
     private static getCollision;
     private static getCircleVsCircleCollision;
     private static getCircleVsRectCollision;

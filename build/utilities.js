@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.framesInTimeDelta = exports.roundForFloatingPoint = exports.quadratic = exports.isInRange = void 0;
+exports.getDtFromTimeDiff = exports.roundForFloatingPoint = exports.quadratic = exports.isInRange = void 0;
 var MS_IN_SECOND = 1000;
 var DESIRED_FRAMES_PER_SECOND = 60;
 var isInRange = function (min, num, max) {
@@ -14,8 +14,8 @@ var quadratic = function (a, b, c) {
 exports.quadratic = quadratic;
 var roundForFloatingPoint = function (num) { return Math.round(num * 1000) / 1000; };
 exports.roundForFloatingPoint = roundForFloatingPoint;
-var framesInTimeDelta = function (dt) {
+var getDtFromTimeDiff = function (dt) {
     return (DESIRED_FRAMES_PER_SECOND * dt) / MS_IN_SECOND; // # "frame" defined as 1/60s
 };
-exports.framesInTimeDelta = framesInTimeDelta;
+exports.getDtFromTimeDiff = getDtFromTimeDiff;
 //# sourceMappingURL=utilities.js.map
