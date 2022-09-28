@@ -141,6 +141,8 @@ class InternalNode extends Node {
                 return child;
             }
 
+            child.update();
+
             if (child.shouldCollapse()) {
                 const leaf = new Leaf(child.boundingBox, this.config);
 

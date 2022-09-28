@@ -152,6 +152,7 @@ var InternalNode = /** @class */ (function (_super) {
                 }
                 return child;
             }
+            child.update();
             if (child.shouldCollapse()) {
                 var leaf = new Leaf(child.boundingBox, _this.config);
                 for (var _b = 0, _c = child.bodies; _b < _c.length; _b++) {
