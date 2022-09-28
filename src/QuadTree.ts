@@ -52,7 +52,7 @@ class Leaf extends Node {
     }
 
     shouldPartition(): boolean {
-        if (this.bodies.length > this.config.maxBodiesInLeaf) return true;
+        if (this.bodies.length <= this.config.maxBodiesInLeaf) return false;
         return (
             this.boundingBox.width / 4 >= this.config.minLeafDimensions.width &&
             this.boundingBox.height / 4 >= this.config.minLeafDimensions.height
@@ -61,6 +61,7 @@ class Leaf extends Node {
 }
 
 class InternalNode extends Node {
+    private needsUpdate = false;
     private children: (InternalNode | Leaf)[];
 
     constructor(boundingBox: BoundingBox, private config: QuadTreeConfig) {
@@ -118,15 +119,21 @@ class InternalNode extends Node {
         for (const child of this.children) {
             child.addBody(body);
         }
+        
+        this.needsUpdate = true;
     }
 
     removeBody(body: Body): void {
         for (const child of this.children) {
             child.removeBody(body);
         }
+        
+        this.needsUpdate = true;
     }
 
     update(): void {
+        if (!this.needsUpdate) return;
+
         this.children = this.children.map((child) => {
             if (child instanceof Leaf) {
                 if (child.shouldPartition()) {
@@ -155,6 +162,8 @@ class InternalNode extends Node {
 
             return child;
         });
+
+        this.needsUpdate = false;
     }
 
     shouldCollapse(): boolean {

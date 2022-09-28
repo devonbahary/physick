@@ -68,8 +68,8 @@ var Leaf = /** @class */ (function (_super) {
         this.bodies = this.bodies.filter(function (b) { return b.id !== body.id; });
     };
     Leaf.prototype.shouldPartition = function () {
-        if (this.bodies.length > this.config.maxBodiesInLeaf)
-            return true;
+        if (this.bodies.length <= this.config.maxBodiesInLeaf)
+            return false;
         return (this.boundingBox.width / 4 >= this.config.minLeafDimensions.width &&
             this.boundingBox.height / 4 >= this.config.minLeafDimensions.height);
     };
@@ -80,6 +80,7 @@ var InternalNode = /** @class */ (function (_super) {
     function InternalNode(boundingBox, config) {
         var _this = _super.call(this, boundingBox) || this;
         _this.config = config;
+        _this.needsUpdate = false;
         _this.children = InternalNode.initLeaves(boundingBox, config);
         return _this;
     }
@@ -131,15 +132,19 @@ var InternalNode = /** @class */ (function (_super) {
             var child = _a[_i];
             child.addBody(body);
         }
+        this.needsUpdate = true;
     };
     InternalNode.prototype.removeBody = function (body) {
         for (var _i = 0, _a = this.children; _i < _a.length; _i++) {
             var child = _a[_i];
             child.removeBody(body);
         }
+        this.needsUpdate = true;
     };
     InternalNode.prototype.update = function () {
         var _this = this;
+        if (!this.needsUpdate)
+            return;
         this.children = this.children.map(function (child) {
             if (child instanceof Leaf) {
                 if (child.shouldPartition()) {
@@ -163,6 +168,7 @@ var InternalNode = /** @class */ (function (_super) {
             }
             return child;
         });
+        this.needsUpdate = false;
     };
     InternalNode.prototype.shouldCollapse = function () {
         return this.bodies.length <= this.config.maxBodiesInLeaf;

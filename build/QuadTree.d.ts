@@ -24,6 +24,7 @@ declare class Leaf extends Node {
 }
 declare class InternalNode extends Node {
     private config;
+    private needsUpdate;
     private children;
     constructor(boundingBox: BoundingBox, config: QuadTreeConfig);
     get bodies(): Body[];
