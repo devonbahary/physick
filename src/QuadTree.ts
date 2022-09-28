@@ -52,7 +52,7 @@ class Leaf extends Node {
     }
 
     shouldPartition(): boolean {
-        if (this.bodies.length <= this.config.maxBodiesInLeaf) return false;
+        if (this.bodies.length > this.config.maxBodiesInLeaf) return true;
         return (
             this.boundingBox.width / 4 >= this.config.minLeafDimensions.width &&
             this.boundingBox.height / 4 >= this.config.minLeafDimensions.height
