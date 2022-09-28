@@ -39,6 +39,7 @@ var WorldEvent;
 })(WorldEvent = exports.WorldEvent || (exports.WorldEvent = {}));
 var DEFAULT_WORLD_OPTIONS = {
     frictionalForce: 0.5,
+    initBoundaries: true,
 };
 var World = /** @class */ (function () {
     function World(args) {
@@ -65,7 +66,8 @@ var World = /** @class */ (function () {
             return pubSub.publish.apply(pubSub, args);
         };
         this.quadTree = new QuadTree_1.QuadTree(this, quadTreeConfig);
-        this.initBoundaries();
+        if (options.initBoundaries)
+            this.initBoundaries();
     }
     World.prototype.update = function (dt) {
         this.updateForces(dt);

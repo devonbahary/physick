@@ -119,7 +119,7 @@ class InternalNode extends Node {
         for (const child of this.children) {
             child.addBody(body);
         }
-        
+
         this.needsUpdate = true;
     }
 
@@ -127,7 +127,7 @@ class InternalNode extends Node {
         for (const child of this.children) {
             child.removeBody(body);
         }
-        
+
         this.needsUpdate = true;
     }
 

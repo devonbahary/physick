@@ -18,6 +18,7 @@ type WorldArgs = Dimensions & {
 
 type WorldOptions = {
     frictionalForce: number;
+    initBoundaries: boolean;
 };
 
 export enum WorldEvent {
@@ -35,6 +36,7 @@ type Publish = PubSub<WorldEvent, WorldEventDataMap>['publish'];
 
 const DEFAULT_WORLD_OPTIONS: WorldOptions = {
     frictionalForce: 0.5,
+    initBoundaries: true,
 };
 
 export class World implements PubSubable<WorldEvent, WorldEventDataMap> {
@@ -64,7 +66,7 @@ export class World implements PubSubable<WorldEvent, WorldEventDataMap> {
 
         this.quadTree = new QuadTree(this, quadTreeConfig);
 
-        this.initBoundaries();
+        if (options.initBoundaries) this.initBoundaries();
     }
 
     public update(dt: number): void {
