@@ -68,8 +68,8 @@ var Leaf = /** @class */ (function (_super) {
         this.bodies = this.bodies.filter(function (b) { return b.id !== body.id; });
     };
     Leaf.prototype.shouldPartition = function () {
-        if (this.bodies.length <= this.config.maxBodiesInLeaf)
-            return false;
+        if (this.bodies.length > this.config.maxBodiesInLeaf)
+            return true;
         return (this.boundingBox.width / 4 >= this.config.minLeafDimensions.width &&
             this.boundingBox.height / 4 >= this.config.minLeafDimensions.height);
     };
