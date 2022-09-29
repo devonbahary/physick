@@ -27,4 +27,5 @@ __exportStar(require("./Vectors"), exports);
 __exportStar(require("./shapes/types"), exports);
 __exportStar(require("./utilities"), exports);
 __exportStar(require("./Serializer"), exports);
+__exportStar(require("./collisions/ContinousCollisionDetection"), exports);
 //# sourceMappingURL=index.js.map
