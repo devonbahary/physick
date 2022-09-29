@@ -11,6 +11,6 @@ export * from './Vectors';
 export * from './shapes/types';
 export * from './utilities';
 export * from './Serializer';
-export * from './collisions/ContinousCollisionDetection';
+export * from './collisions/ContinuousCollisionDetection';
 export * from './collisions/CollisionDetection';
 export * from './collisions/CollisionResolution';

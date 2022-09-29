@@ -5,8 +5,8 @@ import { Particle } from '../shapes/Particle';
 import { HorzLineSegment, LineSegment, LineSegments, VertLineSegment } from '../shapes/LineSegments';
 import { Vector, Vectors } from '../Vectors';
 import { isInRange, quadratic, roundForFloatingPoint } from '../utilities';
-import { Collision, CollisionEvent } from '../collisions/types';
-import { CollisionDetection } from '../collisions/CollisionDetection';
+import { Collision, CollisionEvent } from './types';
+import { CollisionDetection } from './CollisionDetection';
 import { World } from '../World';
 
 const isCollisionInThisTimestep = (t: number, dt: number): boolean => {
@@ -30,7 +30,7 @@ const getEarliestCollision = (collisions: Collision[]): Collision | null => {
     }, null);
 };
 
-export class ContinousCollisionDetection {
+export class ContinuousCollisionDetection {
     static isChronological(collisionEvent: CollisionEvent): boolean {
         // check that the speed at which the movingBody is moving towards collisionBody along the collision vector
         // is no slower than the speed at which collisionBody is (possibly) moving away
@@ -64,7 +64,7 @@ export class ContinousCollisionDetection {
         return potentialCollisionBodies.reduce<CollisionEvent | null>((earliest, collisionBody) => {
             if (movingBody === collisionBody) return earliest;
 
-            const collision = ContinousCollisionDetection.getCollision(movingBody, collisionBody, dt);
+            const collision = ContinuousCollisionDetection.getCollision(movingBody, collisionBody, dt);
 
             if (!collision) return earliest;
 
@@ -83,16 +83,16 @@ export class ContinousCollisionDetection {
     private static getCollision(a: Body, b: Body, dt: number): Collision | null {
         if (a.shape instanceof Circle) {
             if (b.shape instanceof Circle)
-                return ContinousCollisionDetection.getCircleVsCircleCollision(a.shape, b.shape, dt);
+                return ContinuousCollisionDetection.getCircleVsCircleCollision(a.shape, b.shape, dt);
             if (b.shape instanceof Rect)
-                return ContinousCollisionDetection.getCircleVsRectCollision(a.shape, b.shape, dt);
+                return ContinuousCollisionDetection.getCircleVsRectCollision(a.shape, b.shape, dt);
         }
 
         if (a.shape instanceof Rect) {
             if (b.shape instanceof Circle)
-                return ContinousCollisionDetection.getRectVsCircleCollision(a.shape, b.shape, dt);
+                return ContinuousCollisionDetection.getRectVsCircleCollision(a.shape, b.shape, dt);
             if (b.shape instanceof Rect)
-                return ContinousCollisionDetection.getRectVsRectCollision(a.shape, b.shape, dt);
+                return ContinuousCollisionDetection.getRectVsRectCollision(a.shape, b.shape, dt);
         }
 
         return null;
@@ -153,7 +153,7 @@ export class ContinousCollisionDetection {
         const sideCollisions: Collision[] = [];
 
         const addSideCollision = (circle: Circle, side: LineSegment, collisionVector: Vector): void => {
-            const timeOfCollision = ContinousCollisionDetection.getPointVsLineTimeOfCollision(circle, side, dt);
+            const timeOfCollision = ContinuousCollisionDetection.getPointVsLineTimeOfCollision(circle, side, dt);
 
             if (timeOfCollision !== null) {
                 sideCollisions.push({
@@ -187,7 +187,7 @@ export class ContinousCollisionDetection {
 
         const cornerCollisions = corners.reduce<Collision[]>((collisions, corner) => {
             if (isMovingTowards(circle, corner)) {
-                const collision = ContinousCollisionDetection.getCircleVsCircleCollision(circle, corner, dt);
+                const collision = ContinuousCollisionDetection.getCircleVsCircleCollision(circle, corner, dt);
                 if (collision) collisions.push(collision);
             }
             return collisions;
@@ -206,7 +206,7 @@ export class ContinousCollisionDetection {
         const sideCollisions: Collision[] = [];
 
         const addSideCollision = (point: Particle, side: LineSegment, collisionVector: Vector): void => {
-            const timeOfCollision = ContinousCollisionDetection.getPointVsLineTimeOfCollision(point, side, dt);
+            const timeOfCollision = ContinuousCollisionDetection.getPointVsLineTimeOfCollision(point, side, dt);
 
             if (timeOfCollision !== null) {
                 sideCollisions.push({
@@ -242,7 +242,7 @@ export class ContinousCollisionDetection {
         const cornerCollisions = corners.reduce<Collision[]>((collisions, corner) => {
             if (isMovingTowards(point, corner)) {
                 corner.setVelocity(velocity);
-                const collision = ContinousCollisionDetection.getCircleVsCircleCollision(corner, circle, dt);
+                const collision = ContinuousCollisionDetection.getCircleVsCircleCollision(corner, circle, dt);
                 if (collision) collisions.push(collision);
             }
             return collisions;
@@ -261,7 +261,7 @@ export class ContinousCollisionDetection {
             getMovingSideAtTimeOfCollision: (t: number) => LineSegment,
             collisionVector: Vector,
         ): void => {
-            const timeOfCollision = ContinousCollisionDetection.getPointVsLineTimeOfCollision(
+            const timeOfCollision = ContinuousCollisionDetection.getPointVsLineTimeOfCollision(
                 a,
                 minkowskiCollisionSide,
                 dt,

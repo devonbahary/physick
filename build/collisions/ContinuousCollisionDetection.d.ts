@@ -1,5 +1,5 @@
 import { Body } from '../Body';
-import { CollisionEvent } from '../collisions/types';
+import { CollisionEvent } from './types';
 import { World } from '../World';
 export declare class ContinuousCollisionDetection {
     static isChronological(collisionEvent: CollisionEvent): boolean;

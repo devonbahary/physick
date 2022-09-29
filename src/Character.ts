@@ -1,7 +1,7 @@
 import { Body } from './Body';
 import { Vector, Vectors } from './Vectors';
 import { roundForFloatingPoint } from './utilities';
-import { ContinousCollisionDetection } from './collisions/ContinousCollisionDetection';
+import { ContinuousCollisionDetection } from './collisions/ContinuousCollisionDetection';
 import { World } from './World';
 import { CollisionResolution } from './collisions/CollisionResolution';
 import { CollisionEvent } from './collisions/types';
@@ -71,7 +71,7 @@ export class Character {
             this.body.setVelocity(Vectors.resize(this.body.velocity, this.topSpeed));
         }
 
-        const collisionEvent = ContinousCollisionDetection.getCollisionEvent(this.body, world, dt);
+        const collisionEvent = ContinuousCollisionDetection.getCollisionEvent(this.body, world, dt);
         if (collisionEvent) this.redirectAroundCollisionBody(collisionEvent);
     }
 

@@ -14,7 +14,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Character = void 0;
 var Vectors_1 = require("./Vectors");
 var utilities_1 = require("./utilities");
-var ContinousCollisionDetection_1 = require("./collisions/ContinousCollisionDetection");
+var ContinuousCollisionDetection_1 = require("./collisions/ContinuousCollisionDetection");
 var CollisionResolution_1 = require("./collisions/CollisionResolution");
 var DEFAULT_CHARACTER_OPTIONS = {
     framesToTopSpeed: 5,
@@ -69,7 +69,7 @@ var Character = /** @class */ (function () {
         if (this.body.speed >= this.topSpeed) {
             this.body.setVelocity(Vectors_1.Vectors.resize(this.body.velocity, this.topSpeed));
         }
-        var collisionEvent = ContinousCollisionDetection_1.ContinousCollisionDetection.getCollisionEvent(this.body, world, dt);
+        var collisionEvent = ContinuousCollisionDetection_1.ContinuousCollisionDetection.getCollisionEvent(this.body, world, dt);
         if (collisionEvent)
             this.redirectAroundCollisionBody(collisionEvent);
     };

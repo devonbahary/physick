@@ -2,7 +2,7 @@ import { Dimensions } from './shapes/types';
 import { Body, BodyEvent } from './Body';
 import { Vectors } from './Vectors';
 import { Rect } from './shapes/rects/Rect';
-import { ContinousCollisionDetection } from './collisions/ContinousCollisionDetection';
+import { ContinuousCollisionDetection } from './collisions/ContinuousCollisionDetection';
 import { CollisionResolution } from './collisions/CollisionResolution';
 import { PubSub, PubSubable } from './PubSub';
 import { roundForFloatingPoint } from './utilities';
@@ -133,14 +133,14 @@ export class World implements PubSubable<WorldEvent, WorldEventDataMap> {
     }
 
     private updateBodyMovement(body: Body, dt: number, ignoreBodyIds = new Set<string>()): void {
-        const collisionEvent = ContinousCollisionDetection.getCollisionEvent(body, this, dt, ignoreBodyIds);
+        const collisionEvent = ContinuousCollisionDetection.getCollisionEvent(body, this, dt, ignoreBodyIds);
 
         if (collisionEvent) {
             // because we traverse bodies in no particular order, it's possible that we accidentally consider a false
             // collision of a slower-moving body into a faster-moving body along the collision vector
             // rather than ignoring the false collision altogether, we wait for that faster-moving colliding body to get
             // a chance to move
-            if (ContinousCollisionDetection.isChronological(collisionEvent)) {
+            if (ContinuousCollisionDetection.isChronological(collisionEvent)) {
                 const { collisionBody } = collisionEvent;
 
                 if (collisionBody.isSensor) {
@@ -168,7 +168,7 @@ export class World implements PubSubable<WorldEvent, WorldEventDataMap> {
     private resolveChainedBodies(bodyInChain: Body, visitedBodyIds = new Set<string>()): void {
         if (bodyInChain.isFixed()) return;
 
-        const collisionEvent = ContinousCollisionDetection.getCollisionEvent(bodyInChain, this, 0, visitedBodyIds);
+        const collisionEvent = ContinuousCollisionDetection.getCollisionEvent(bodyInChain, this, 0, visitedBodyIds);
 
         if (collisionEvent && roundForFloatingPoint(collisionEvent.timeOfCollision) === 0) {
             this.onCollision(collisionEvent);

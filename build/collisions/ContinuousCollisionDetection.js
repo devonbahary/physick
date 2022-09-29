@@ -27,7 +27,7 @@ var Particle_1 = require("../shapes/Particle");
 var LineSegments_1 = require("../shapes/LineSegments");
 var Vectors_1 = require("../Vectors");
 var utilities_1 = require("../utilities");
-var CollisionDetection_1 = require("../collisions/CollisionDetection");
+var CollisionDetection_1 = require("./CollisionDetection");
 var isCollisionInThisTimestep = function (t, dt) {
     var rounded = (0, utilities_1.roundForFloatingPoint)(t);
     return (0, utilities_1.isInRange)(0, rounded, dt);
@@ -332,4 +332,4 @@ var ContinuousCollisionDetection = /** @class */ (function () {
     return ContinuousCollisionDetection;
 }());
 exports.ContinuousCollisionDetection = ContinuousCollisionDetection;
-//# sourceMappingURL=ContinousCollisionDetection.js.map
+//# sourceMappingURL=ContinuousCollisionDetection.js.map

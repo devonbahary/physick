@@ -26,7 +26,7 @@ exports.World = exports.WorldEvent = void 0;
 var Body_1 = require("./Body");
 var Vectors_1 = require("./Vectors");
 var Rect_1 = require("./shapes/rects/Rect");
-var ContinousCollisionDetection_1 = require("./collisions/ContinousCollisionDetection");
+var ContinuousCollisionDetection_1 = require("./collisions/ContinuousCollisionDetection");
 var CollisionResolution_1 = require("./collisions/CollisionResolution");
 var PubSub_1 = require("./PubSub");
 var utilities_1 = require("./utilities");
@@ -127,13 +127,13 @@ var World = /** @class */ (function () {
     };
     World.prototype.updateBodyMovement = function (body, dt, ignoreBodyIds) {
         if (ignoreBodyIds === void 0) { ignoreBodyIds = new Set(); }
-        var collisionEvent = ContinousCollisionDetection_1.ContinousCollisionDetection.getCollisionEvent(body, this, dt, ignoreBodyIds);
+        var collisionEvent = ContinuousCollisionDetection_1.ContinuousCollisionDetection.getCollisionEvent(body, this, dt, ignoreBodyIds);
         if (collisionEvent) {
             // because we traverse bodies in no particular order, it's possible that we accidentally consider a false
             // collision of a slower-moving body into a faster-moving body along the collision vector
             // rather than ignoring the false collision altogether, we wait for that faster-moving colliding body to get
             // a chance to move
-            if (ContinousCollisionDetection_1.ContinousCollisionDetection.isChronological(collisionEvent)) {
+            if (ContinuousCollisionDetection_1.ContinuousCollisionDetection.isChronological(collisionEvent)) {
                 var collisionBody = collisionEvent.collisionBody;
                 if (collisionBody.isSensor) {
                     this.onCollision(collisionEvent);
@@ -158,7 +158,7 @@ var World = /** @class */ (function () {
         if (visitedBodyIds === void 0) { visitedBodyIds = new Set(); }
         if (bodyInChain.isFixed())
             return;
-        var collisionEvent = ContinousCollisionDetection_1.ContinousCollisionDetection.getCollisionEvent(bodyInChain, this, 0, visitedBodyIds);
+        var collisionEvent = ContinuousCollisionDetection_1.ContinuousCollisionDetection.getCollisionEvent(bodyInChain, this, 0, visitedBodyIds);
         if (collisionEvent && (0, utilities_1.roundForFloatingPoint)(collisionEvent.timeOfCollision) === 0) {
             this.onCollision(collisionEvent);
             if (collisionEvent.collisionBody.isFixed()) {
