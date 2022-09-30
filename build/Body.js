@@ -118,6 +118,7 @@ var Body = /** @class */ (function () {
     };
     Body.prototype.moveTo = function (pos) {
         this.shape.moveTo(pos);
+        this.publish(BodyEvent.Move, this);
     };
     Body.prototype.move = function (movement) {
         if (this.isSensor)

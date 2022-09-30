@@ -104,6 +104,7 @@ export class Body implements Particle, PubSubable<BodyEvent, BodyEventDataMap> {
 
     public moveTo(pos: Vector): void {
         this.shape.moveTo(pos);
+        this.publish(BodyEvent.Move, this);
     }
 
     public move(movement: Vector): void {
