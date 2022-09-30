@@ -40,6 +40,7 @@ var WorldEvent;
 var DEFAULT_WORLD_OPTIONS = {
     friction: 0.5,
     initBoundaries: true,
+    shouldResolveCollision: function () { return true; },
 };
 var World = /** @class */ (function () {
     function World(args) {
@@ -150,22 +151,27 @@ var World = /** @class */ (function () {
             // a chance to move
             if (ContinuousCollisionDetection_1.ContinuousCollisionDetection.isChronological(collisionEvent)) {
                 var collisionBody = collisionEvent.collisionBody;
-                if (collisionBody.isSensor) {
-                    this.onCollision(collisionEvent);
-                    // recognize sensor collision but do not resolve collision; continue on
-                    ignoreBodyIds.add(collisionBody.id);
-                    this.updateBodyMovement(body, dt, ignoreBodyIds);
-                }
-                else {
+                if (this.shouldResolveCollision(collisionEvent)) {
                     CollisionResolution_1.CollisionResolution.resolve(collisionEvent);
                     this.onCollision(collisionEvent);
                     this.resolveChainedBodies(collisionBody);
+                }
+                else {
+                    // recognize collision but do not resolve collision; continue on
+                    this.onCollision(collisionEvent);
+                    ignoreBodyIds.add(collisionBody.id);
+                    this.updateBodyMovement(body, dt, ignoreBodyIds);
                 }
             }
         }
         else {
             body.move(Vectors_1.Vectors.resize(body.velocity, dt * body.speed));
         }
+    };
+    World.prototype.shouldResolveCollision = function (collisionEvent) {
+        if (collisionEvent.collisionBody.isSensor)
+            return false;
+        return this.options.shouldResolveCollision(collisionEvent);
     };
     // if the force through 1+ non-fixed bodies is stopped at a fixed body, move the last non-fixed body in the chain
     // around the fixed body

@@ -19,6 +19,8 @@ type WorldArgs = Dimensions & {
 type WorldOptions = {
     friction: number;
     initBoundaries: boolean;
+    // specify custom rules for when to treat collisionEvents like sensor collisions
+    shouldResolveCollision: (collisionEvent: CollisionEvent) => boolean;
 };
 
 export enum WorldEvent {
@@ -37,6 +39,7 @@ type Publish = PubSub<WorldEvent, WorldEventDataMap>['publish'];
 const DEFAULT_WORLD_OPTIONS: WorldOptions = {
     friction: 0.5,
     initBoundaries: true,
+    shouldResolveCollision: () => true,
 };
 
 export class World implements PubSubable<WorldEvent, WorldEventDataMap> {
@@ -159,24 +162,29 @@ export class World implements PubSubable<WorldEvent, WorldEventDataMap> {
             if (ContinuousCollisionDetection.isChronological(collisionEvent)) {
                 const { collisionBody } = collisionEvent;
 
-                if (collisionBody.isSensor) {
-                    this.onCollision(collisionEvent);
-
-                    // recognize sensor collision but do not resolve collision; continue on
-                    ignoreBodyIds.add(collisionBody.id);
-
-                    this.updateBodyMovement(body, dt, ignoreBodyIds);
-                } else {
+                if (this.shouldResolveCollision(collisionEvent)) {
                     CollisionResolution.resolve(collisionEvent);
 
                     this.onCollision(collisionEvent);
 
                     this.resolveChainedBodies(collisionBody);
+                } else {
+                    // recognize collision but do not resolve collision; continue on
+                    this.onCollision(collisionEvent);
+
+                    ignoreBodyIds.add(collisionBody.id);
+
+                    this.updateBodyMovement(body, dt, ignoreBodyIds);
                 }
             }
         } else {
             body.move(Vectors.resize(body.velocity, dt * body.speed));
         }
+    }
+
+    private shouldResolveCollision(collisionEvent: CollisionEvent): boolean {
+        if (collisionEvent.collisionBody.isSensor) return false;
+        return this.options.shouldResolveCollision(collisionEvent);
     }
 
     // if the force through 1+ non-fixed bodies is stopped at a fixed body, move the last non-fixed body in the chain

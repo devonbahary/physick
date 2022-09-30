@@ -4,6 +4,7 @@ import { Vector } from './Vectors';
 import { PubSub, PubSubable } from './PubSub';
 import { QuadTreeConfig } from './QuadTree';
 import { Force } from './Force';
+import { CollisionEvent } from './collisions/types';
 import { SerializedWorld } from './Serializer';
 import { BoundingBox } from './shapes/rects/BoundingBox';
 declare type WorldArgs = Dimensions & {
@@ -14,6 +15,7 @@ declare type WorldArgs = Dimensions & {
 declare type WorldOptions = {
     friction: number;
     initBoundaries: boolean;
+    shouldResolveCollision: (collisionEvent: CollisionEvent) => boolean;
 };
 export declare enum WorldEvent {
     AddBody = "AddBody",
@@ -47,6 +49,7 @@ export declare class World implements PubSubable<WorldEvent, WorldEventDataMap> 
     private updateForces;
     private updateBodies;
     private updateBodyMovement;
+    private shouldResolveCollision;
     private resolveChainedBodies;
     private onCollision;
     private initBoundaries;
