@@ -43,8 +43,8 @@ var Node = /** @class */ (function () {
     function Node(boundingBox) {
         this.boundingBox = boundingBox;
     }
-    Node.prototype.overlapsWith = function (boundingBox) {
-        return CollisionDetection_1.CollisionDetection.hasOverlap(this.boundingBox, boundingBox);
+    Node.prototype.overlapsWith = function (shape) {
+        return CollisionDetection_1.CollisionDetection.hasOverlap(this.boundingBox, shape);
     };
     return Node;
 }());
@@ -56,8 +56,8 @@ var Leaf = /** @class */ (function (_super) {
         _this.bodies = [];
         return _this;
     }
-    Leaf.prototype.getBodiesInBoundingBox = function (boundingBox) {
-        return this.overlapsWith(boundingBox) ? this.bodies : [];
+    Leaf.prototype.getBodiesInShape = function (shape) {
+        return this.overlapsWith(shape) ? this.bodies : [];
     };
     Leaf.prototype.addBody = function (body) {
         if (this.overlapsWith(body.shape)) {
@@ -114,11 +114,11 @@ var InternalNode = /** @class */ (function (_super) {
         ];
         return bounds.map(function (r) { return new Leaf(r, config); });
     };
-    InternalNode.prototype.getBodiesInBoundingBox = function (boundingBox) {
-        if (!this.overlapsWith(boundingBox))
+    InternalNode.prototype.getBodiesInShape = function (shape) {
+        if (!this.overlapsWith(shape))
             return [];
         var uniqueBodiesSet = this.children.reduce(function (acc, child) {
-            var bodies = child.getBodiesInBoundingBox(boundingBox);
+            var bodies = child.getBodiesInShape(shape);
             for (var _i = 0, bodies_1 = bodies; _i < bodies_1.length; _i++) {
                 var body = bodies_1[_i];
                 acc.add(body);

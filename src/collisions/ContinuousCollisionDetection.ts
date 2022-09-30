@@ -57,7 +57,7 @@ export class ContinuousCollisionDetection {
         const movementBoundingBox = CollisionDetection.getMovementBoundingBox(movingBody);
         if (!movementBoundingBox) return null;
 
-        const bodiesInBoundingBox = world.getBodiesInBoundingBox(movementBoundingBox);
+        const bodiesInBoundingBox = world.getBodiesInShape(movementBoundingBox);
 
         const potentialCollisionBodies = bodiesInBoundingBox.filter((body) => !ignoreBodyIds.has(body.id));
 

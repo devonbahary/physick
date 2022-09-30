@@ -54,7 +54,7 @@ var BaseForce = /** @class */ (function () {
         this.expirable = __assign(__assign(__assign({}, DEFAULT_EXPIRATION), expiration), { applications: 0, age: 0 });
     }
     BaseForce.prototype.apply = function (world) {
-        var bodies = world.getBodiesInBoundingBox(this.boundingCircle.boundingBox);
+        var bodies = world.getBodiesInShape(this.boundingCircle);
         for (var _i = 0, bodies_1 = bodies; _i < bodies_1.length; _i++) {
             var body = bodies_1[_i];
             if (CollisionDetection_1.CollisionDetection.hasOverlap(this.boundingCircle, body.shape)) {

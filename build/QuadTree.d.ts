@@ -1,5 +1,5 @@
 import { Body } from './Body';
-import { Dimensions } from './shapes/types';
+import { Dimensions, Shape } from './shapes/types';
 import { World } from './World';
 import { BoundingBox } from './shapes/rects/BoundingBox';
 export declare type QuadTreeConfig = {
@@ -9,15 +9,15 @@ export declare type QuadTreeConfig = {
 declare abstract class Node {
     boundingBox: BoundingBox;
     constructor(boundingBox: BoundingBox);
-    abstract getBodiesInBoundingBox(boundingBox: BoundingBox): Body[];
+    abstract getBodiesInShape(shape: Shape): Body[];
     abstract addBody(body: Body): void;
-    protected overlapsWith(boundingBox: BoundingBox): boolean;
+    protected overlapsWith(shape: Shape): boolean;
 }
 declare class Leaf extends Node {
     private config;
     bodies: Body[];
     constructor(boundingBox: BoundingBox, config: QuadTreeConfig);
-    getBodiesInBoundingBox(boundingBox: BoundingBox): Body[];
+    getBodiesInShape(shape: Shape): Body[];
     addBody(body: Body): void;
     removeBody(body: Body): void;
     shouldPartition(): boolean;
@@ -29,7 +29,7 @@ declare class InternalNode extends Node {
     constructor(boundingBox: BoundingBox, config: QuadTreeConfig);
     get bodies(): Body[];
     static initLeaves(boundingBox: BoundingBox, config: QuadTreeConfig): Leaf[];
-    getBodiesInBoundingBox(boundingBox: BoundingBox): Body[];
+    getBodiesInShape(shape: Shape): Body[];
     addBody(body: Body): void;
     removeBody(body: Body): void;
     update(): void;

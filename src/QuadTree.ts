@@ -1,5 +1,5 @@
 import { Body, BodyEvent } from './Body';
-import { Dimensions } from './shapes/types';
+import { Dimensions, Shape } from './shapes/types';
 import { World, WorldEvent } from './World';
 import { CollisionDetection } from './collisions/CollisionDetection';
 import { BoundingBox } from './shapes/rects/BoundingBox';
@@ -21,12 +21,12 @@ const DEFAULT_CONFIG: QuadTreeConfig = {
 abstract class Node {
     constructor(public boundingBox: BoundingBox) {}
 
-    abstract getBodiesInBoundingBox(boundingBox: BoundingBox): Body[];
+    abstract getBodiesInShape(shape: Shape): Body[];
 
     abstract addBody(body: Body): void;
 
-    protected overlapsWith(boundingBox: BoundingBox): boolean {
-        return CollisionDetection.hasOverlap(this.boundingBox, boundingBox);
+    protected overlapsWith(shape: Shape): boolean {
+        return CollisionDetection.hasOverlap(this.boundingBox, shape);
     }
 }
 
@@ -37,8 +37,8 @@ class Leaf extends Node {
         super(boundingBox);
     }
 
-    getBodiesInBoundingBox(boundingBox: BoundingBox): Body[] {
-        return this.overlapsWith(boundingBox) ? this.bodies : [];
+    getBodiesInShape(shape: Shape): Body[] {
+        return this.overlapsWith(shape) ? this.bodies : [];
     }
 
     addBody(body: Body): void {
@@ -101,11 +101,11 @@ class InternalNode extends Node {
         return bounds.map((r) => new Leaf(r, config));
     }
 
-    getBodiesInBoundingBox(boundingBox: BoundingBox): Body[] {
-        if (!this.overlapsWith(boundingBox)) return [];
+    getBodiesInShape(shape: Shape): Body[] {
+        if (!this.overlapsWith(shape)) return [];
 
         const uniqueBodiesSet = this.children.reduce<Set<Body>>((acc, child) => {
-            const bodies = child.getBodiesInBoundingBox(boundingBox);
+            const bodies = child.getBodiesInShape(shape);
             for (const body of bodies) {
                 acc.add(body);
             }

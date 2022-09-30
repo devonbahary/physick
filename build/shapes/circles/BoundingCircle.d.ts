@@ -1,5 +1,4 @@
 import { Spatial } from '../types';
-import { BoundingBox } from '../rects/BoundingBox';
 declare type BoundingCircleArgs = {
     x: number;
     y: number;
@@ -16,6 +15,5 @@ export declare class BoundingCircle implements Spatial {
     get y1(): number;
     get width(): number;
     get height(): number;
-    get boundingBox(): BoundingBox;
 }
 export {};

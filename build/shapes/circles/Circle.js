@@ -17,7 +17,6 @@ var __extends = (this && this.__extends) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Circle = void 0;
 var Particle_1 = require("../Particle");
-var BoundingBox_1 = require("../rects/BoundingBox");
 var Circle = /** @class */ (function (_super) {
     __extends(Circle, _super);
     function Circle(args) {
@@ -65,14 +64,6 @@ var Circle = /** @class */ (function (_super) {
     Object.defineProperty(Circle.prototype, "y1", {
         get: function () {
             return this.y + this.radius;
-        },
-        enumerable: false,
-        configurable: true
-    });
-    Object.defineProperty(Circle.prototype, "boundingBox", {
-        get: function () {
-            var _a = this, x0 = _a.x0, x1 = _a.x1, y0 = _a.y0, y1 = _a.y1;
-            return new BoundingBox_1.BoundingBox({ x0: x0, x1: x1, y0: y0, y1: y1 });
         },
         enumerable: false,
         configurable: true

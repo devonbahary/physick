@@ -1,4 +1,4 @@
-import { Dimensions } from './shapes/types';
+import { Dimensions, Shape } from './shapes/types';
 import { Body, BodyEvent } from './Body';
 import { Vector, Vectors } from './Vectors';
 import { Rect } from './shapes/rects/Rect';
@@ -10,7 +10,6 @@ import { QuadTree, QuadTreeConfig } from './QuadTree';
 import { Force } from './Force';
 import { CollisionEvent } from './collisions/types';
 import { SerializedWorld, Serializer } from './Serializer';
-import { BoundingBox } from './shapes/rects/BoundingBox';
 
 type WorldArgs = Dimensions & {
     options?: Partial<WorldOptions> & { quadTreeConfig?: Partial<QuadTreeConfig> };
@@ -96,8 +95,8 @@ export class World implements PubSubable<WorldEvent, WorldEventDataMap> {
         this.forces = this.forces.filter((f) => f.id !== force.id);
     }
 
-    public getBodiesInBoundingBox(boundingBox: BoundingBox): Body[] {
-        return this.quadTree.getBodiesInBoundingBox(boundingBox);
+    public getBodiesInShape(shape: Shape): Body[] {
+        return this.quadTree.getBodiesInShape(shape);
     }
 
     public getFrictionOnBody(body: Body): number {

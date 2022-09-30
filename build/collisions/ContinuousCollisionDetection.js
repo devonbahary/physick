@@ -66,7 +66,7 @@ var ContinuousCollisionDetection = /** @class */ (function () {
         var movementBoundingBox = CollisionDetection_1.CollisionDetection.getMovementBoundingBox(movingBody);
         if (!movementBoundingBox)
             return null;
-        var bodiesInBoundingBox = world.getBodiesInBoundingBox(movementBoundingBox);
+        var bodiesInBoundingBox = world.getBodiesInShape(movementBoundingBox);
         var potentialCollisionBodies = bodiesInBoundingBox.filter(function (body) { return !ignoreBodyIds.has(body.id); });
         return potentialCollisionBodies.reduce(function (earliest, collisionBody) {
             if (movingBody === collisionBody)

@@ -1,4 +1,4 @@
-import { Dimensions } from './shapes/types';
+import { Dimensions, Shape } from './shapes/types';
 import { Body } from './Body';
 import { Vector } from './Vectors';
 import { PubSub, PubSubable } from './PubSub';
@@ -6,7 +6,6 @@ import { QuadTreeConfig } from './QuadTree';
 import { Force } from './Force';
 import { CollisionEvent } from './collisions/types';
 import { SerializedWorld } from './Serializer';
-import { BoundingBox } from './shapes/rects/BoundingBox';
 declare type WorldArgs = Dimensions & {
     options?: Partial<WorldOptions> & {
         quadTreeConfig?: Partial<QuadTreeConfig>;
@@ -42,7 +41,7 @@ export declare class World implements PubSubable<WorldEvent, WorldEventDataMap> 
     removeBody(body: Body): void;
     addForce(force: Force): void;
     removeForce(force: Force): void;
-    getBodiesInBoundingBox(boundingBox: BoundingBox): Body[];
+    getBodiesInShape(shape: Shape): Body[];
     getFrictionOnBody(body: Body): number;
     getBodyVelocityAfterFriction(body: Body): Vector;
     loadSerialized(serializedWorld: SerializedWorld): void;

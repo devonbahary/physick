@@ -42,7 +42,7 @@ abstract class BaseForce {
     }
 
     protected apply(world: World): void {
-        const bodies = world.getBodiesInBoundingBox(this.boundingCircle.boundingBox);
+        const bodies = world.getBodiesInShape(this.boundingCircle);
 
         for (const body of bodies) {
             if (CollisionDetection.hasOverlap(this.boundingCircle, body.shape)) {

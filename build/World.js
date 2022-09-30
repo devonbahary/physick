@@ -89,8 +89,8 @@ var World = /** @class */ (function () {
     World.prototype.removeForce = function (force) {
         this.forces = this.forces.filter(function (f) { return f.id !== force.id; });
     };
-    World.prototype.getBodiesInBoundingBox = function (boundingBox) {
-        return this.quadTree.getBodiesInBoundingBox(boundingBox);
+    World.prototype.getBodiesInShape = function (shape) {
+        return this.quadTree.getBodiesInShape(shape);
     };
     World.prototype.getFrictionOnBody = function (body) {
         return body.mass * this.options.friction;

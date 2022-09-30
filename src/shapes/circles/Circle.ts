@@ -1,6 +1,5 @@
 import { Particle } from '../Particle';
 import { Vector } from '../../Vectors';
-import { BoundingBox } from '../rects/BoundingBox';
 import { BoundingCircle } from './BoundingCircle';
 
 export type CircleArgs = Partial<Vector> & {
@@ -38,10 +37,5 @@ export class Circle extends Particle implements BoundingCircle {
 
     get y1(): number {
         return this.y + this.radius;
-    }
-
-    get boundingBox(): BoundingBox {
-        const { x0, x1, y0, y1 } = this;
-        return new BoundingBox({ x0, x1, y0, y1 });
     }
 }
