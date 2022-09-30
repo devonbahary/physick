@@ -189,12 +189,17 @@ export class World implements PubSubable<WorldEvent, WorldEventDataMap> {
         if (collisionEvent && roundForFloatingPoint(collisionEvent.timeOfCollision) === 0) {
             this.onCollision(collisionEvent);
 
-            if (collisionEvent.collisionBody.isFixed()) {
+            const { collisionBody } = collisionEvent;
+
+            if (collisionBody.isSensor) {
+                visitedBodyIds.add(collisionBody.id);
+                this.resolveChainedBodies(bodyInChain, visitedBodyIds);
+            } else if (collisionBody.isFixed()) {
                 const getTangentMovement = CollisionResolution.getTangentMovement(collisionEvent);
                 bodyInChain.setVelocity(getTangentMovement);
             } else {
                 visitedBodyIds.add(bodyInChain.id); // avoid infinite recursion
-                this.resolveChainedBodies(collisionEvent.collisionBody, visitedBodyIds);
+                this.resolveChainedBodies(collisionBody, visitedBodyIds);
             }
         }
     }

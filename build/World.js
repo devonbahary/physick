@@ -176,13 +176,18 @@ var World = /** @class */ (function () {
         var collisionEvent = ContinuousCollisionDetection_1.ContinuousCollisionDetection.getCollisionEvent(bodyInChain, this, 0, visitedBodyIds);
         if (collisionEvent && (0, utilities_1.roundForFloatingPoint)(collisionEvent.timeOfCollision) === 0) {
             this.onCollision(collisionEvent);
-            if (collisionEvent.collisionBody.isFixed()) {
+            var collisionBody = collisionEvent.collisionBody;
+            if (collisionBody.isSensor) {
+                visitedBodyIds.add(collisionBody.id);
+                this.resolveChainedBodies(bodyInChain, visitedBodyIds);
+            }
+            else if (collisionBody.isFixed()) {
                 var getTangentMovement = CollisionResolution_1.CollisionResolution.getTangentMovement(collisionEvent);
                 bodyInChain.setVelocity(getTangentMovement);
             }
             else {
                 visitedBodyIds.add(bodyInChain.id); // avoid infinite recursion
-                this.resolveChainedBodies(collisionEvent.collisionBody, visitedBodyIds);
+                this.resolveChainedBodies(collisionBody, visitedBodyIds);
             }
         }
     };
