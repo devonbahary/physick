@@ -38,7 +38,7 @@ var WorldEvent;
     WorldEvent["RemoveBody"] = "RemoveBody";
 })(WorldEvent = exports.WorldEvent || (exports.WorldEvent = {}));
 var DEFAULT_WORLD_OPTIONS = {
-    frictionalForce: 0.5,
+    friction: 0.5,
     initBoundaries: true,
 };
 var World = /** @class */ (function () {
@@ -92,7 +92,7 @@ var World = /** @class */ (function () {
         return this.quadTree.getBodiesInBoundingBox(boundingBox);
     };
     World.prototype.getFrictionOnBody = function (body) {
-        return body.mass * this.options.frictionalForce;
+        return body.mass * this.options.friction;
     };
     World.prototype.getBodyVelocityAfterFriction = function (body) {
         if (!body.isMoving())

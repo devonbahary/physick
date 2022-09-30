@@ -17,7 +17,7 @@ type WorldArgs = Dimensions & {
 };
 
 type WorldOptions = {
-    frictionalForce: number;
+    friction: number;
     initBoundaries: boolean;
 };
 
@@ -35,7 +35,7 @@ type Subscribe = PubSub<WorldEvent, WorldEventDataMap>['subscribe'];
 type Publish = PubSub<WorldEvent, WorldEventDataMap>['publish'];
 
 const DEFAULT_WORLD_OPTIONS: WorldOptions = {
-    frictionalForce: 0.5,
+    friction: 0.5,
     initBoundaries: true,
 };
 
@@ -98,7 +98,7 @@ export class World implements PubSubable<WorldEvent, WorldEventDataMap> {
     }
 
     public getFrictionOnBody(body: Body): number {
-        return body.mass * this.options.frictionalForce;
+        return body.mass * this.options.friction;
     }
 
     public getBodyVelocityAfterFriction(body: Body): Vector {

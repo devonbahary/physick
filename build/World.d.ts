@@ -12,7 +12,7 @@ declare type WorldArgs = Dimensions & {
     };
 };
 declare type WorldOptions = {
-    frictionalForce: number;
+    friction: number;
     initBoundaries: boolean;
 };
 export declare enum WorldEvent {
