@@ -1,6 +1,6 @@
 import { Dimensions } from './shapes/types';
 import { Body, BodyEvent } from './Body';
-import { Vectors } from './Vectors';
+import { Vector, Vectors } from './Vectors';
 import { Rect } from './shapes/rects/Rect';
 import { ContinuousCollisionDetection } from './collisions/ContinuousCollisionDetection';
 import { CollisionResolution } from './collisions/CollisionResolution';
@@ -99,6 +99,22 @@ export class World implements PubSubable<WorldEvent, WorldEventDataMap> {
 
     public getFrictionOnBody(body: Body): number {
         return body.mass * this.options.frictionalForce;
+    }
+
+    public getBodyVelocityAfterFriction(body: Body): Vector {
+        if (!body.isMoving()) return body.velocity;
+
+        const friction = this.getFrictionOnBody(body);
+        if (!friction) return body.velocity;
+
+        const speed = body.speed;
+
+        if (friction >= speed) {
+            // friction should never reverse a body's velocity, only ever set its speed to 0
+            return { x: 0, y: 0 };
+        } else {
+            return Vectors.resize(body.velocity, speed - friction);
+        }
     }
 
     // TODO: forces?
@@ -207,19 +223,7 @@ export class World implements PubSubable<WorldEvent, WorldEventDataMap> {
     }
 
     private applyFriction(body: Body): void {
-        if (!body.isMoving()) return;
-
-        const friction = this.getFrictionOnBody(body);
-        const speed = body.speed;
-
-        if (!friction) return;
-
-        if (friction >= speed) {
-            // friction should never reverse a body's velocity, only ever set it to 0
-            body.setVelocity({ x: 0, y: 0 });
-        } else {
-            const newVelocity = Vectors.resize(body.velocity, speed - friction);
-            body.setVelocity(newVelocity);
-        }
+        const newVelocity = this.getBodyVelocityAfterFriction(body);
+        body.setVelocity(newVelocity);
     }
 }

@@ -1,5 +1,6 @@
 import { Dimensions } from './shapes/types';
 import { Body } from './Body';
+import { Vector } from './Vectors';
 import { PubSub, PubSubable } from './PubSub';
 import { QuadTreeConfig } from './QuadTree';
 import { Force } from './Force';
@@ -41,6 +42,7 @@ export declare class World implements PubSubable<WorldEvent, WorldEventDataMap> 
     removeForce(force: Force): void;
     getBodiesInBoundingBox(boundingBox: BoundingBox): Body[];
     getFrictionOnBody(body: Body): number;
+    getBodyVelocityAfterFriction(body: Body): Vector;
     loadSerialized(serializedWorld: SerializedWorld): void;
     private updateForces;
     private updateBodies;

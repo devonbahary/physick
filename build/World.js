@@ -94,6 +94,21 @@ var World = /** @class */ (function () {
     World.prototype.getFrictionOnBody = function (body) {
         return body.mass * this.options.frictionalForce;
     };
+    World.prototype.getBodyVelocityAfterFriction = function (body) {
+        if (!body.isMoving())
+            return body.velocity;
+        var friction = this.getFrictionOnBody(body);
+        if (!friction)
+            return body.velocity;
+        var speed = body.speed;
+        if (friction >= speed) {
+            // friction should never reverse a body's velocity, only ever set its speed to 0
+            return { x: 0, y: 0 };
+        }
+        else {
+            return Vectors_1.Vectors.resize(body.velocity, speed - friction);
+        }
+    };
     // TODO: forces?
     World.prototype.loadSerialized = function (serializedWorld) {
         for (var _i = 0, _a = this.bodies; _i < _a.length; _i++) {
@@ -191,20 +206,8 @@ var World = /** @class */ (function () {
         }
     };
     World.prototype.applyFriction = function (body) {
-        if (!body.isMoving())
-            return;
-        var friction = this.getFrictionOnBody(body);
-        var speed = body.speed;
-        if (!friction)
-            return;
-        if (friction >= speed) {
-            // friction should never reverse a body's velocity, only ever set it to 0
-            body.setVelocity({ x: 0, y: 0 });
-        }
-        else {
-            var newVelocity = Vectors_1.Vectors.resize(body.velocity, speed - friction);
-            body.setVelocity(newVelocity);
-        }
+        var newVelocity = this.getBodyVelocityAfterFriction(body);
+        body.setVelocity(newVelocity);
     };
     return World;
 }());
