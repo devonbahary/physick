@@ -37,6 +37,7 @@ declare class InternalNode extends Node {
 }
 export declare class QuadTree extends InternalNode {
     constructor(world: World, config?: Partial<QuadTreeConfig>);
+    getBodiesInShape(shape: Shape): Body[];
     private initWorldSubscriptions;
 }
 export {};

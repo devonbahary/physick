@@ -39,7 +39,6 @@ var __rest = (this && this.__rest) || function (s, e) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.IntervalForce = exports.ConstantForce = void 0;
 var uuid_1 = require("uuid");
-var CollisionDetection_1 = require("./collisions/CollisionDetection");
 var Vectors_1 = require("./Vectors");
 var DEFAULT_EXPIRATION = {
     duration: Infinity,
@@ -57,12 +56,10 @@ var BaseForce = /** @class */ (function () {
         var bodies = world.getBodiesInShape(this.boundingCircle);
         for (var _i = 0, bodies_1 = bodies; _i < bodies_1.length; _i++) {
             var body = bodies_1[_i];
-            if (CollisionDetection_1.CollisionDetection.hasOverlap(this.boundingCircle, body.shape)) {
-                var diffPos = Vectors_1.Vectors.subtract(body, this.boundingCircle);
-                var dissipation = this.getDissipationFactor(diffPos);
-                var force = Vectors_1.Vectors.resize(diffPos, this.magnitude * dissipation);
-                body.applyForce(force);
-            }
+            var diffPos = Vectors_1.Vectors.subtract(body, this.boundingCircle);
+            var dissipation = this.getDissipationFactor(diffPos);
+            var force = Vectors_1.Vectors.resize(diffPos, this.magnitude * dissipation);
+            body.applyForce(force);
         }
         this.expirable.applications += 1;
     };

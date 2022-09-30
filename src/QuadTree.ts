@@ -186,6 +186,11 @@ export class QuadTree extends InternalNode {
         this.initWorldSubscriptions(world);
     }
 
+    getBodiesInShape(shape: Shape): Body[] {
+        const bodies = super.getBodiesInShape(shape);
+        return bodies.filter((b) => CollisionDetection.hasOverlap(shape, b.shape));
+    }
+
     private initWorldSubscriptions(world: World): void {
         world.subscribe(WorldEvent.AddBody, (body) => {
             this.addBody(body);

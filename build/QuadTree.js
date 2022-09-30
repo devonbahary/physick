@@ -191,6 +191,10 @@ var QuadTree = /** @class */ (function (_super) {
         _this.initWorldSubscriptions(world);
         return _this;
     }
+    QuadTree.prototype.getBodiesInShape = function (shape) {
+        var bodies = _super.prototype.getBodiesInShape.call(this, shape);
+        return bodies.filter(function (b) { return CollisionDetection_1.CollisionDetection.hasOverlap(shape, b.shape); });
+    };
     QuadTree.prototype.initWorldSubscriptions = function (world) {
         var _this = this;
         world.subscribe(World_1.WorldEvent.AddBody, function (body) {

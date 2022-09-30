@@ -1,6 +1,5 @@
 import { v4 as uuid } from 'uuid';
 import { World } from './World';
-import { CollisionDetection } from './collisions/CollisionDetection';
 import { Vector, Vectors } from './Vectors';
 import { BoundingCircle } from './shapes/circles/BoundingCircle';
 
@@ -45,12 +44,10 @@ abstract class BaseForce {
         const bodies = world.getBodiesInShape(this.boundingCircle);
 
         for (const body of bodies) {
-            if (CollisionDetection.hasOverlap(this.boundingCircle, body.shape)) {
-                const diffPos = Vectors.subtract(body, this.boundingCircle);
-                const dissipation = this.getDissipationFactor(diffPos);
-                const force = Vectors.resize(diffPos, this.magnitude * dissipation);
-                body.applyForce(force);
-            }
+            const diffPos = Vectors.subtract(body, this.boundingCircle);
+            const dissipation = this.getDissipationFactor(diffPos);
+            const force = Vectors.resize(diffPos, this.magnitude * dissipation);
+            body.applyForce(force);
         }
 
         this.expirable.applications += 1;
