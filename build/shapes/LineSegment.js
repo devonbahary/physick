@@ -1,19 +1,4 @@
 "use strict";
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        if (typeof b !== "function" && b !== null)
-            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.VertLineSegment = exports.HorzLineSegment = exports.LineSegment = void 0;
 var utilities_1 = require("../utilities");
@@ -53,66 +38,50 @@ var LineSegment = /** @class */ (function () {
     LineSegment.isPoint = function (lineSegment) {
         return lineSegment.start.x === lineSegment.end.x && lineSegment.start.y === lineSegment.end.y;
     };
+    LineSegment.isHorzLine = function (lineSegment) {
+        return lineSegment.start.y === lineSegment.end.y;
+    };
+    LineSegment.isVertLine = function (lineSegment) {
+        return lineSegment.start.x === lineSegment.end.x;
+    };
     LineSegment.getOverlappingLineSegment = function (a, b) {
-        if (a instanceof HorzLineSegment && b instanceof HorzLineSegment) {
+        if (LineSegment.isHorzLine(a) && LineSegment.isHorzLine(b)) {
             var x0 = Math.max(a.x0, b.x0);
             var x1 = Math.min(a.x1, b.x1);
-            if (a.y !== b.y ||
+            if (a.y0 !== b.y0 || // y0 and y1 will be the same
                 !(0, utilities_1.isInRange)(a.x0, x0, a.x1) ||
                 !(0, utilities_1.isInRange)(a.x0, x1, a.x1) ||
                 !(0, utilities_1.isInRange)(b.x0, x0, b.x1) ||
                 !(0, utilities_1.isInRange)(b.x0, x1, b.x1)) {
                 throw new Error("can't get overlap of incompatible line segments: ".concat(JSON.stringify(a), ", ").concat(JSON.stringify(b)));
             }
-            return new HorzLineSegment({ x0: x0, x1: x1, y: a.y }); // a.y === b.y
+            return (0, exports.HorzLineSegment)({ x0: x0, x1: x1, y: a.start.y }); // y0 and y1 will be the same
         }
-        if (a instanceof VertLineSegment && b instanceof VertLineSegment) {
+        if (LineSegment.isVertLine(a) && LineSegment.isVertLine(b)) {
             var y0 = Math.max(a.y0, b.y0);
             var y1 = Math.min(a.y1, b.y1);
-            if (a.x !== b.x ||
+            if (a.x0 !== b.x0 || // x0 and x1 will be the same
                 !(0, utilities_1.isInRange)(a.y0, y0, a.y1) ||
                 !(0, utilities_1.isInRange)(a.y0, y1, a.y1) ||
                 !(0, utilities_1.isInRange)(b.y0, y0, b.y1) ||
                 !(0, utilities_1.isInRange)(b.y0, y1, b.y1)) {
                 throw new Error("can't get overlap of incompatible line segments: ".concat(JSON.stringify(a), ", ").concat(JSON.stringify(b)));
             }
-            return new VertLineSegment({ y0: y0, y1: y1, x: a.x }); // a.x === b.x
+            return (0, exports.VertLineSegment)({ y0: y0, y1: y1, x: a.x0 }); // x0 and x1 will be the same
         }
         throw new Error("can only getOverlappingLineSegment() for mutually vertical / horizontal lines");
     };
     return LineSegment;
 }());
 exports.LineSegment = LineSegment;
-var HorzLineSegment = /** @class */ (function (_super) {
-    __extends(HorzLineSegment, _super);
-    function HorzLineSegment(args) {
-        var x0 = args.x0, x1 = args.x1, y = args.y;
-        return _super.call(this, { x: x0, y: y }, { x: x1, y: y }) || this;
-    }
-    Object.defineProperty(HorzLineSegment.prototype, "y", {
-        get: function () {
-            return this.start.y; // arbitrarily choosing start.y instead of end.y
-        },
-        enumerable: false,
-        configurable: true
-    });
-    return HorzLineSegment;
-}(LineSegment));
+var HorzLineSegment = function (args) {
+    var x0 = args.x0, x1 = args.x1, y = args.y;
+    return new LineSegment({ x: x0, y: y }, { x: x1, y: y });
+};
 exports.HorzLineSegment = HorzLineSegment;
-var VertLineSegment = /** @class */ (function (_super) {
-    __extends(VertLineSegment, _super);
-    function VertLineSegment(args) {
-        var x = args.x, y0 = args.y0, y1 = args.y1;
-        return _super.call(this, { x: x, y: y0 }, { x: x, y: y1 }) || this;
-    }
-    Object.defineProperty(VertLineSegment.prototype, "x", {
-        get: function () {
-            return this.start.x; // arbitrarily choosing start.y instead of end.y
-        },
-        enumerable: false,
-        configurable: true
-    });
-    return VertLineSegment;
-}(LineSegment));
+var VertLineSegment = function (args) {
+    var x = args.x, y0 = args.y0, y1 = args.y1;
+    return new LineSegment({ x: x, y: y0 }, { x: x, y: y1 });
+};
 exports.VertLineSegment = VertLineSegment;
-//# sourceMappingURL=LineSegments.js.map
+//# sourceMappingURL=LineSegment.js.map

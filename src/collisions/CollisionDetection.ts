@@ -31,6 +31,7 @@ export class CollisionDetection {
             if (isCircle(b)) {
                 return CollisionDetection.getCircleVsCircleOverlap(a, b);
             }
+
             if (isRect(b)) {
                 return CollisionDetection.getCircleVsRectOverlap(a, b);
             }

@@ -2,12 +2,12 @@ import { Body } from '../Body';
 import { Circle } from '../shapes/circles/Circle';
 import { Rect } from '../shapes/rects/Rect';
 import { Particle } from '../shapes/Particle';
-import { HorzLineSegment, LineSegment, LineSegments, VertLineSegment } from '../shapes/LineSegments';
 import { Vector, Vectors } from '../Vectors';
 import { isInRange, quadratic, roundForFloatingPoint } from '../utilities';
 import { Collision, CollisionEvent } from './types';
 import { CollisionDetection } from './CollisionDetection';
 import { World } from '../World';
+import { HorzLineSegment, LineSegment, VertLineSegment } from '../shapes/LineSegments';
 
 const isCollisionInThisTimestep = (t: number, dt: number): boolean => {
     const rounded = roundForFloatingPoint(t);
@@ -270,12 +270,12 @@ export class ContinuousCollisionDetection {
             if (timeOfCollision !== null) {
                 const movingSideAtTimeOfCollision = getMovingSideAtTimeOfCollision(timeOfCollision);
 
-                const lineSegmentContact = LineSegments.getOverlappingSegment(
+                const lineSegmentContact = LineSegment.getOverlappingLineSegment(
                     actualCollisionSide,
                     movingSideAtTimeOfCollision,
                 );
 
-                if (!LineSegments.isPoint(lineSegmentContact)) {
+                if (!LineSegment.isPoint(lineSegmentContact)) {
                     collisions.push({
                         timeOfCollision,
                         collisionVector,
@@ -300,7 +300,9 @@ export class ContinuousCollisionDetection {
                 x1: minkowskiSumB.x1,
                 y: minkowskiSumB.y0,
             });
-            const actualTopB = new HorzLineSegment({ x0: b.x0, x1: b.x1, y: b.y0 });
+
+            const collisionY = b.y0;
+            const actualTopB = new HorzLineSegment({ x0: b.x0, x1: b.x1, y: collisionY });
 
             addSideCollision(
                 minkowskiTopB,
@@ -309,7 +311,7 @@ export class ContinuousCollisionDetection {
                     new HorzLineSegment({
                         x0: a.x0 + dx * t,
                         x1: a.x1 + dx * t,
-                        y: actualTopB.y,
+                        y: collisionY,
                     }),
                 { x: 0, y: yAxisCollisionDistance },
             );
@@ -321,7 +323,9 @@ export class ContinuousCollisionDetection {
                 x1: minkowskiSumB.x1,
                 y: minkowskiSumB.y1,
             });
-            const actualBottomB = new HorzLineSegment({ x0: b.x0, x1: b.x1, y: b.y1 });
+
+            const collisionY = b.y1;
+            const actualBottomB = new HorzLineSegment({ x0: b.x0, x1: b.x1, y: collisionY });
 
             addSideCollision(
                 minkowskiBottomB,
@@ -330,7 +334,7 @@ export class ContinuousCollisionDetection {
                     new HorzLineSegment({
                         x0: a.x0 + dx * t,
                         x1: a.x1 + dx * t,
-                        y: actualBottomB.y,
+                        y: collisionY,
                     }),
                 { x: 0, y: -yAxisCollisionDistance },
             );
@@ -342,7 +346,9 @@ export class ContinuousCollisionDetection {
                 y0: minkowskiSumB.y0,
                 y1: minkowskiSumB.y1,
             });
-            const actualRightB = new VertLineSegment({ y0: b.y0, y1: b.y1, x: b.x1 });
+
+            const collisionX = b.x1;
+            const actualRightB = new VertLineSegment({ y0: b.y0, y1: b.y1, x: collisionX });
 
             addSideCollision(
                 minkowskiRightB,
@@ -351,7 +357,7 @@ export class ContinuousCollisionDetection {
                     new VertLineSegment({
                         y0: a.y0 + dy * t,
                         y1: a.y1 + dy * t,
-                        x: actualRightB.x,
+                        x: collisionX,
                     }),
                 { x: -xAxisCollisionDistance, y: 0 },
             );
@@ -363,16 +369,18 @@ export class ContinuousCollisionDetection {
                 y0: minkowskiSumB.y0,
                 y1: minkowskiSumB.y1,
             });
-            const rectBLeftSide = new VertLineSegment({ y0: b.y0, y1: b.y1, x: b.x0 });
+
+            const collisionX = b.x0;
+            const actualLeftB = new VertLineSegment({ y0: b.y0, y1: b.y1, x: collisionX });
 
             addSideCollision(
                 minkowskiLeft,
-                rectBLeftSide,
+                actualLeftB,
                 (t) =>
                     new VertLineSegment({
                         y0: a.y0 + dy * t,
                         y1: a.y1 + dy * t,
-                        x: rectBLeftSide.x,
+                        x: collisionX,
                     }),
                 { x: xAxisCollisionDistance, y: 0 },
             );
@@ -387,6 +395,10 @@ export class ContinuousCollisionDetection {
             y: pointY,
             velocity: { x: dx, y: dy },
         } = point;
+
+        if (!(line instanceof HorzLineSegment) && !(line instanceof VertLineSegment)) {
+            throw new Error(`can't getPointVsLineTimeOfCollision() with non-horizontal/vertical line`);
+        }
 
         if (line instanceof HorzLineSegment) {
             if (!dy) return null;

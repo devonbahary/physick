@@ -1,4 +1,4 @@
-import { Vector } from '../Vectors';
+import { Vector } from "../Vectors";
 export declare class LineSegment {
     start: Vector;
     end: Vector;
@@ -8,6 +8,8 @@ export declare class LineSegment {
     get y0(): number;
     get y1(): number;
     static isPoint(lineSegment: LineSegment): boolean;
+    static isHorzLine(lineSegment: LineSegment): boolean;
+    static isVertLine(lineSegment: LineSegment): boolean;
     static getOverlappingLineSegment(a: LineSegment, b: LineSegment): LineSegment;
 }
 declare type HorzLineSegmentArgs = {
@@ -15,17 +17,11 @@ declare type HorzLineSegmentArgs = {
     x1: number;
     y: number;
 };
-export declare class HorzLineSegment extends LineSegment {
-    constructor(args: HorzLineSegmentArgs);
-    get y(): number;
-}
+export declare const HorzLineSegment: (args: HorzLineSegmentArgs) => LineSegment;
 declare type VertLineSegmentArgs = {
     x: number;
     y0: number;
     y1: number;
 };
-export declare class VertLineSegment extends LineSegment {
-    constructor(args: VertLineSegmentArgs);
-    get x(): number;
-}
+export declare const VertLineSegment: (args: VertLineSegmentArgs) => LineSegment;
 export {};

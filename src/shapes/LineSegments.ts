@@ -1,6 +1,71 @@
 import { isInRange } from '../utilities';
+import { Vector } from '../Vectors';
 
-export type LineSegment = HorzLineSegment | VertLineSegment;
+export class LineSegment {
+    constructor(public start: Vector, public end: Vector) {}
+
+    get x0(): number {
+        return Math.min(this.start.x, this.end.x);
+    }
+
+    get x1(): number {
+        return Math.max(this.start.x, this.end.x);
+    }
+
+    get y0(): number {
+        return Math.min(this.start.y, this.end.y);
+    }
+
+    get y1(): number {
+        return Math.max(this.start.y, this.end.y);
+    }
+
+    static isPoint(lineSegment: LineSegment): boolean {
+        return lineSegment.start.x === lineSegment.end.x && lineSegment.start.y === lineSegment.end.y;
+    }
+
+    static getOverlappingLineSegment(a: LineSegment, b: LineSegment): LineSegment {
+        if (a instanceof HorzLineSegment && b instanceof HorzLineSegment) {
+            const x0 = Math.max(a.x0, b.x0);
+            const x1 = Math.min(a.x1, b.x1);
+
+            if (
+                a.y !== b.y ||
+                !isInRange(a.x0, x0, a.x1) ||
+                !isInRange(a.x0, x1, a.x1) ||
+                !isInRange(b.x0, x0, b.x1) ||
+                !isInRange(b.x0, x1, b.x1)
+            ) {
+                throw new Error(
+                    `can't get overlap of incompatible line segments: ${JSON.stringify(a)}, ${JSON.stringify(b)}`,
+                );
+            }
+
+            return new HorzLineSegment({ x0, x1, y: a.y }); // a.y === b.y
+        }
+
+        if (a instanceof VertLineSegment && b instanceof VertLineSegment) {
+            const y0 = Math.max(a.y0, b.y0);
+            const y1 = Math.min(a.y1, b.y1);
+
+            if (
+                a.x !== b.x ||
+                !isInRange(a.y0, y0, a.y1) ||
+                !isInRange(a.y0, y1, a.y1) ||
+                !isInRange(b.y0, y0, b.y1) ||
+                !isInRange(b.y0, y1, b.y1)
+            ) {
+                throw new Error(
+                    `can't get overlap of incompatible line segments: ${JSON.stringify(a)}, ${JSON.stringify(b)}`,
+                );
+            }
+
+            return new VertLineSegment({ y0, y1, x: a.x }); // a.x === b.x
+        }
+
+        throw new Error(`can only getOverlappingLineSegment() for mutually vertical / horizontal lines`);
+    }
+}
 
 type HorzLineSegmentArgs = {
     x0: number;
@@ -8,15 +73,14 @@ type HorzLineSegmentArgs = {
     y: number;
 };
 
-export class HorzLineSegment implements HorzLineSegmentArgs {
-    public x0: number;
-    public x1: number;
-    public y: number;
+export class HorzLineSegment extends LineSegment {
+    constructor(args: HorzLineSegmentArgs) {
+        const { x0, x1, y } = args;
+        super({ x: x0, y }, { x: x1, y });
+    }
 
-    constructor({ x0, x1, y }: HorzLineSegmentArgs) {
-        this.x0 = x0;
-        this.x1 = x1;
-        this.y = y;
+    get y(): number {
+        return this.start.y; // arbitrarily choosing start.y instead of end.y
     }
 }
 
@@ -26,74 +90,13 @@ type VertLineSegmentArgs = {
     y1: number;
 };
 
-export class VertLineSegment implements VertLineSegmentArgs {
-    public x: number;
-    public y0: number;
-    public y1: number;
-
-    constructor({ x, y0, y1 }: VertLineSegmentArgs) {
-        this.x = x;
-        this.y0 = y0;
-        this.y1 = y1;
-    }
-}
-
-const invalidOverlappingSegmentsErrMessage = (a: LineSegment, b: LineSegment): string => {
-    return `can't get overlap of incompatible line segments ${JSON.stringify(a)}, ${JSON.stringify(b)}`;
-};
-
-export class LineSegments {
-    static isPoint(line: LineSegment): boolean {
-        if (line instanceof HorzLineSegment) {
-            return line.x0 === line.x1;
-        }
-
-        if (line instanceof VertLineSegment) {
-            return line.y0 === line.y1;
-        }
-
-        throw new Error(`invalid LineSegment`);
+export class VertLineSegment extends LineSegment {
+    constructor(args: VertLineSegmentArgs) {
+        const { x, y0, y1 } = args;
+        super({ x, y: y0 }, { x, y: y1 });
     }
 
-    static getOverlappingSegment(a: LineSegment, b: LineSegment): LineSegment {
-        if (a instanceof HorzLineSegment) {
-            if (b instanceof HorzLineSegment) {
-                const x0 = Math.max(a.x0, b.x0);
-                const x1 = Math.min(a.x1, b.x1);
-
-                if (
-                    a.y !== b.y ||
-                    !isInRange(a.x0, x0, a.x1) ||
-                    !isInRange(a.x0, x1, a.x1) ||
-                    !isInRange(b.x0, x0, b.x1) ||
-                    !isInRange(b.x0, x1, b.x1)
-                ) {
-                    throw new Error(invalidOverlappingSegmentsErrMessage(a, b));
-                }
-
-                return new HorzLineSegment({ x0, x1, y: a.y });
-            }
-        }
-
-        if (a instanceof VertLineSegment) {
-            if (b instanceof VertLineSegment) {
-                const y0 = Math.max(a.y0, b.y0);
-                const y1 = Math.min(a.y1, b.y1);
-
-                if (
-                    a.x !== b.x ||
-                    !isInRange(a.y0, y0, a.y1) ||
-                    !isInRange(a.y0, y1, a.y1) ||
-                    !isInRange(b.y0, y0, b.y1) ||
-                    !isInRange(b.y0, y1, b.y1)
-                ) {
-                    throw new Error(invalidOverlappingSegmentsErrMessage(a, b));
-                }
-
-                return new VertLineSegment({ y0, y1, x: a.x });
-            }
-        }
-
-        throw new Error(invalidOverlappingSegmentsErrMessage(a, b));
+    get x(): number {
+        return this.start.x; // arbitrarily choosing start.y instead of end.y
     }
 }

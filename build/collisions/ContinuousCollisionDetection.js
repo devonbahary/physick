@@ -24,10 +24,10 @@ exports.ContinuousCollisionDetection = void 0;
 var Circle_1 = require("../shapes/circles/Circle");
 var Rect_1 = require("../shapes/rects/Rect");
 var Particle_1 = require("../shapes/Particle");
-var LineSegments_1 = require("../shapes/LineSegments");
 var Vectors_1 = require("../Vectors");
 var utilities_1 = require("../utilities");
 var CollisionDetection_1 = require("./CollisionDetection");
+var LineSegments_1 = require("../shapes/LineSegments");
 var isCollisionInThisTimestep = function (t, dt) {
     var rounded = (0, utilities_1.roundForFloatingPoint)(t);
     return (0, utilities_1.isInRange)(0, rounded, dt);
@@ -227,8 +227,8 @@ var ContinuousCollisionDetection = /** @class */ (function () {
             var timeOfCollision = ContinuousCollisionDetection.getPointVsLineTimeOfCollision(a, minkowskiCollisionSide, dt);
             if (timeOfCollision !== null) {
                 var movingSideAtTimeOfCollision = getMovingSideAtTimeOfCollision(timeOfCollision);
-                var lineSegmentContact = LineSegments_1.LineSegments.getOverlappingSegment(actualCollisionSide, movingSideAtTimeOfCollision);
-                if (!LineSegments_1.LineSegments.isPoint(lineSegmentContact)) {
+                var lineSegmentContact = LineSegments_1.LineSegment.getOverlappingLineSegment(actualCollisionSide, movingSideAtTimeOfCollision);
+                if (!LineSegments_1.LineSegment.isPoint(lineSegmentContact)) {
                     collisions.push({
                         timeOfCollision: timeOfCollision,
                         collisionVector: collisionVector,
@@ -247,12 +247,13 @@ var ContinuousCollisionDetection = /** @class */ (function () {
                 x1: minkowskiSumB.x1,
                 y: minkowskiSumB.y0,
             });
-            var actualTopB_1 = new LineSegments_1.HorzLineSegment({ x0: b.x0, x1: b.x1, y: b.y0 });
-            addSideCollision(minkowskiTopB, actualTopB_1, function (t) {
+            var collisionY_1 = b.y0;
+            var actualTopB = new LineSegments_1.HorzLineSegment({ x0: b.x0, x1: b.x1, y: collisionY_1 });
+            addSideCollision(minkowskiTopB, actualTopB, function (t) {
                 return new LineSegments_1.HorzLineSegment({
                     x0: a.x0 + dx * t,
                     x1: a.x1 + dx * t,
-                    y: actualTopB_1.y,
+                    y: collisionY_1,
                 });
             }, { x: 0, y: yAxisCollisionDistance });
         }
@@ -262,12 +263,13 @@ var ContinuousCollisionDetection = /** @class */ (function () {
                 x1: minkowskiSumB.x1,
                 y: minkowskiSumB.y1,
             });
-            var actualBottomB_1 = new LineSegments_1.HorzLineSegment({ x0: b.x0, x1: b.x1, y: b.y1 });
-            addSideCollision(minkowskiBottomB, actualBottomB_1, function (t) {
+            var collisionY_2 = b.y1;
+            var actualBottomB = new LineSegments_1.HorzLineSegment({ x0: b.x0, x1: b.x1, y: collisionY_2 });
+            addSideCollision(minkowskiBottomB, actualBottomB, function (t) {
                 return new LineSegments_1.HorzLineSegment({
                     x0: a.x0 + dx * t,
                     x1: a.x1 + dx * t,
-                    y: actualBottomB_1.y,
+                    y: collisionY_2,
                 });
             }, { x: 0, y: -yAxisCollisionDistance });
         }
@@ -277,12 +279,13 @@ var ContinuousCollisionDetection = /** @class */ (function () {
                 y0: minkowskiSumB.y0,
                 y1: minkowskiSumB.y1,
             });
-            var actualRightB_1 = new LineSegments_1.VertLineSegment({ y0: b.y0, y1: b.y1, x: b.x1 });
-            addSideCollision(minkowskiRightB, actualRightB_1, function (t) {
+            var collisionX_1 = b.x1;
+            var actualRightB = new LineSegments_1.VertLineSegment({ y0: b.y0, y1: b.y1, x: collisionX_1 });
+            addSideCollision(minkowskiRightB, actualRightB, function (t) {
                 return new LineSegments_1.VertLineSegment({
                     y0: a.y0 + dy * t,
                     y1: a.y1 + dy * t,
-                    x: actualRightB_1.x,
+                    x: collisionX_1,
                 });
             }, { x: -xAxisCollisionDistance, y: 0 });
         }
@@ -292,12 +295,13 @@ var ContinuousCollisionDetection = /** @class */ (function () {
                 y0: minkowskiSumB.y0,
                 y1: minkowskiSumB.y1,
             });
-            var rectBLeftSide_1 = new LineSegments_1.VertLineSegment({ y0: b.y0, y1: b.y1, x: b.x0 });
-            addSideCollision(minkowskiLeft, rectBLeftSide_1, function (t) {
+            var collisionX_2 = b.x0;
+            var actualLeftB = new LineSegments_1.VertLineSegment({ y0: b.y0, y1: b.y1, x: collisionX_2 });
+            addSideCollision(minkowskiLeft, actualLeftB, function (t) {
                 return new LineSegments_1.VertLineSegment({
                     y0: a.y0 + dy * t,
                     y1: a.y1 + dy * t,
-                    x: rectBLeftSide_1.x,
+                    x: collisionX_2,
                 });
             }, { x: xAxisCollisionDistance, y: 0 });
         }
@@ -305,6 +309,9 @@ var ContinuousCollisionDetection = /** @class */ (function () {
     };
     ContinuousCollisionDetection.getPointVsLineTimeOfCollision = function (point, line, dt) {
         var pointX = point.x, pointY = point.y, _a = point.velocity, dx = _a.x, dy = _a.y;
+        if (!(line instanceof LineSegments_1.HorzLineSegment) && !(line instanceof LineSegments_1.VertLineSegment)) {
+            throw new Error("can't getPointVsLineTimeOfCollision() with non-horizontal/vertical line");
+        }
         if (line instanceof LineSegments_1.HorzLineSegment) {
             if (!dy)
                 return null;
