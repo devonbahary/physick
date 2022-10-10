@@ -7,6 +7,7 @@ export declare class LineSegment {
     get x1(): number;
     get y0(): number;
     get y1(): number;
+    toVector(): Vector;
     static isPoint(lineSegment: LineSegment): boolean;
     static getOverlappingLineSegment(a: LineSegment, b: LineSegment): LineSegment;
 }

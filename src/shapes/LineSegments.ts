@@ -1,5 +1,5 @@
 import { isInRange } from '../utilities';
-import { Vector } from '../Vectors';
+import { Vector, Vectors } from '../Vectors';
 
 export class LineSegment {
     constructor(public start: Vector, public end: Vector) {}
@@ -18,6 +18,10 @@ export class LineSegment {
 
     get y1(): number {
         return Math.max(this.start.y, this.end.y);
+    }
+
+    toVector(): Vector {
+        return Vectors.subtract(this.end, this.start);
     }
 
     static isPoint(lineSegment: LineSegment): boolean {

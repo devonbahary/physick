@@ -1,12 +1,13 @@
 import { BoundingBox } from './rects/BoundingBox';
 import { BoundingCircle } from './circles/BoundingCircle';
+import { LineSegment } from './LineSegments';
 
 export type Dimensions = {
     width: number;
     height: number;
 };
 
-export type Shape = BoundingBox | BoundingCircle;
+export type Shape = BoundingBox | BoundingCircle | LineSegment;
 
 export type Spatial = Dimensions & {
     x: number;

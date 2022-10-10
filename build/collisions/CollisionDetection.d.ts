@@ -7,4 +7,8 @@ export declare class CollisionDetection {
     private static getCircleVsCircleOverlap;
     private static getCircleVsRectOverlap;
     private static getRectVsRectOverlap;
+    private static getCircleVsLineOverlap;
+    private static getCircleVsPointOverlap;
+    private static getRectVsLineOverlap;
+    private static getLineVsLineOverlap;
 }

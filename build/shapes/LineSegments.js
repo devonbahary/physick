@@ -17,6 +17,7 @@ var __extends = (this && this.__extends) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.VertLineSegment = exports.HorzLineSegment = exports.LineSegment = void 0;
 var utilities_1 = require("../utilities");
+var Vectors_1 = require("../Vectors");
 var LineSegment = /** @class */ (function () {
     function LineSegment(start, end) {
         this.start = start;
@@ -50,6 +51,9 @@ var LineSegment = /** @class */ (function () {
         enumerable: false,
         configurable: true
     });
+    LineSegment.prototype.toVector = function () {
+        return Vectors_1.Vectors.subtract(this.end, this.start);
+    };
     LineSegment.isPoint = function (lineSegment) {
         return lineSegment.start.x === lineSegment.end.x && lineSegment.start.y === lineSegment.end.y;
     };
