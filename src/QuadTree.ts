@@ -37,6 +37,7 @@ class Leaf extends Node {
         super(boundingBox);
     }
 
+    // broad phase collision detection of node with shape
     getBodiesInShape(shape: Shape): Body[] {
         return this.overlapsWith(shape) ? this.bodies : [];
     }
@@ -186,6 +187,7 @@ export class QuadTree extends InternalNode {
         this.initWorldSubscriptions(world);
     }
 
+    // narrow phase collision detection of shape with bodies returned in broad phase
     getBodiesInShape(shape: Shape): Body[] {
         const bodies = super.getBodiesInShape(shape);
         return bodies.filter((b) => CollisionDetection.hasOverlap(shape, b.shape));

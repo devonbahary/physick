@@ -56,6 +56,7 @@ var Leaf = /** @class */ (function (_super) {
         _this.bodies = [];
         return _this;
     }
+    // broad phase collision detection of node with shape
     Leaf.prototype.getBodiesInShape = function (shape) {
         return this.overlapsWith(shape) ? this.bodies : [];
     };
@@ -191,6 +192,7 @@ var QuadTree = /** @class */ (function (_super) {
         _this.initWorldSubscriptions(world);
         return _this;
     }
+    // narrow phase collision detection of shape with bodies returned in broad phase
     QuadTree.prototype.getBodiesInShape = function (shape) {
         var bodies = _super.prototype.getBodiesInShape.call(this, shape);
         return bodies.filter(function (b) { return CollisionDetection_1.CollisionDetection.hasOverlap(shape, b.shape); });
