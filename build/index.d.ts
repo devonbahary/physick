@@ -3,6 +3,7 @@ export * from './shapes/circles/BoundingCircle';
 export * from './shapes/circles/Circle';
 export * from './shapes/rects/BoundingBox';
 export * from './shapes/rects/Rect';
+export * from './shapes/LineSegments';
 export * from './Character';
 export * from './Force';
 export * from './PubSub';

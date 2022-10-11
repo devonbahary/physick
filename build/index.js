@@ -19,6 +19,7 @@ __exportStar(require("./shapes/circles/BoundingCircle"), exports);
 __exportStar(require("./shapes/circles/Circle"), exports);
 __exportStar(require("./shapes/rects/BoundingBox"), exports);
 __exportStar(require("./shapes/rects/Rect"), exports);
+__exportStar(require("./shapes/LineSegments"), exports);
 __exportStar(require("./Character"), exports);
 __exportStar(require("./Force"), exports);
 __exportStar(require("./PubSub"), exports);
