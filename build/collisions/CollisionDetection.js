@@ -32,7 +32,7 @@ var CollisionDetection = /** @class */ (function () {
             if ((0, utilities_1.isRect)(b)) {
                 return CollisionDetection.getCircleVsRectOverlap(a, b);
             }
-            if (b instanceof LineSegments_1.LineSegment) {
+            if ((0, utilities_1.isLineSegment)(b)) {
                 return CollisionDetection.getCircleVsLineOverlap(a, b);
             }
         }
@@ -43,18 +43,18 @@ var CollisionDetection = /** @class */ (function () {
             if ((0, utilities_1.isRect)(b)) {
                 return CollisionDetection.getRectVsRectOverlap(a, b);
             }
-            if (b instanceof LineSegments_1.LineSegment) {
+            if ((0, utilities_1.isLineSegment)(b)) {
                 return CollisionDetection.getRectVsLineOverlap(a, b);
             }
         }
-        if (a instanceof LineSegments_1.LineSegment) {
+        if ((0, utilities_1.isLineSegment)(a)) {
             if ((0, utilities_1.isCircle)(b)) {
                 return CollisionDetection.getCircleVsLineOverlap(b, a);
             }
             if ((0, utilities_1.isRect)(b)) {
                 return CollisionDetection.getRectVsLineOverlap(b, a);
             }
-            if (b instanceof LineSegments_1.LineSegment) {
+            if ((0, utilities_1.isLineSegment)(b)) {
                 return CollisionDetection.getLineVsLineOverlap(a, b);
             }
         }
@@ -110,7 +110,14 @@ var CollisionDetection = /** @class */ (function () {
         var diffPos = Vectors_1.Vectors.subtract(circle, point);
         return Math.pow(diffPos.x, 2) + Math.pow(diffPos.y, 2) <= Math.pow(circle.radius, 2);
     };
+    CollisionDetection.getRectVsPointOverlap = function (rect, point) {
+        return (0, utilities_2.isInRange)(rect.x0, point.x, rect.x1) && (0, utilities_2.isInRange)(rect.y0, point.y, rect.y1);
+    };
     CollisionDetection.getRectVsLineOverlap = function (rect, line) {
+        if (CollisionDetection.getRectVsPointOverlap(rect, line.start) ||
+            CollisionDetection.getRectVsPointOverlap(rect, line.end)) {
+            return true;
+        }
         var topLeftCorner = { x: rect.x0, y: rect.y0 };
         var topRightCorner = { x: rect.x1, y: rect.y0 };
         var bottomRightCorner = { x: rect.x1, y: rect.y1 };

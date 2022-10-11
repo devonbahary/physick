@@ -8,6 +8,7 @@ import { Collision, CollisionEvent } from './types';
 import { CollisionDetection } from './CollisionDetection';
 import { World } from '../World';
 import { HorzLineSegment, LineSegment, VertLineSegment } from '../shapes/LineSegments';
+import { isCircle, isRect } from '../shapes/utilities';
 
 const isCollisionInThisTimestep = (t: number, dt: number): boolean => {
     const rounded = roundForFloatingPoint(t);
@@ -81,18 +82,14 @@ export class ContinuousCollisionDetection {
     }
 
     private static getCollision(a: Body, b: Body, dt: number): Collision | null {
-        if (a.shape instanceof Circle) {
-            if (b.shape instanceof Circle)
-                return ContinuousCollisionDetection.getCircleVsCircleCollision(a.shape, b.shape, dt);
-            if (b.shape instanceof Rect)
-                return ContinuousCollisionDetection.getCircleVsRectCollision(a.shape, b.shape, dt);
+        if (isCircle(a.shape)) {
+            if (isCircle(b.shape)) return ContinuousCollisionDetection.getCircleVsCircleCollision(a.shape, b.shape, dt);
+            if (isRect(b.shape)) return ContinuousCollisionDetection.getCircleVsRectCollision(a.shape, b.shape, dt);
         }
 
-        if (a.shape instanceof Rect) {
-            if (b.shape instanceof Circle)
-                return ContinuousCollisionDetection.getRectVsCircleCollision(a.shape, b.shape, dt);
-            if (b.shape instanceof Rect)
-                return ContinuousCollisionDetection.getRectVsRectCollision(a.shape, b.shape, dt);
+        if (isRect(a.shape)) {
+            if (isCircle(b.shape)) return ContinuousCollisionDetection.getRectVsCircleCollision(a.shape, b.shape, dt);
+            if (isRect(b.shape)) return ContinuousCollisionDetection.getRectVsRectCollision(a.shape, b.shape, dt);
         }
 
         return null;
@@ -112,8 +109,8 @@ export class ContinuousCollisionDetection {
 
         const diffX = a.x - b.x;
         const diffY = a.y - b.y;
-        const radiusA = a instanceof Circle ? a.radius : 0;
-        const radiusB = b instanceof Circle ? b.radius : 0;
+        const radiusA = isCircle(a) ? a.radius : 0;
+        const radiusB = isCircle(b) ? b.radius : 0;
 
         const coefficientA = dx ** 2 + dy ** 2;
         const coefficientB = 2 * dx * diffX + 2 * dy * diffY;

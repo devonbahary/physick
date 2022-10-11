@@ -21,13 +21,13 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ContinuousCollisionDetection = void 0;
-var Circle_1 = require("../shapes/circles/Circle");
 var Rect_1 = require("../shapes/rects/Rect");
 var Particle_1 = require("../shapes/Particle");
 var Vectors_1 = require("../Vectors");
 var utilities_1 = require("../utilities");
 var CollisionDetection_1 = require("./CollisionDetection");
 var LineSegments_1 = require("../shapes/LineSegments");
+var utilities_2 = require("../shapes/utilities");
 var isCollisionInThisTimestep = function (t, dt) {
     var rounded = (0, utilities_1.roundForFloatingPoint)(t);
     return (0, utilities_1.isInRange)(0, rounded, dt);
@@ -81,16 +81,16 @@ var ContinuousCollisionDetection = /** @class */ (function () {
         }, null);
     };
     ContinuousCollisionDetection.getCollision = function (a, b, dt) {
-        if (a.shape instanceof Circle_1.Circle) {
-            if (b.shape instanceof Circle_1.Circle)
+        if ((0, utilities_2.isCircle)(a.shape)) {
+            if ((0, utilities_2.isCircle)(b.shape))
                 return ContinuousCollisionDetection.getCircleVsCircleCollision(a.shape, b.shape, dt);
-            if (b.shape instanceof Rect_1.Rect)
+            if ((0, utilities_2.isRect)(b.shape))
                 return ContinuousCollisionDetection.getCircleVsRectCollision(a.shape, b.shape, dt);
         }
-        if (a.shape instanceof Rect_1.Rect) {
-            if (b.shape instanceof Circle_1.Circle)
+        if ((0, utilities_2.isRect)(a.shape)) {
+            if ((0, utilities_2.isCircle)(b.shape))
                 return ContinuousCollisionDetection.getRectVsCircleCollision(a.shape, b.shape, dt);
-            if (b.shape instanceof Rect_1.Rect)
+            if ((0, utilities_2.isRect)(b.shape))
                 return ContinuousCollisionDetection.getRectVsRectCollision(a.shape, b.shape, dt);
         }
         return null;
@@ -102,8 +102,8 @@ var ContinuousCollisionDetection = /** @class */ (function () {
         var _a = a.velocity, dx = _a.x, dy = _a.y;
         var diffX = a.x - b.x;
         var diffY = a.y - b.y;
-        var radiusA = a instanceof Circle_1.Circle ? a.radius : 0;
-        var radiusB = b instanceof Circle_1.Circle ? b.radius : 0;
+        var radiusA = (0, utilities_2.isCircle)(a) ? a.radius : 0;
+        var radiusB = (0, utilities_2.isCircle)(b) ? b.radius : 0;
         var coefficientA = Math.pow(dx, 2) + Math.pow(dy, 2);
         var coefficientB = 2 * dx * diffX + 2 * dy * diffY;
         var coefficientC = Math.pow(diffX, 2) + Math.pow(diffY, 2) - Math.pow((radiusA + radiusB), 2);

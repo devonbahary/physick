@@ -2,7 +2,7 @@ import { Body } from '../Body';
 import { BoundingBox } from '../shapes/rects/BoundingBox';
 import { BoundingCircle } from '../shapes/circles/BoundingCircle';
 import { Shape } from '../shapes/types';
-import { isCircle, isRect } from '../shapes/utilities';
+import { isCircle, isLineSegment, isRect } from '../shapes/utilities';
 import { Vector, Vectors } from '../Vectors';
 import { LineSegment } from '../shapes/LineSegments';
 import { isInRange } from '../utilities';
@@ -38,7 +38,7 @@ export class CollisionDetection {
                 return CollisionDetection.getCircleVsRectOverlap(a, b);
             }
 
-            if (b instanceof LineSegment) {
+            if (isLineSegment(b)) {
                 return CollisionDetection.getCircleVsLineOverlap(a, b);
             }
         }
@@ -52,12 +52,12 @@ export class CollisionDetection {
                 return CollisionDetection.getRectVsRectOverlap(a, b);
             }
 
-            if (b instanceof LineSegment) {
+            if (isLineSegment(b)) {
                 return CollisionDetection.getRectVsLineOverlap(a, b);
             }
         }
 
-        if (a instanceof LineSegment) {
+        if (isLineSegment(a)) {
             if (isCircle(b)) {
                 return CollisionDetection.getCircleVsLineOverlap(b, a);
             }
@@ -66,7 +66,7 @@ export class CollisionDetection {
                 return CollisionDetection.getRectVsLineOverlap(b, a);
             }
 
-            if (b instanceof LineSegment) {
+            if (isLineSegment(b)) {
                 return CollisionDetection.getLineVsLineOverlap(a, b);
             }
         }
@@ -136,7 +136,18 @@ export class CollisionDetection {
         return diffPos.x ** 2 + diffPos.y ** 2 <= circle.radius ** 2;
     }
 
+    private static getRectVsPointOverlap(rect: BoundingBox, point: Vector): boolean {
+        return isInRange(rect.x0, point.x, rect.x1) && isInRange(rect.y0, point.y, rect.y1);
+    }
+
     private static getRectVsLineOverlap(rect: BoundingBox, line: LineSegment): boolean {
+        if (
+            CollisionDetection.getRectVsPointOverlap(rect, line.start) ||
+            CollisionDetection.getRectVsPointOverlap(rect, line.end)
+        ) {
+            return true;
+        }
+
         const topLeftCorner = { x: rect.x0, y: rect.y0 };
         const topRightCorner = { x: rect.x1, y: rect.y0 };
         const bottomRightCorner = { x: rect.x1, y: rect.y1 };
