@@ -35,6 +35,9 @@ var CollisionDetection = /** @class */ (function () {
             if ((0, utilities_1.isLineSegment)(b)) {
                 return CollisionDetection.getCircleVsLineOverlap(a, b);
             }
+            if ((0, utilities_1.isPoint)(b)) {
+                return CollisionDetection.getCircleVsPointOverlap(a, b);
+            }
         }
         if ((0, utilities_1.isRect)(a)) {
             if ((0, utilities_1.isCircle)(b)) {
@@ -46,6 +49,9 @@ var CollisionDetection = /** @class */ (function () {
             if ((0, utilities_1.isLineSegment)(b)) {
                 return CollisionDetection.getRectVsLineOverlap(a, b);
             }
+            if ((0, utilities_1.isPoint)(b)) {
+                return CollisionDetection.getRectVsPointOverlap(a, b);
+            }
         }
         if ((0, utilities_1.isLineSegment)(a)) {
             if ((0, utilities_1.isCircle)(b)) {
@@ -56,6 +62,17 @@ var CollisionDetection = /** @class */ (function () {
             }
             if ((0, utilities_1.isLineSegment)(b)) {
                 return CollisionDetection.getLineVsLineOverlap(a, b);
+            }
+        }
+        if ((0, utilities_1.isPoint)(a)) {
+            if ((0, utilities_1.isCircle)(b)) {
+                return CollisionDetection.getCircleVsPointOverlap(b, a);
+            }
+            if ((0, utilities_1.isRect)(b)) {
+                return CollisionDetection.getRectVsPointOverlap(b, a);
+            }
+            if ((0, utilities_1.isPoint)(b)) {
+                return CollisionDetection.getPointVsPointOverlap(a, b);
             }
         }
         throw new Error("can't determine overlap for shapes: ".concat(JSON.stringify(a), ", ").concat(JSON.stringify(b)));
@@ -143,6 +160,9 @@ var CollisionDetection = /** @class */ (function () {
         var uA = ((x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3)) / ((y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1));
         var uB = ((x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3)) / ((y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1));
         return (0, utilities_2.isInRange)(0, uA, 1) && (0, utilities_2.isInRange)(0, uB, 1);
+    };
+    CollisionDetection.getPointVsPointOverlap = function (a, b) {
+        return a.x === b.x && a.y === b.y;
     };
     return CollisionDetection;
 }());

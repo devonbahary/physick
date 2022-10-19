@@ -2,10 +2,11 @@ import { Body } from '../Body';
 import { BoundingBox } from '../shapes/rects/BoundingBox';
 import { BoundingCircle } from '../shapes/circles/BoundingCircle';
 import { Shape } from '../shapes/types';
-import { isCircle, isLineSegment, isRect } from '../shapes/utilities';
+import { isCircle, isLineSegment, isPoint, isRect } from '../shapes/utilities';
 import { Vector, Vectors } from '../Vectors';
 import { LineSegment } from '../shapes/LineSegments';
 import { isInRange } from '../utilities';
+import { Particle } from '../shapes/Particle';
 
 export class CollisionDetection {
     static getMovementBoundingBox(body: Body): BoundingBox | null {
@@ -41,6 +42,10 @@ export class CollisionDetection {
             if (isLineSegment(b)) {
                 return CollisionDetection.getCircleVsLineOverlap(a, b);
             }
+
+            if (isPoint(b)) {
+                return CollisionDetection.getCircleVsPointOverlap(a, b);
+            }
         }
 
         if (isRect(a)) {
@@ -55,6 +60,10 @@ export class CollisionDetection {
             if (isLineSegment(b)) {
                 return CollisionDetection.getRectVsLineOverlap(a, b);
             }
+
+            if (isPoint(b)) {
+                return CollisionDetection.getRectVsPointOverlap(a, b);
+            }
         }
 
         if (isLineSegment(a)) {
@@ -68,6 +77,20 @@ export class CollisionDetection {
 
             if (isLineSegment(b)) {
                 return CollisionDetection.getLineVsLineOverlap(a, b);
+            }
+        }
+
+        if (isPoint(a)) {
+            if (isCircle(b)) {
+                return CollisionDetection.getCircleVsPointOverlap(b, a);
+            }
+
+            if (isRect(b)) {
+                return CollisionDetection.getRectVsPointOverlap(b, a);
+            }
+
+            if (isPoint(b)) {
+                return CollisionDetection.getPointVsPointOverlap(a, b);
             }
         }
 
@@ -184,5 +207,9 @@ export class CollisionDetection {
         const uB = ((x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3)) / ((y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1));
 
         return isInRange(0, uA, 1) && isInRange(0, uB, 1);
+    }
+
+    private static getPointVsPointOverlap(a: Particle, b: Particle): boolean {
+        return a.x === b.x && a.y === b.y;
     }
 }

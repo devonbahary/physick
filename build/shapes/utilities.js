@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.isLineSegment = exports.isCircle = exports.isRect = void 0;
+exports.isPoint = exports.isLineSegment = exports.isCircle = exports.isRect = void 0;
 var isRect = function (rect) {
     for (var _i = 0, _a = ['x0', 'x1', 'y0', 'y1', 'width', 'height']; _i < _a.length; _i++) {
         var prop = _a[_i];
@@ -30,4 +30,18 @@ var isLineSegment = function (line) {
     return true;
 };
 exports.isLineSegment = isLineSegment;
+var isPoint = function (point) {
+    for (var _i = 0, _a = ['x', 'y']; _i < _a.length; _i++) {
+        var prop = _a[_i];
+        if (!(prop in point))
+            return false;
+    }
+    for (var _b = 0, _c = ['radius', 'width', 'height']; _b < _c.length; _b++) {
+        var prop = _c[_b];
+        if (prop in point)
+            return false;
+    }
+    return true;
+};
+exports.isPoint = isPoint;
 //# sourceMappingURL=utilities.js.map
