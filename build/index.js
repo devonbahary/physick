@@ -26,6 +26,7 @@ __exportStar(require("./PubSub"), exports);
 __exportStar(require("./World"), exports);
 __exportStar(require("./Vectors"), exports);
 __exportStar(require("./shapes/types"), exports);
+__exportStar(require("./shapes/utilities"), exports);
 __exportStar(require("./utilities"), exports);
 __exportStar(require("./Serializer"), exports);
 __exportStar(require("./collisions/ContinuousCollisionDetection"), exports);

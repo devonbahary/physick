@@ -10,6 +10,7 @@ export * from './PubSub';
 export * from './World';
 export * from './Vectors';
 export * from './shapes/types';
+export * from './shapes/utilities';
 export * from './utilities';
 export * from './Serializer';
 export * from './collisions/ContinuousCollisionDetection';
