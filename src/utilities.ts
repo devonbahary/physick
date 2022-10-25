@@ -1,8 +1,8 @@
 const MS_IN_SECOND = 1000;
 const DESIRED_FRAMES_PER_SECOND = 60;
 
-export const isInRange = (min: number, num: number, max: number): boolean => {
-    return num >= min && num <= max;
+export const isInRange = (min: number, num: number, max: number, inclusive: boolean): boolean => {
+    return inclusive ? num >= min && num <= max : num > min && num < max;
 };
 
 export const quadratic = (a: number, b: number, c: number): number[] => {

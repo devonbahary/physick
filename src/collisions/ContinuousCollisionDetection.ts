@@ -12,7 +12,7 @@ import { isCircle, isRect } from '../shapes/utilities';
 
 const isCollisionInThisTimestep = (t: number, dt: number): boolean => {
     const rounded = roundForFloatingPoint(t);
-    return isInRange(0, rounded, dt);
+    return isInRange(0, rounded, dt, true);
 };
 
 const isMovingTowards = (a: Particle, b: Particle): boolean => {
@@ -405,7 +405,7 @@ export class ContinuousCollisionDetection {
 
             if (isCollisionInThisTimestep(t, dt)) {
                 const pointXAtTimeOfCollision = pointX + dx * t;
-                if (isInRange(x0, pointXAtTimeOfCollision, x1)) return t;
+                if (isInRange(x0, pointXAtTimeOfCollision, x1, true)) return t;
             }
         }
 
@@ -417,7 +417,7 @@ export class ContinuousCollisionDetection {
 
             if (isCollisionInThisTimestep(t, dt)) {
                 const pointYAtTimeOfCollision = pointY + dy * t;
-                if (isInRange(y0, pointYAtTimeOfCollision, y1)) return t;
+                if (isInRange(y0, pointYAtTimeOfCollision, y1, true)) return t;
             }
         }
 

@@ -30,7 +30,7 @@ var LineSegments_1 = require("../shapes/LineSegments");
 var utilities_2 = require("../shapes/utilities");
 var isCollisionInThisTimestep = function (t, dt) {
     var rounded = (0, utilities_1.roundForFloatingPoint)(t);
-    return (0, utilities_1.isInRange)(0, rounded, dt);
+    return (0, utilities_1.isInRange)(0, rounded, dt, true);
 };
 var isMovingTowards = function (a, b) {
     var diffVector = Vectors_1.Vectors.subtract(b, a);
@@ -319,7 +319,7 @@ var ContinuousCollisionDetection = /** @class */ (function () {
             var t = (lineY - pointY) / dy;
             if (isCollisionInThisTimestep(t, dt)) {
                 var pointXAtTimeOfCollision = pointX + dx * t;
-                if ((0, utilities_1.isInRange)(x0, pointXAtTimeOfCollision, x1))
+                if ((0, utilities_1.isInRange)(x0, pointXAtTimeOfCollision, x1, true))
                     return t;
             }
         }
@@ -330,7 +330,7 @@ var ContinuousCollisionDetection = /** @class */ (function () {
             var t = (lineX - pointX) / dx;
             if (isCollisionInThisTimestep(t, dt)) {
                 var pointYAtTimeOfCollision = pointY + dy * t;
-                if ((0, utilities_1.isInRange)(y0, pointYAtTimeOfCollision, y1))
+                if ((0, utilities_1.isInRange)(y0, pointYAtTimeOfCollision, y1, true))
                     return t;
             }
         }

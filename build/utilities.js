@@ -3,8 +3,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getDtFromTimeDiff = exports.roundForFloatingPoint = exports.quadratic = exports.isInRange = void 0;
 var MS_IN_SECOND = 1000;
 var DESIRED_FRAMES_PER_SECOND = 60;
-var isInRange = function (min, num, max) {
-    return num >= min && num <= max;
+var isInRange = function (min, num, max, inclusive) {
+    return inclusive ? num >= min && num <= max : num > min && num < max;
 };
 exports.isInRange = isInRange;
 var quadratic = function (a, b, c) {

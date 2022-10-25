@@ -29,64 +29,64 @@ export class CollisionDetection {
         return new BoundingBox(bounds);
     }
 
-    static hasOverlap(a: Shape, b: Shape): boolean {
+    static hasOverlap(a: Shape, b: Shape, inclusive = true): boolean {
         if (isCircle(a)) {
             if (isCircle(b)) {
-                return CollisionDetection.getCircleVsCircleOverlap(a, b);
+                return CollisionDetection.getCircleVsCircleOverlap(a, b, inclusive);
             }
 
             if (isRect(b)) {
-                return CollisionDetection.getCircleVsRectOverlap(a, b);
+                return CollisionDetection.getCircleVsRectOverlap(a, b, inclusive);
             }
 
             if (isLineSegment(b)) {
-                return CollisionDetection.getCircleVsLineOverlap(a, b);
+                return CollisionDetection.getCircleVsLineOverlap(a, b, inclusive);
             }
 
             if (isPoint(b)) {
-                return CollisionDetection.getCircleVsPointOverlap(a, b);
+                return CollisionDetection.getCircleVsPointOverlap(a, b, inclusive);
             }
         }
 
         if (isRect(a)) {
             if (isCircle(b)) {
-                return CollisionDetection.getCircleVsRectOverlap(b, a);
+                return CollisionDetection.getCircleVsRectOverlap(b, a, inclusive);
             }
 
             if (isRect(b)) {
-                return CollisionDetection.getRectVsRectOverlap(a, b);
+                return CollisionDetection.getRectVsRectOverlap(a, b, inclusive);
             }
 
             if (isLineSegment(b)) {
-                return CollisionDetection.getRectVsLineOverlap(a, b);
+                return CollisionDetection.getRectVsLineOverlap(a, b, inclusive);
             }
 
             if (isPoint(b)) {
-                return CollisionDetection.getRectVsPointOverlap(a, b);
+                return CollisionDetection.getRectVsPointOverlap(a, b, inclusive);
             }
         }
 
         if (isLineSegment(a)) {
             if (isCircle(b)) {
-                return CollisionDetection.getCircleVsLineOverlap(b, a);
+                return CollisionDetection.getCircleVsLineOverlap(b, a, inclusive);
             }
 
             if (isRect(b)) {
-                return CollisionDetection.getRectVsLineOverlap(b, a);
+                return CollisionDetection.getRectVsLineOverlap(b, a, inclusive);
             }
 
             if (isLineSegment(b)) {
-                return CollisionDetection.getLineVsLineOverlap(a, b);
+                return CollisionDetection.getLineVsLineOverlap(a, b, inclusive);
             }
         }
 
         if (isPoint(a)) {
             if (isCircle(b)) {
-                return CollisionDetection.getCircleVsPointOverlap(b, a);
+                return CollisionDetection.getCircleVsPointOverlap(b, a, inclusive);
             }
 
             if (isRect(b)) {
-                return CollisionDetection.getRectVsPointOverlap(b, a);
+                return CollisionDetection.getRectVsPointOverlap(b, a, inclusive);
             }
 
             if (isPoint(b)) {
@@ -97,39 +97,55 @@ export class CollisionDetection {
         throw new Error(`can't determine overlap for shapes: ${JSON.stringify(a)}, ${JSON.stringify(b)}`);
     }
 
-    private static getCircleVsCircleOverlap(a: BoundingCircle, b: BoundingCircle): boolean {
+    private static getCircleVsCircleOverlap(a: BoundingCircle, b: BoundingCircle, inclusive: boolean): boolean {
         const diffPos = Vectors.subtract(a, b);
         const radiiLength = a.radius + b.radius;
-        return diffPos.x ** 2 + diffPos.y ** 2 <= radiiLength ** 2;
+        return inclusive
+            ? diffPos.x ** 2 + diffPos.y ** 2 <= radiiLength ** 2
+            : diffPos.x ** 2 + diffPos.y ** 2 < radiiLength ** 2;
     }
 
     // https://stackoverflow.com/questions/401847/circle-rectangle-collision-detection-intersection
-    private static getCircleVsRectOverlap(circle: BoundingCircle, rect: BoundingBox): boolean {
+    private static getCircleVsRectOverlap(circle: BoundingCircle, rect: BoundingBox, inclusive: boolean): boolean {
         const dx = Math.abs(circle.x - rect.x);
         const dy = Math.abs(circle.y - rect.y);
 
         // check if circle is beyond the length of the radius and half the rect
-        if (dx > rect.width / 2 + circle.radius) return false;
-        if (dy > rect.height / 2 + circle.radius) return false;
+        if (inclusive) {
+            if (dx > rect.width / 2 + circle.radius) return false;
+            if (dy > rect.height / 2 + circle.radius) return false;
+        } else {
+            if (dx >= rect.width / 2 + circle.radius) return false;
+            if (dy >= rect.height / 2 + circle.radius) return false;
+        }
 
         // check if is circle is close enough to rect to guarantee intersection
-        if (dx <= rect.width / 2) return true;
-        if (dy <= rect.height / 2) return true;
+        if (inclusive) {
+            if (dx <= rect.width / 2) return true;
+            if (dy <= rect.height / 2) return true;
+        } else {
+            if (dx < rect.width / 2) return true;
+            if (dy < rect.height / 2) return true;
+        }
 
         const circleDistanceFromCorner = (dx - rect.width / 2) ** 2 + (dy - rect.height / 2) ** 2;
 
-        return circleDistanceFromCorner <= circle.radius ** 2;
+        return inclusive
+            ? circleDistanceFromCorner <= circle.radius ** 2
+            : circleDistanceFromCorner < circle.radius ** 2;
     }
 
-    private static getRectVsRectOverlap(a: BoundingBox, b: BoundingBox): boolean {
-        return a.x0 <= b.x1 && a.x1 >= b.x0 && a.y0 <= b.y1 && a.y1 >= b.y0;
+    private static getRectVsRectOverlap(a: BoundingBox, b: BoundingBox, inclusive: boolean): boolean {
+        return inclusive
+            ? a.x0 <= b.x1 && a.x1 >= b.x0 && a.y0 <= b.y1 && a.y1 >= b.y0
+            : a.x0 < b.x1 && a.x1 > b.x0 && a.y0 < b.y1 && a.y1 > b.y0;
     }
 
     // https://www.jeffreythompson.org/collision-detection/line-circle.php
-    private static getCircleVsLineOverlap(circle: BoundingCircle, line: LineSegment): boolean {
+    private static getCircleVsLineOverlap(circle: BoundingCircle, line: LineSegment, inclusive: boolean): boolean {
         // check if either end of the line segment exists inside the circle
-        if (CollisionDetection.getCircleVsPointOverlap(circle, line.start)) return true;
-        if (CollisionDetection.getCircleVsPointOverlap(circle, line.end)) return true;
+        if (CollisionDetection.getCircleVsPointOverlap(circle, line.start, inclusive)) return true;
+        if (CollisionDetection.getCircleVsPointOverlap(circle, line.end, inclusive)) return true;
 
         const lineAsVector = line.toVector();
         const startToCircle = Vectors.subtract(circle, line.start);
@@ -151,22 +167,26 @@ export class CollisionDetection {
         );
 
         // circle overlaps with line if the radius is >= than the distance to closest point
-        return closestPointToCircleVector.x ** 2 + closestPointToCircleVector.y ** 2 <= circle.radius ** 2;
+        return inclusive
+            ? closestPointToCircleVector.x ** 2 + closestPointToCircleVector.y ** 2 <= circle.radius ** 2
+            : closestPointToCircleVector.x ** 2 + closestPointToCircleVector.y ** 2 < circle.radius ** 2;
     }
 
-    private static getCircleVsPointOverlap(circle: BoundingCircle, point: Vector): boolean {
+    private static getCircleVsPointOverlap(circle: BoundingCircle, point: Vector, inclusive: boolean): boolean {
         const diffPos = Vectors.subtract(circle, point);
-        return diffPos.x ** 2 + diffPos.y ** 2 <= circle.radius ** 2;
+        return inclusive
+            ? diffPos.x ** 2 + diffPos.y ** 2 <= circle.radius ** 2
+            : diffPos.x ** 2 + diffPos.y ** 2 < circle.radius ** 2;
     }
 
-    private static getRectVsPointOverlap(rect: BoundingBox, point: Vector): boolean {
-        return isInRange(rect.x0, point.x, rect.x1) && isInRange(rect.y0, point.y, rect.y1);
+    private static getRectVsPointOverlap(rect: BoundingBox, point: Vector, inclusive: boolean): boolean {
+        return isInRange(rect.x0, point.x, rect.x1, inclusive) && isInRange(rect.y0, point.y, rect.y1, inclusive);
     }
 
-    private static getRectVsLineOverlap(rect: BoundingBox, line: LineSegment): boolean {
+    private static getRectVsLineOverlap(rect: BoundingBox, line: LineSegment, inclusive: boolean): boolean {
         if (
-            CollisionDetection.getRectVsPointOverlap(rect, line.start) ||
-            CollisionDetection.getRectVsPointOverlap(rect, line.end)
+            CollisionDetection.getRectVsPointOverlap(rect, line.start, inclusive) ||
+            CollisionDetection.getRectVsPointOverlap(rect, line.end, inclusive)
         ) {
             return true;
         }
@@ -184,7 +204,7 @@ export class CollisionDetection {
         ];
 
         for (const rectLineSegment of rectLineSegments) {
-            if (CollisionDetection.getLineVsLineOverlap(line, rectLineSegment)) {
+            if (CollisionDetection.getLineVsLineOverlap(line, rectLineSegment, inclusive)) {
                 return true;
             }
         }
@@ -193,7 +213,7 @@ export class CollisionDetection {
     }
 
     // https://www.jeffreythompson.org/collision-detection/line-line.php
-    private static getLineVsLineOverlap(a: LineSegment, b: LineSegment): boolean {
+    private static getLineVsLineOverlap(a: LineSegment, b: LineSegment, inclusive: boolean): boolean {
         const {
             start: { x: x1, y: y1 },
             end: { x: x2, y: y2 },
@@ -206,7 +226,7 @@ export class CollisionDetection {
         const uA = ((x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3)) / ((y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1));
         const uB = ((x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3)) / ((y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1));
 
-        return isInRange(0, uA, 1) && isInRange(0, uB, 1);
+        return isInRange(0, uA, 1, inclusive) && isInRange(0, uB, 1, inclusive);
     }
 
     private static getPointVsPointOverlap(a: Particle, b: Particle): boolean {

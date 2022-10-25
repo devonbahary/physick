@@ -35,10 +35,10 @@ export class LineSegment {
 
             if (
                 a.y !== b.y ||
-                !isInRange(a.x0, x0, a.x1) ||
-                !isInRange(a.x0, x1, a.x1) ||
-                !isInRange(b.x0, x0, b.x1) ||
-                !isInRange(b.x0, x1, b.x1)
+                !isInRange(a.x0, x0, a.x1, true) ||
+                !isInRange(a.x0, x1, a.x1, true) ||
+                !isInRange(b.x0, x0, b.x1, true) ||
+                !isInRange(b.x0, x1, b.x1, true)
             ) {
                 throw new Error(
                     `can't get overlap of incompatible line segments: ${JSON.stringify(a)}, ${JSON.stringify(b)}`,
@@ -54,10 +54,10 @@ export class LineSegment {
 
             if (
                 a.x !== b.x ||
-                !isInRange(a.y0, y0, a.y1) ||
-                !isInRange(a.y0, y1, a.y1) ||
-                !isInRange(b.y0, y0, b.y1) ||
-                !isInRange(b.y0, y1, b.y1)
+                !isInRange(a.y0, y0, a.y1, true) ||
+                !isInRange(a.y0, y1, a.y1, true) ||
+                !isInRange(b.y0, y0, b.y1, true) ||
+                !isInRange(b.y0, y1, b.y1, true)
             ) {
                 throw new Error(
                     `can't get overlap of incompatible line segments: ${JSON.stringify(a)}, ${JSON.stringify(b)}`,
