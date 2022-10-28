@@ -150,7 +150,6 @@ var World = /** @class */ (function () {
             // rather than ignoring the false collision altogether, we wait for that faster-moving colliding body to get
             // a chance to move
             if (ContinuousCollisionDetection_1.ContinuousCollisionDetection.isChronological(collisionEvent)) {
-                console.log('chronological', collisionEvent);
                 var collisionBody = collisionEvent.collisionBody;
                 if (this.shouldResolveCollision(collisionEvent)) {
                     CollisionResolution_1.CollisionResolution.resolve(collisionEvent);
@@ -163,9 +162,6 @@ var World = /** @class */ (function () {
                     ignoreBodyIds.add(collisionBody.id);
                     this.updateBodyMovement(body, dt, ignoreBodyIds);
                 }
-            }
-            else {
-                console.log('not chronological', collisionEvent);
             }
         }
         else {
