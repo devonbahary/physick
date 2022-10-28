@@ -8,6 +8,8 @@ var BodyEvent;
 (function (BodyEvent) {
     BodyEvent["Move"] = "Move";
     BodyEvent["Collision"] = "Collision";
+    BodyEvent["MassChange"] = "MassChange";
+    BodyEvent["ShapeChange"] = "ShapeChange";
 })(BodyEvent = exports.BodyEvent || (exports.BodyEvent = {}));
 var Body = /** @class */ (function () {
     function Body(args) {
@@ -134,6 +136,15 @@ var Body = /** @class */ (function () {
             return;
         var netForce = Vectors_1.Vectors.divide(force, this.mass);
         this.shape.velocity = Vectors_1.Vectors.add(this.shape.velocity, netForce);
+    };
+    Body.prototype.setMass = function (number) {
+        var oldValue = this.mass;
+        this.mass = number;
+        this.publish(BodyEvent.MassChange, { oldValue: oldValue, newValue: this.mass });
+    };
+    Body.prototype.setShape = function (shape) {
+        this.shape = shape;
+        this.publish(BodyEvent.ShapeChange, shape);
     };
     return Body;
 }());

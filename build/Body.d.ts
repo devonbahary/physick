@@ -1,6 +1,6 @@
 import { Vector } from './Vectors';
 import { Particle } from './shapes/Particle';
-import { PubSub, PubSubable } from './PubSub';
+import { ChangeOfValue, PubSub, PubSubable } from './PubSub';
 import { CollisionEvent } from './collisions/types';
 import { Rect } from './shapes/rects/Rect';
 import { Circle } from './shapes/circles/Circle';
@@ -13,11 +13,15 @@ export declare type BodyArgs = {
 };
 export declare enum BodyEvent {
     Move = "Move",
-    Collision = "Collision"
+    Collision = "Collision",
+    MassChange = "MassChange",
+    ShapeChange = "ShapeChange"
 }
 declare type BodyEventDataMap = {
     [BodyEvent.Move]: Body;
     [BodyEvent.Collision]: CollisionEvent;
+    [BodyEvent.MassChange]: ChangeOfValue<number>;
+    [BodyEvent.ShapeChange]: Rect | Circle;
 };
 declare type Subscribe = PubSub<BodyEvent, BodyEventDataMap>['subscribe'];
 declare type Publish = PubSub<BodyEvent, BodyEventDataMap>['publish'];
@@ -47,5 +51,7 @@ export declare class Body implements Particle, PubSubable<BodyEvent, BodyEventDa
     move(movement: Vector): void;
     setVelocity(vel: Vector): void;
     applyForce(force: Vector): void;
+    setMass(number: number): void;
+    setShape(shape: Circle | Rect): void;
 }
 export {};

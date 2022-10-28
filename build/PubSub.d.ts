@@ -1,3 +1,7 @@
+export declare type ChangeOfValue<T> = {
+    oldValue: T;
+    newValue: T;
+};
 export declare type PubSubable<Event extends string, EventDataMap extends Record<Event, unknown>> = {
     subscribe: (event: Event, callback: (eventData: EventDataMap[Event]) => void) => void;
     publish: (event: Event, eventData: EventDataMap[Event]) => void;

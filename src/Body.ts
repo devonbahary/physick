@@ -1,7 +1,7 @@
 import { v4 as uuid } from 'uuid';
 import { Vector, Vectors } from './Vectors';
 import { Particle } from './shapes/Particle';
-import { PubSub, PubSubable } from './PubSub';
+import { ChangeOfValue, PubSub, PubSubable } from './PubSub';
 import { CollisionEvent } from './collisions/types';
 import { Rect } from './shapes/rects/Rect';
 import { Circle } from './shapes/circles/Circle';
@@ -17,11 +17,15 @@ export type BodyArgs = {
 export enum BodyEvent {
     Move = 'Move',
     Collision = 'Collision',
+    MassChange = 'MassChange',
+    ShapeChange = 'ShapeChange',
 }
 
 type BodyEventDataMap = {
     [BodyEvent.Move]: Body;
     [BodyEvent.Collision]: CollisionEvent;
+    [BodyEvent.MassChange]: ChangeOfValue<number>;
+    [BodyEvent.ShapeChange]: Rect | Circle;
 };
 
 type Subscribe = PubSub<BodyEvent, BodyEventDataMap>['subscribe'];
@@ -121,5 +125,16 @@ export class Body implements Particle, PubSubable<BodyEvent, BodyEventDataMap> {
         if (this.isSensor) return;
         const netForce = Vectors.divide(force, this.mass);
         this.shape.velocity = Vectors.add(this.shape.velocity, netForce);
+    }
+
+    public setMass(number: number): void {
+        const oldValue = this.mass;
+        this.mass = number;
+        this.publish(BodyEvent.MassChange, { oldValue, newValue: this.mass });
+    }
+
+    public setShape(shape: Circle | Rect): void {
+        this.shape = shape;
+        this.publish(BodyEvent.ShapeChange, shape);
     }
 }
