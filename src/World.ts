@@ -159,6 +159,7 @@ export class World implements PubSubable<WorldEvent, WorldEventDataMap> {
             // rather than ignoring the false collision altogether, we wait for that faster-moving colliding body to get
             // a chance to move
             if (ContinuousCollisionDetection.isChronological(collisionEvent)) {
+                console.log('chronological', collisionEvent);
                 const { collisionBody } = collisionEvent;
 
                 if (this.shouldResolveCollision(collisionEvent)) {
@@ -175,6 +176,8 @@ export class World implements PubSubable<WorldEvent, WorldEventDataMap> {
 
                     this.updateBodyMovement(body, dt, ignoreBodyIds);
                 }
+            } else {
+                console.log('not chronological', collisionEvent);
             }
         } else {
             body.move(Vectors.resize(body.velocity, dt * body.speed));
