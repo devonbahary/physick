@@ -25,7 +25,7 @@ type BodyEventDataMap = {
     [BodyEvent.Move]: Body;
     [BodyEvent.Collision]: CollisionEvent;
     [BodyEvent.MassChange]: ChangeOfValue<number>;
-    [BodyEvent.ShapeChange]: Rect | Circle;
+    [BodyEvent.ShapeChange]: ChangeOfValue<Body['shape']>;
 };
 
 type Subscribe = PubSub<BodyEvent, BodyEventDataMap>['subscribe'];
@@ -130,11 +130,16 @@ export class Body implements Particle, PubSubable<BodyEvent, BodyEventDataMap> {
     public setMass(number: number): void {
         const oldValue = this.mass;
         this.mass = number;
-        this.publish(BodyEvent.MassChange, { oldValue, newValue: this.mass });
+        if (oldValue !== this.mass) {
+            this.publish(BodyEvent.MassChange, { oldValue, newValue: this.mass });
+        }
     }
 
     public setShape(shape: Circle | Rect): void {
+        const oldValue = this.shape;
         this.shape = shape;
-        this.publish(BodyEvent.ShapeChange, shape);
+        if (oldValue !== this.shape) {
+            this.publish(BodyEvent.ShapeChange, { oldValue, newValue: this.shape });
+        }
     }
 }

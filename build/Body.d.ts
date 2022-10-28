@@ -21,7 +21,7 @@ declare type BodyEventDataMap = {
     [BodyEvent.Move]: Body;
     [BodyEvent.Collision]: CollisionEvent;
     [BodyEvent.MassChange]: ChangeOfValue<number>;
-    [BodyEvent.ShapeChange]: Rect | Circle;
+    [BodyEvent.ShapeChange]: ChangeOfValue<Body['shape']>;
 };
 declare type Subscribe = PubSub<BodyEvent, BodyEventDataMap>['subscribe'];
 declare type Publish = PubSub<BodyEvent, BodyEventDataMap>['publish'];

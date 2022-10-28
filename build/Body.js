@@ -140,11 +140,16 @@ var Body = /** @class */ (function () {
     Body.prototype.setMass = function (number) {
         var oldValue = this.mass;
         this.mass = number;
-        this.publish(BodyEvent.MassChange, { oldValue: oldValue, newValue: this.mass });
+        if (oldValue !== this.mass) {
+            this.publish(BodyEvent.MassChange, { oldValue: oldValue, newValue: this.mass });
+        }
     };
     Body.prototype.setShape = function (shape) {
+        var oldValue = this.shape;
         this.shape = shape;
-        this.publish(BodyEvent.ShapeChange, shape);
+        if (oldValue !== this.shape) {
+            this.publish(BodyEvent.ShapeChange, { oldValue: oldValue, newValue: this.shape });
+        }
     };
     return Body;
 }());
