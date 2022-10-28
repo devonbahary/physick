@@ -40,7 +40,6 @@ var WorldEvent;
 var DEFAULT_WORLD_OPTIONS = {
     friction: 0.5,
     initBoundaries: true,
-    shouldResolveCollision: function () { return true; },
 };
 var World = /** @class */ (function () {
     function World(args) {
@@ -169,9 +168,10 @@ var World = /** @class */ (function () {
         }
     };
     World.prototype.shouldResolveCollision = function (collisionEvent) {
-        if (collisionEvent.collisionBody.isSensor)
-            return false;
-        return this.options.shouldResolveCollision(collisionEvent);
+        if (this.options.shouldResolveCollision) {
+            return this.options.shouldResolveCollision(collisionEvent);
+        }
+        return !collisionEvent.movingBody.isSensor && !collisionEvent.collisionBody.isSensor;
     };
     // if the force through 1+ non-fixed bodies is stopped at a fixed body, move the last non-fixed body in the chain
     // around the fixed body

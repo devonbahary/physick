@@ -18,8 +18,8 @@ type WorldArgs = Dimensions & {
 type WorldOptions = {
     friction: number;
     initBoundaries: boolean;
-    // specify custom rules for when to treat collisionEvents like sensor collisions
-    shouldResolveCollision: (collisionEvent: CollisionEvent) => boolean;
+    // specify overwriting rules for when to treat collisionEvents like sensor collisions
+    shouldResolveCollision?: (collisionEvent: CollisionEvent) => boolean;
 };
 
 export enum WorldEvent {
@@ -38,7 +38,6 @@ type Publish = PubSub<WorldEvent, WorldEventDataMap>['publish'];
 const DEFAULT_WORLD_OPTIONS: WorldOptions = {
     friction: 0.5,
     initBoundaries: true,
-    shouldResolveCollision: () => true,
 };
 
 export class World implements PubSubable<WorldEvent, WorldEventDataMap> {
@@ -182,8 +181,10 @@ export class World implements PubSubable<WorldEvent, WorldEventDataMap> {
     }
 
     private shouldResolveCollision(collisionEvent: CollisionEvent): boolean {
-        if (collisionEvent.collisionBody.isSensor) return false;
-        return this.options.shouldResolveCollision(collisionEvent);
+        if (this.options.shouldResolveCollision) {
+            return this.options.shouldResolveCollision(collisionEvent);
+        }
+        return !collisionEvent.movingBody.isSensor && !collisionEvent.collisionBody.isSensor;
     }
 
     // if the force through 1+ non-fixed bodies is stopped at a fixed body, move the last non-fixed body in the chain

@@ -14,7 +14,7 @@ declare type WorldArgs = Dimensions & {
 declare type WorldOptions = {
     friction: number;
     initBoundaries: boolean;
-    shouldResolveCollision: (collisionEvent: CollisionEvent) => boolean;
+    shouldResolveCollision?: (collisionEvent: CollisionEvent) => boolean;
 };
 export declare enum WorldEvent {
     AddBody = "AddBody",
