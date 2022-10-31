@@ -1,16 +1,19 @@
-import { Body, BodyEvent } from './Body';
 import { Dimensions, Shape } from './shapes/types';
-import { World, WorldEvent } from './World';
 import { CollisionDetection } from './collisions/CollisionDetection';
 import { BoundingBox } from './shapes/rects/BoundingBox';
 
+type SpatialData = {
+    id: string;
+    shape: Shape;
+};
+
 export type QuadTreeConfig = {
-    maxBodiesInLeaf: number;
+    maxDataInLeaf: number;
     minLeafDimensions: Dimensions;
 };
 
 const DEFAULT_CONFIG: QuadTreeConfig = {
-    maxBodiesInLeaf: 2,
+    maxDataInLeaf: 2,
     // world should be at least 4x the size of minLeafDimensions to comply with a min of 4 Leafs
     minLeafDimensions: {
         width: 40,
@@ -18,42 +21,42 @@ const DEFAULT_CONFIG: QuadTreeConfig = {
     },
 };
 
-abstract class Node {
+abstract class Node<T extends SpatialData> {
     constructor(public boundingBox: BoundingBox) {}
 
-    abstract getBodiesInShape(shape: Shape): Body[];
+    abstract getDataInShape(shape: Shape): T[];
 
-    abstract addBody(body: Body): void;
+    abstract addData(data: T): void;
 
     protected overlapsWith(shape: Shape): boolean {
         return CollisionDetection.hasOverlap(this.boundingBox, shape);
     }
 }
 
-class Leaf extends Node {
-    public bodies: Body[] = [];
+class Leaf<T extends SpatialData> extends Node<T> {
+    public data: T[] = [];
 
     constructor(boundingBox: BoundingBox, private config: QuadTreeConfig) {
         super(boundingBox);
     }
 
     // broad phase collision detection of node with shape
-    getBodiesInShape(shape: Shape): Body[] {
-        return this.overlapsWith(shape) ? this.bodies : [];
+    getDataInShape(shape: Shape): T[] {
+        return this.overlapsWith(shape) ? this.data : [];
     }
 
-    addBody(body: Body): void {
-        if (this.overlapsWith(body.shape)) {
-            this.bodies.push(body);
+    addData(data: T): void {
+        if (this.overlapsWith(data.shape)) {
+            this.data.push(data);
         }
     }
 
-    removeBody(body: Body): void {
-        this.bodies = this.bodies.filter((b) => b.id !== body.id);
+    removeData(data: T): void {
+        this.data = this.data.filter((b) => b.id !== data.id);
     }
 
     shouldPartition(): boolean {
-        if (this.bodies.length <= this.config.maxBodiesInLeaf) return false;
+        if (this.data.length <= this.config.maxDataInLeaf) return false;
         return (
             this.boundingBox.width / 4 >= this.config.minLeafDimensions.width &&
             this.boundingBox.height / 4 >= this.config.minLeafDimensions.height
@@ -61,27 +64,13 @@ class Leaf extends Node {
     }
 }
 
-class InternalNode extends Node {
+class InternalNode<T extends SpatialData> extends Node<T> {
     private needsUpdate = false;
-    private children: (InternalNode | Leaf)[];
+    private children: (InternalNode<T> | Leaf<T>)[];
 
     constructor(boundingBox: BoundingBox, private config: QuadTreeConfig) {
         super(boundingBox);
-        this.children = InternalNode.initLeaves(boundingBox, config);
-    }
 
-    get bodies(): Body[] {
-        const uniqueBodiesSet = this.children.reduce<Set<Body>>((acc, child) => {
-            for (const body of child.bodies) {
-                acc.add(body);
-            }
-            return acc;
-        }, new Set());
-
-        return Array.from(uniqueBodiesSet);
-    }
-
-    static initLeaves(boundingBox: BoundingBox, config: QuadTreeConfig): Leaf[] {
         const { x0, x1, width, y0, y1, height } = boundingBox;
 
         const halfWidth = width / 2;
@@ -99,34 +88,45 @@ class InternalNode extends Node {
             new BoundingBox({ ...rightSide, ...bottomSide }),
         ];
 
-        return bounds.map((r) => new Leaf(r, config));
+        this.children = bounds.map((r) => new Leaf(r, config));
     }
 
-    getBodiesInShape(shape: Shape): Body[] {
-        if (!this.overlapsWith(shape)) return [];
-
-        const uniqueBodiesSet = this.children.reduce<Set<Body>>((acc, child) => {
-            const bodies = child.getBodiesInShape(shape);
-            for (const body of bodies) {
-                acc.add(body);
+    get data(): T[] {
+        const uniqueDataSet = this.children.reduce<Set<T>>((acc, child) => {
+            for (const data of child.data) {
+                acc.add(data);
             }
             return acc;
         }, new Set());
 
-        return Array.from(uniqueBodiesSet);
+        return Array.from(uniqueDataSet);
     }
 
-    addBody(body: Body): void {
+    getDataInShape(shape: Shape): T[] {
+        if (!this.overlapsWith(shape)) return [];
+
+        const uniqueDataSet = this.children.reduce<Set<T>>((acc, child) => {
+            const data = child.getDataInShape(shape);
+            for (const item of data) {
+                acc.add(item);
+            }
+            return acc;
+        }, new Set());
+
+        return Array.from(uniqueDataSet);
+    }
+
+    addData(data: T): void {
         for (const child of this.children) {
-            child.addBody(body);
+            child.addData(data);
         }
 
         this.needsUpdate = true;
     }
 
-    removeBody(body: Body): void {
+    removeData(data: T): void {
         for (const child of this.children) {
-            child.removeBody(body);
+            child.removeData(data);
         }
 
         this.needsUpdate = true;
@@ -138,10 +138,10 @@ class InternalNode extends Node {
         this.children = this.children.map((child) => {
             if (child instanceof Leaf) {
                 if (child.shouldPartition()) {
-                    const internalNode = new InternalNode(child.boundingBox, this.config);
+                    const internalNode = new InternalNode<T>(child.boundingBox, this.config);
 
-                    for (const body of child.bodies) {
-                        internalNode.addBody(body);
+                    for (const data of child.data) {
+                        internalNode.addData(data);
                     }
 
                     return internalNode;
@@ -152,10 +152,10 @@ class InternalNode extends Node {
             child.update();
 
             if (child.shouldCollapse()) {
-                const leaf = new Leaf(child.boundingBox, this.config);
+                const leaf = new Leaf<T>(child.boundingBox, this.config);
 
-                for (const body of child.bodies) {
-                    leaf.addBody(body);
+                for (const data of child.data) {
+                    leaf.addData(data);
                 }
 
                 return leaf;
@@ -168,13 +168,13 @@ class InternalNode extends Node {
     }
 
     shouldCollapse(): boolean {
-        return this.bodies.length <= this.config.maxBodiesInLeaf;
+        return this.data.length <= this.config.maxDataInLeaf;
     }
 }
 
-export class QuadTree extends InternalNode {
-    constructor(world: World, config: Partial<QuadTreeConfig> = {}) {
-        const { width, height } = world;
+export class QuadTree<T extends SpatialData> extends InternalNode<T> {
+    constructor(dimensions: Dimensions, config: Partial<QuadTreeConfig> = {}) {
+        const { width, height } = dimensions;
         const boundingBox = new BoundingBox({
             x0: 0,
             x1: width,
@@ -183,27 +183,16 @@ export class QuadTree extends InternalNode {
         });
 
         super(boundingBox, { ...DEFAULT_CONFIG, ...config });
-
-        this.initWorldSubscriptions(world);
     }
 
-    // narrow phase collision detection of shape with bodies returned in broad phase
-    getBodiesInShape(shape: Shape): Body[] {
-        const bodies = super.getBodiesInShape(shape);
-        return bodies.filter((b) => CollisionDetection.hasOverlap(shape, b.shape));
+    // narrow phase collision detection of shape with data returned in broad phase
+    getDataInShape(shape: Shape): T[] {
+        const data = super.getDataInShape(shape);
+        return data.filter((b) => CollisionDetection.hasOverlap(shape, b.shape));
     }
 
-    private initWorldSubscriptions(world: World): void {
-        world.subscribe(WorldEvent.AddBody, (body) => {
-            this.addBody(body);
-            body.subscribe(BodyEvent.Move, (body) => {
-                this.removeBody(body); // remove body from tree
-                this.addBody(body); // re-insert in proper position
-            });
-        });
-
-        world.subscribe(WorldEvent.RemoveBody, (body) => {
-            this.removeBody(body);
-        });
+    onDataPositionChange(data: T): void {
+        this.removeData(data); // remove data from tree
+        this.addData(data); // re-insert in proper position
     }
 }

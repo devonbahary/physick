@@ -49,7 +49,7 @@ export class World implements PubSubable<WorldEvent, WorldEventDataMap> {
     public publish: Publish;
 
     private options: WorldOptions;
-    private quadTree: QuadTree;
+    private quadTree: QuadTree<Body>;
     private forces: Force[] = [];
 
     constructor(args: WorldArgs) {
@@ -78,12 +78,18 @@ export class World implements PubSubable<WorldEvent, WorldEventDataMap> {
 
     public addBody(body: Body): void {
         this.bodies.push(body);
+        this.quadTree.addData(body);
         this.publish(WorldEvent.AddBody, body);
+
+        body.subscribe(BodyEvent.Move, (body) => {
+            this.quadTree.onDataPositionChange(body);
+        });
     }
 
     public removeBody(body: Body): void {
         this.bodies = this.bodies.filter((b) => b.id !== body.id);
         this.publish(WorldEvent.RemoveBody, body);
+        this.quadTree.removeData(body);
     }
 
     public addForce(force: Force): void {
@@ -95,7 +101,7 @@ export class World implements PubSubable<WorldEvent, WorldEventDataMap> {
     }
 
     public getBodiesInShape(shape: Shape): Body[] {
-        return this.quadTree.getBodiesInShape(shape);
+        return this.quadTree.getDataInShape(shape);
     }
 
     public getFrictionOnBody(body: Body): number {

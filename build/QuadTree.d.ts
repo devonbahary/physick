@@ -1,43 +1,35 @@
-import { Body } from './Body';
 import { Dimensions, Shape } from './shapes/types';
-import { World } from './World';
 import { BoundingBox } from './shapes/rects/BoundingBox';
+declare type SpatialData = {
+    id: string;
+    shape: Shape;
+};
 export declare type QuadTreeConfig = {
-    maxBodiesInLeaf: number;
+    maxDataInLeaf: number;
     minLeafDimensions: Dimensions;
 };
-declare abstract class Node {
+declare abstract class Node<T extends SpatialData> {
     boundingBox: BoundingBox;
     constructor(boundingBox: BoundingBox);
-    abstract getBodiesInShape(shape: Shape): Body[];
-    abstract addBody(body: Body): void;
+    abstract getDataInShape(shape: Shape): T[];
+    abstract addData(data: T): void;
     protected overlapsWith(shape: Shape): boolean;
 }
-declare class Leaf extends Node {
-    private config;
-    bodies: Body[];
-    constructor(boundingBox: BoundingBox, config: QuadTreeConfig);
-    getBodiesInShape(shape: Shape): Body[];
-    addBody(body: Body): void;
-    removeBody(body: Body): void;
-    shouldPartition(): boolean;
-}
-declare class InternalNode extends Node {
+declare class InternalNode<T extends SpatialData> extends Node<T> {
     private config;
     private needsUpdate;
     private children;
     constructor(boundingBox: BoundingBox, config: QuadTreeConfig);
-    get bodies(): Body[];
-    static initLeaves(boundingBox: BoundingBox, config: QuadTreeConfig): Leaf[];
-    getBodiesInShape(shape: Shape): Body[];
-    addBody(body: Body): void;
-    removeBody(body: Body): void;
+    get data(): T[];
+    getDataInShape(shape: Shape): T[];
+    addData(data: T): void;
+    removeData(data: T): void;
     update(): void;
     shouldCollapse(): boolean;
 }
-export declare class QuadTree extends InternalNode {
-    constructor(world: World, config?: Partial<QuadTreeConfig>);
-    getBodiesInShape(shape: Shape): Body[];
-    private initWorldSubscriptions;
+export declare class QuadTree<T extends SpatialData> extends InternalNode<T> {
+    constructor(dimensions: Dimensions, config?: Partial<QuadTreeConfig>);
+    getDataInShape(shape: Shape): T[];
+    onDataPositionChange(data: T): void;
 }
 export {};

@@ -75,12 +75,18 @@ var World = /** @class */ (function () {
         this.quadTree.update();
     };
     World.prototype.addBody = function (body) {
+        var _this = this;
         this.bodies.push(body);
+        this.quadTree.addData(body);
         this.publish(WorldEvent.AddBody, body);
+        body.subscribe(Body_1.BodyEvent.Move, function (body) {
+            _this.quadTree.onDataPositionChange(body);
+        });
     };
     World.prototype.removeBody = function (body) {
         this.bodies = this.bodies.filter(function (b) { return b.id !== body.id; });
         this.publish(WorldEvent.RemoveBody, body);
+        this.quadTree.removeData(body);
     };
     World.prototype.addForce = function (force) {
         this.forces.push(force);
@@ -89,7 +95,7 @@ var World = /** @class */ (function () {
         this.forces = this.forces.filter(function (f) { return f.id !== force.id; });
     };
     World.prototype.getBodiesInShape = function (shape) {
-        return this.quadTree.getBodiesInShape(shape);
+        return this.quadTree.getDataInShape(shape);
     };
     World.prototype.getFrictionOnBody = function (body) {
         return body.mass * this.options.friction;
