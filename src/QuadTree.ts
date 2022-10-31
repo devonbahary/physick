@@ -186,9 +186,9 @@ export class QuadTree<T extends SpatialData> extends InternalNode<T> {
     }
 
     // narrow phase collision detection of shape with data returned in broad phase
-    getDataInShape(shape: Shape): T[] {
+    getDataInShape(shape: Shape, inclusive = true): T[] {
         const data = super.getDataInShape(shape);
-        return data.filter((b) => CollisionDetection.hasOverlap(shape, b.shape));
+        return data.filter((b) => CollisionDetection.hasOverlap(shape, b.shape, inclusive));
     }
 
     onDataPositionChange(data: T): void {

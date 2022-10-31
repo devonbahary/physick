@@ -41,7 +41,7 @@ export declare class World implements PubSubable<WorldEvent, WorldEventDataMap> 
     removeBody(body: Body): void;
     addForce(force: Force): void;
     removeForce(force: Force): void;
-    getBodiesInShape(shape: Shape): Body[];
+    getBodiesInShape(shape: Shape, inclusive?: boolean): Body[];
     getFrictionOnBody(body: Body): number;
     getBodyVelocityAfterFriction(body: Body): Vector;
     loadSerialized(serializedWorld: SerializedWorld): void;

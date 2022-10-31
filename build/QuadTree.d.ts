@@ -29,7 +29,7 @@ declare class InternalNode<T extends SpatialData> extends Node<T> {
 }
 export declare class QuadTree<T extends SpatialData> extends InternalNode<T> {
     constructor(dimensions: Dimensions, config?: Partial<QuadTreeConfig>);
-    getDataInShape(shape: Shape): T[];
+    getDataInShape(shape: Shape, inclusive?: boolean): T[];
     onDataPositionChange(data: T): void;
 }
 export {};

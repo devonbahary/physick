@@ -185,9 +185,10 @@ var QuadTree = /** @class */ (function (_super) {
         return _super.call(this, boundingBox, __assign(__assign({}, DEFAULT_CONFIG), config)) || this;
     }
     // narrow phase collision detection of shape with data returned in broad phase
-    QuadTree.prototype.getDataInShape = function (shape) {
+    QuadTree.prototype.getDataInShape = function (shape, inclusive) {
+        if (inclusive === void 0) { inclusive = true; }
         var data = _super.prototype.getDataInShape.call(this, shape);
-        return data.filter(function (b) { return CollisionDetection_1.CollisionDetection.hasOverlap(shape, b.shape); });
+        return data.filter(function (b) { return CollisionDetection_1.CollisionDetection.hasOverlap(shape, b.shape, inclusive); });
     };
     QuadTree.prototype.onDataPositionChange = function (data) {
         this.removeData(data); // remove data from tree

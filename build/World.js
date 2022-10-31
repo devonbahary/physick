@@ -94,8 +94,9 @@ var World = /** @class */ (function () {
     World.prototype.removeForce = function (force) {
         this.forces = this.forces.filter(function (f) { return f.id !== force.id; });
     };
-    World.prototype.getBodiesInShape = function (shape) {
-        return this.quadTree.getDataInShape(shape);
+    World.prototype.getBodiesInShape = function (shape, inclusive) {
+        if (inclusive === void 0) { inclusive = true; }
+        return this.quadTree.getDataInShape(shape, inclusive);
     };
     World.prototype.getFrictionOnBody = function (body) {
         return body.mass * this.options.friction;

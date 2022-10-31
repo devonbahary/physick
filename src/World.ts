@@ -100,8 +100,8 @@ export class World implements PubSubable<WorldEvent, WorldEventDataMap> {
         this.forces = this.forces.filter((f) => f.id !== force.id);
     }
 
-    public getBodiesInShape(shape: Shape): Body[] {
-        return this.quadTree.getDataInShape(shape);
+    public getBodiesInShape(shape: Shape, inclusive = true): Body[] {
+        return this.quadTree.getDataInShape(shape, inclusive);
     }
 
     public getFrictionOnBody(body: Body): number {
