@@ -70,6 +70,9 @@ var Vectors = /** @class */ (function () {
     Vectors.isSameDirection = function (a, b) {
         return Vectors.dot(a, b) > 0;
     };
+    Vectors.isSame = function (a, b) {
+        return a.x === b.x && a.y === b.y;
+    };
     return Vectors;
 }());
 exports.Vectors = Vectors;

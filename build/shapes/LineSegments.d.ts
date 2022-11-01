@@ -9,6 +9,7 @@ export declare class LineSegment {
     get y1(): number;
     toVector(): Vector;
     static isPoint(lineSegment: LineSegment): boolean;
+    static isSame(a: LineSegment, b: LineSegment): boolean;
     static getOverlappingLineSegment(a: LineSegment, b: LineSegment): LineSegment;
 }
 declare type HorzLineSegmentArgs = {

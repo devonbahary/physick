@@ -57,6 +57,9 @@ var LineSegment = /** @class */ (function () {
     LineSegment.isPoint = function (lineSegment) {
         return lineSegment.start.x === lineSegment.end.x && lineSegment.start.y === lineSegment.end.y;
     };
+    LineSegment.isSame = function (a, b) {
+        return Vectors_1.Vectors.isSame(a.start, b.start) && Vectors_1.Vectors.isSame(a.end, b.end);
+    };
     LineSegment.getOverlappingLineSegment = function (a, b) {
         if (a instanceof HorzLineSegment && b instanceof HorzLineSegment) {
             var x0 = Math.max(a.x0, b.x0);

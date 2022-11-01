@@ -28,6 +28,10 @@ export class LineSegment {
         return lineSegment.start.x === lineSegment.end.x && lineSegment.start.y === lineSegment.end.y;
     }
 
+    static isSame(a: LineSegment, b: LineSegment): boolean {
+        return Vectors.isSame(a.start, b.start) && Vectors.isSame(a.end, b.end);
+    }
+
     static getOverlappingLineSegment(a: LineSegment, b: LineSegment): LineSegment {
         if (a instanceof HorzLineSegment && b instanceof HorzLineSegment) {
             const x0 = Math.max(a.x0, b.x0);

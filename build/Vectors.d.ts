@@ -17,4 +17,5 @@ export declare class Vectors {
     static resize(v: Vector, scalar: number): Vector;
     static isLarger(a: Vector, b: Vector): boolean;
     static isSameDirection(a: Vector, b: Vector): boolean;
+    static isSame(a: Vector, b: Vector): boolean;
 }

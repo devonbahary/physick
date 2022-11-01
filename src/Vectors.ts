@@ -83,4 +83,8 @@ export class Vectors {
     static isSameDirection(a: Vector, b: Vector): boolean {
         return Vectors.dot(a, b) > 0;
     }
+
+    static isSame(a: Vector, b: Vector): boolean {
+        return a.x === b.x && a.y === b.y;
+    }
 }
