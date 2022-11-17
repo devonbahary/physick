@@ -5,13 +5,14 @@ var Vectors_1 = require("../Vectors");
 var CollisionResolution = /** @class */ (function () {
     function CollisionResolution() {
     }
-    CollisionResolution.resolve = function (collisionEvent) {
+    CollisionResolution.resolve = function (collisionEvent, getCoefficientOfRestitution) {
+        if (getCoefficientOfRestitution === void 0) { getCoefficientOfRestitution = CollisionResolution.getCoefficientOfRestitution; }
         var movingBody = collisionEvent.movingBody, collisionBody = collisionEvent.collisionBody, timeOfCollision = collisionEvent.timeOfCollision;
         if (timeOfCollision) {
             var movementToTimeOfCollision = Vectors_1.Vectors.mult(movingBody.velocity, timeOfCollision);
             movingBody.move(movementToTimeOfCollision);
         }
-        var _a = CollisionResolution.getResolvedCollisionVelocities(collisionEvent), resolvedVelocityA = _a[0], resolvedVelocityB = _a[1];
+        var _a = CollisionResolution.getResolvedCollisionVelocities(collisionEvent, getCoefficientOfRestitution), resolvedVelocityA = _a[0], resolvedVelocityB = _a[1];
         movingBody.setVelocity(resolvedVelocityA);
         collisionBody.setVelocity(resolvedVelocityB);
     };
@@ -20,9 +21,9 @@ var CollisionResolution = /** @class */ (function () {
         var tangentCollisionVector = Vectors_1.Vectors.normal(collisionVector);
         return Vectors_1.Vectors.proj(movingBody.velocity, tangentCollisionVector);
     };
-    CollisionResolution.getResolvedCollisionVelocities = function (collisionEvent) {
+    CollisionResolution.getResolvedCollisionVelocities = function (collisionEvent, getCoefficientOfRestitution) {
         var a = collisionEvent.movingBody, b = collisionEvent.collisionBody, collisionVector = collisionEvent.collisionVector;
-        var cor = CollisionResolution.getCoefficientOfRestitution(a, b);
+        var cor = getCoefficientOfRestitution(a, b);
         if (b.isFixed()) {
             // https://www.youtube.com/watch?v=naaeH1qbjdQ
             var surfaceNormal = Vectors_1.Vectors.opposite(collisionVector);

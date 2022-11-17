@@ -15,6 +15,7 @@ declare type WorldOptions = {
     friction: number;
     initBoundaries: boolean;
     shouldResolveCollision?: (collisionEvent: CollisionEvent) => boolean;
+    getCoefficientOfRestitution?: (a: Body, b: Body) => number;
 };
 export declare enum WorldEvent {
     AddBody = "AddBody",

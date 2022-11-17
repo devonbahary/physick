@@ -20,6 +20,7 @@ type WorldOptions = {
     initBoundaries: boolean;
     // specify overwriting rules for when to treat collisionEvents like sensor collisions
     shouldResolveCollision?: (collisionEvent: CollisionEvent) => boolean;
+    getCoefficientOfRestitution?: (a: Body, b: Body) => number;
 };
 
 export enum WorldEvent {
@@ -167,7 +168,7 @@ export class World implements PubSubable<WorldEvent, WorldEventDataMap> {
                 const { collisionBody } = collisionEvent;
 
                 if (this.shouldResolveCollision(collisionEvent)) {
-                    CollisionResolution.resolve(collisionEvent);
+                    CollisionResolution.resolve(collisionEvent, this.options.getCoefficientOfRestitution);
 
                     this.onCollision(collisionEvent);
 

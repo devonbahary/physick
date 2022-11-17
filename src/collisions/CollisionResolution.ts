@@ -3,7 +3,10 @@ import { CollisionEvent } from '../collisions/types';
 import { Vector, Vectors } from '../Vectors';
 
 export class CollisionResolution {
-    static resolve(collisionEvent: CollisionEvent): void {
+    static resolve(
+        collisionEvent: CollisionEvent,
+        getCoefficientOfRestitution = CollisionResolution.getCoefficientOfRestitution,
+    ): void {
         const { movingBody, collisionBody, timeOfCollision } = collisionEvent;
 
         if (timeOfCollision) {
@@ -11,8 +14,10 @@ export class CollisionResolution {
             movingBody.move(movementToTimeOfCollision);
         }
 
-        const [resolvedVelocityA, resolvedVelocityB] =
-            CollisionResolution.getResolvedCollisionVelocities(collisionEvent);
+        const [resolvedVelocityA, resolvedVelocityB] = CollisionResolution.getResolvedCollisionVelocities(
+            collisionEvent,
+            getCoefficientOfRestitution,
+        );
 
         movingBody.setVelocity(resolvedVelocityA);
         collisionBody.setVelocity(resolvedVelocityB);
@@ -24,10 +29,13 @@ export class CollisionResolution {
         return Vectors.proj(movingBody.velocity, tangentCollisionVector);
     }
 
-    private static getResolvedCollisionVelocities(collisionEvent: CollisionEvent): [Vector, Vector] {
+    private static getResolvedCollisionVelocities(
+        collisionEvent: CollisionEvent,
+        getCoefficientOfRestitution: (a: Body, b: Body) => number,
+    ): [Vector, Vector] {
         const { movingBody: a, collisionBody: b, collisionVector } = collisionEvent;
 
-        const cor = CollisionResolution.getCoefficientOfRestitution(a, b);
+        const cor = getCoefficientOfRestitution(a, b);
 
         if (b.isFixed()) {
             // https://www.youtube.com/watch?v=naaeH1qbjdQ
@@ -73,7 +81,7 @@ export class CollisionResolution {
         return [Vectors.mult(resolvedVelocityA, cor), Vectors.mult(resolvedVelocityB, cor)];
     }
 
-    private static getCoefficientOfRestitution(a: Body, b: Body): number {
+    private static getCoefficientOfRestitution = (a: Body, b: Body): number => {
         return Math.min(a.restitution, b.restitution);
-    }
+    };
 }

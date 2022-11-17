@@ -158,7 +158,7 @@ var World = /** @class */ (function () {
             if (ContinuousCollisionDetection_1.ContinuousCollisionDetection.isChronological(collisionEvent)) {
                 var collisionBody = collisionEvent.collisionBody;
                 if (this.shouldResolveCollision(collisionEvent)) {
-                    CollisionResolution_1.CollisionResolution.resolve(collisionEvent);
+                    CollisionResolution_1.CollisionResolution.resolve(collisionEvent, this.options.getCoefficientOfRestitution);
                     this.onCollision(collisionEvent);
                     this.resolveChainedBodies(collisionBody);
                 }
